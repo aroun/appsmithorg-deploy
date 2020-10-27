@@ -31,7 +31,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.ArrayList;
@@ -60,8 +59,7 @@ public class OrganizationServiceImpl extends BaseService<OrganizationRepository,
     private final AssetRepository assetRepository;
 
     @Autowired
-    public OrganizationServiceImpl(Scheduler scheduler,
-                                   Validator validator,
+    public OrganizationServiceImpl(Validator validator,
                                    MongoConverter mongoConverter,
                                    ReactiveMongoTemplate reactiveMongoTemplate,
                                    OrganizationRepository repository,
@@ -73,7 +71,7 @@ public class OrganizationServiceImpl extends BaseService<OrganizationRepository,
                                    UserRepository userRepository,
                                    RoleGraph roleGraph,
                                    AssetRepository assetRepository) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.settingService = settingService;
         this.pluginRepository = pluginRepository;
         this.sessionUserService = sessionUserService;

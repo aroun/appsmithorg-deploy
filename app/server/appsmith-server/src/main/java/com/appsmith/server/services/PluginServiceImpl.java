@@ -31,7 +31,6 @@ import org.springframework.util.StreamUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.io.File;
@@ -65,8 +64,7 @@ public class PluginServiceImpl extends BaseService<PluginRepository, Plugin, Str
     private static final int READ_TIMEOUT = 10000;
 
     @Autowired
-    public PluginServiceImpl(Scheduler scheduler,
-                             Validator validator,
+    public PluginServiceImpl(Validator validator,
                              MongoConverter mongoConverter,
                              ReactiveMongoTemplate reactiveMongoTemplate,
                              PluginRepository repository,
@@ -76,7 +74,7 @@ public class PluginServiceImpl extends BaseService<PluginRepository, Plugin, Str
                              ReactiveRedisTemplate<String, String> reactiveTemplate,
                              ChannelTopic topic,
                              ObjectMapper objectMapper) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.organizationService = organizationService;
         this.pluginManager = pluginManager;
         this.reactiveTemplate = reactiveTemplate;

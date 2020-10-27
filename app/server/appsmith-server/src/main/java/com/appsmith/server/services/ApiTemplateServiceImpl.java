@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 
@@ -19,13 +18,12 @@ import javax.validation.Validator;
 @Slf4j
 public class ApiTemplateServiceImpl extends BaseService<ApiTemplateRepository, ApiTemplate, String> implements ApiTemplateService {
 
-    public ApiTemplateServiceImpl(Scheduler scheduler,
-                                  Validator validator,
+    public ApiTemplateServiceImpl(Validator validator,
                                   MongoConverter mongoConverter,
                                   ReactiveMongoTemplate reactiveMongoTemplate,
                                   ApiTemplateRepository repository,
                                   AnalyticsService analyticsService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
     }
 
     @Override

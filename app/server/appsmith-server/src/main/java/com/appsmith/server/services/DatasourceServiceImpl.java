@@ -30,7 +30,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
@@ -58,8 +57,7 @@ public class DatasourceServiceImpl extends BaseService<DatasourceRepository, Dat
     private final EncryptionService encryptionService;
 
     @Autowired
-    public DatasourceServiceImpl(Scheduler scheduler,
-                                 Validator validator,
+    public DatasourceServiceImpl(Validator validator,
                                  MongoConverter mongoConverter,
                                  ReactiveMongoTemplate reactiveMongoTemplate,
                                  DatasourceRepository repository,
@@ -72,7 +70,7 @@ public class DatasourceServiceImpl extends BaseService<DatasourceRepository, Dat
                                  SequenceService sequenceService,
                                  NewActionRepository newActionRepository,
                                  EncryptionService encryptionService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.organizationService = organizationService;
         this.sessionUserService = sessionUserService;
         this.pluginService = pluginService;

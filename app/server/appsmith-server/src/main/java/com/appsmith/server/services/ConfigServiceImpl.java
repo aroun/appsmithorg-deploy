@@ -13,7 +13,6 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.Collections;
@@ -27,14 +26,13 @@ public class ConfigServiceImpl extends BaseService<ConfigRepository, Config, Str
 
     private final ApplicationRepository applicationRepository;
 
-    public ConfigServiceImpl(Scheduler scheduler,
-                             Validator validator,
+    public ConfigServiceImpl(Validator validator,
                              MongoConverter mongoConverter,
                              ReactiveMongoTemplate reactiveMongoTemplate,
                              ConfigRepository repository,
                              AnalyticsService analyticsService,
                              ApplicationRepository applicationRepository) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.applicationRepository = applicationRepository;
     }
 

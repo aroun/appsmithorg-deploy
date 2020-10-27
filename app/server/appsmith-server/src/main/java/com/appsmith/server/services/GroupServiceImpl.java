@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.Set;
@@ -28,14 +27,13 @@ public class GroupServiceImpl extends BaseService<GroupRepository, Group, String
     private final SessionUserService sessionUserService;
 
     @Autowired
-    public GroupServiceImpl(Scheduler scheduler,
-                            Validator validator,
+    public GroupServiceImpl(Validator validator,
                             MongoConverter mongoConverter,
                             ReactiveMongoTemplate reactiveMongoTemplate,
                             GroupRepository repository,
                             AnalyticsService analyticsService,
                             SessionUserService sessionUserService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.repository = repository;
         this.sessionUserService = sessionUserService;
     }

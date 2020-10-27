@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 
@@ -16,13 +15,12 @@ public class PermissionServiceImpl extends BaseService<PermissionRepository, Per
     private final PermissionRepository repository;
 
     @Autowired
-    public PermissionServiceImpl(Scheduler scheduler,
-                                 Validator validator,
+    public PermissionServiceImpl(Validator validator,
                                  MongoConverter mongoConverter,
                                  ReactiveMongoTemplate reactiveMongoTemplate,
                                  PermissionRepository repository,
                                  AnalyticsService analyticsService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.repository = repository;
     }
 }

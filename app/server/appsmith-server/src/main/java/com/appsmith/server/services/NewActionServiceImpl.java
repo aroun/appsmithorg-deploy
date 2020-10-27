@@ -44,7 +44,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import javax.lang.model.SourceVersion;
 import javax.validation.Validator;
@@ -82,8 +82,7 @@ public class NewActionServiceImpl extends BaseService<NewActionRepository, NewAc
     private final PolicyGenerator policyGenerator;
     private final NewPageService newPageService;
 
-    public NewActionServiceImpl(Scheduler scheduler,
-                                Validator validator,
+    public NewActionServiceImpl(Validator validator,
                                 MongoConverter mongoConverter,
                                 ReactiveMongoTemplate reactiveMongoTemplate,
                                 NewActionRepository repository,
@@ -95,7 +94,7 @@ public class NewActionServiceImpl extends BaseService<NewActionRepository, NewAc
                                 MarketplaceService marketplaceService,
                                 PolicyGenerator policyGenerator,
                                 NewPageService newPageService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.repository = repository;
         this.datasourceService = datasourceService;
         this.pluginService = pluginService;
@@ -510,6 +509,7 @@ public class NewActionServiceImpl extends BaseService<NewActionRepository, NewAc
                         datasourceMono,
                         pluginExecutorMono
                 )
+                .publishOn(Schedulers.boundedElastic())
                 .flatMap(tuple -> {
                     final ActionDTO action = tuple.getT1();
                     final Datasource datasource = tuple.getT2();
@@ -522,7 +522,8 @@ public class NewActionServiceImpl extends BaseService<NewActionRepository, NewAc
 
                     Integer timeoutDuration = actionConfiguration.getTimeoutInMillisecond();
 
-                    log.debug("Execute Action called in Page {}, for action id : {}  action name : {}, {}, {}",
+                    log.debug("Thread [{}] : Execute Action called in Page {}, for action id : {}  action name : {}, {}, {}",
+                            Thread.currentThread().getName(),
                             action.getPageId(), actionId, action.getName(), datasourceConfiguration,
                             actionConfiguration);
 

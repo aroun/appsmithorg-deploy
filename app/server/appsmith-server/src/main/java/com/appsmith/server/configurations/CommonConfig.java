@@ -32,7 +32,10 @@ public class CommonConfig {
 
     @Bean
     public Scheduler scheduler() {
-        return Schedulers.newElastic(ELASTIC_THREAD_POOL_NAME);
+
+        return Schedulers.single();
+
+//        return Schedulers.newElastic(ELASTIC_THREAD_POOL_NAME);
     }
 
     @Bean

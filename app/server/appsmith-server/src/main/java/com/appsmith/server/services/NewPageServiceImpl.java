@@ -23,7 +23,6 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.List;
@@ -38,14 +37,13 @@ public class NewPageServiceImpl extends BaseService<NewPageRepository, NewPage, 
     private final ApplicationService applicationService;
 
     @Autowired
-    public NewPageServiceImpl(Scheduler scheduler,
-                              Validator validator,
+    public NewPageServiceImpl(Validator validator,
                               MongoConverter mongoConverter,
                               ReactiveMongoTemplate reactiveMongoTemplate,
                               NewPageRepository repository,
                               AnalyticsService analyticsService,
                               ApplicationService applicationService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.applicationService = applicationService;
     }
 

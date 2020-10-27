@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.HashSet;
@@ -44,15 +43,14 @@ public class ApplicationServiceImpl extends BaseService<ApplicationRepository, A
     private final ConfigService configService;
 
     @Autowired
-    public ApplicationServiceImpl(Scheduler scheduler,
-                                  Validator validator,
+    public ApplicationServiceImpl(Validator validator,
                                   MongoConverter mongoConverter,
                                   ReactiveMongoTemplate reactiveMongoTemplate,
                                   ApplicationRepository repository,
                                   AnalyticsService analyticsService,
                                   PolicyUtils policyUtils,
                                   ConfigService configService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.policyUtils = policyUtils;
         this.configService = configService;
     }

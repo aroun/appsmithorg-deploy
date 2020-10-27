@@ -1,6 +1,5 @@
 package com.appsmith.server.controllers;
 
-import com.appsmith.server.configurations.CommonConfig;
 import com.appsmith.server.configurations.SecurityTestConfig;
 import com.appsmith.server.services.OrganizationService;
 import com.appsmith.server.services.UserOrganizationService;
@@ -32,9 +31,6 @@ public class OrganizationControllerTest {
 
     @MockBean
     private UserService userService;
-
-    @MockBean
-    private CommonConfig commonConfig;
 
     @Test
     @WithMockUser

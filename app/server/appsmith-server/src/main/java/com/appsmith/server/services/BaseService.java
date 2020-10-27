@@ -19,7 +19,6 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.io.Serializable;
@@ -38,8 +37,6 @@ import static java.util.stream.Collectors.toSet;
 public abstract class BaseService<R extends BaseRepository<T, ID> & AppsmithRepository<T>, T extends BaseDomain, ID extends Serializable>
         implements CrudService<T, ID> {
 
-    final Scheduler scheduler;
-
     protected final MongoConverter mongoConverter;
 
     protected final ReactiveMongoTemplate mongoTemplate;
@@ -50,13 +47,11 @@ public abstract class BaseService<R extends BaseRepository<T, ID> & AppsmithRepo
 
     protected final AnalyticsService analyticsService;
 
-    public BaseService(Scheduler scheduler,
-                       Validator validator,
+    public BaseService(Validator validator,
                        MongoConverter mongoConverter,
                        ReactiveMongoTemplate reactiveMongoTemplate,
                        R repository,
                        AnalyticsService analyticsService) {
-        this.scheduler = scheduler;
         this.validator = validator;
         this.mongoConverter = mongoConverter;
         this.mongoTemplate = reactiveMongoTemplate;

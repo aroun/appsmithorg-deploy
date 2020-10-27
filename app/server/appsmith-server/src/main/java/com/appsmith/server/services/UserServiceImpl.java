@@ -34,7 +34,6 @@ import org.springframework.util.StringUtils;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.net.URLEncoder;
@@ -80,8 +79,7 @@ public class UserServiceImpl extends BaseService<UserRepository, User, String> i
     private static final String DEFAULT_ORIGIN_HEADER = "https://app.appsmith.com";
 
     @Autowired
-    public UserServiceImpl(Scheduler scheduler,
-                           Validator validator,
+    public UserServiceImpl(Validator validator,
                            MongoConverter mongoConverter,
                            ReactiveMongoTemplate reactiveMongoTemplate,
                            UserRepository repository,
@@ -97,7 +95,7 @@ public class UserServiceImpl extends BaseService<UserRepository, User, String> i
                            UserOrganizationService userOrganizationService,
                            RoleGraph roleGraph,
                            ConfigService configService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.organizationService = organizationService;
         this.analyticsService = analyticsService;
         this.sessionUserService = sessionUserService;

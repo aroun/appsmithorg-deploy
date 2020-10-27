@@ -79,8 +79,7 @@ public class ActionServiceImpl extends BaseService<ActionRepository, Action, Str
     private final NewPageService newPageService;
 
     @Autowired
-    public ActionServiceImpl(Scheduler scheduler,
-                             Validator validator,
+    public ActionServiceImpl(Validator validator,
                              MongoConverter mongoConverter,
                              ReactiveMongoTemplate reactiveMongoTemplate,
                              ActionRepository repository,
@@ -93,7 +92,7 @@ public class ActionServiceImpl extends BaseService<ActionRepository, Action, Str
                              MarketplaceService marketplaceService,
                              PolicyGenerator policyGenerator,
                              NewPageService newPageService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.repository = repository;
         this.datasourceService = datasourceService;
         this.pluginService = pluginService;

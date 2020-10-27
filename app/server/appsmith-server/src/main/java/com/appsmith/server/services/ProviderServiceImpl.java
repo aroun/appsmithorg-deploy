@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
 import java.util.ArrayList;
@@ -31,13 +30,12 @@ public class ProviderServiceImpl extends BaseService<ProviderRepository, Provide
 
     private static final String DEFAULT_CATEGORY = "Business Software";
 
-    public ProviderServiceImpl(Scheduler scheduler,
-                               Validator validator,
+    public ProviderServiceImpl(Validator validator,
                                MongoConverter mongoConverter,
                                ReactiveMongoTemplate reactiveMongoTemplate,
                                ProviderRepository repository,
                                AnalyticsService analyticsService) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        super(validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
     }
 
     @Override
