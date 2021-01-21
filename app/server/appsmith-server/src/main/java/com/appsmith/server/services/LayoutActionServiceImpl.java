@@ -423,6 +423,18 @@ public class LayoutActionServiceImpl implements LayoutActionService {
                 .updateUnpublishedAction(id, action)
                 .cache();
 
+        /**
+         * TODO
+         * Instead of doing updateLayout, we should call computeAndSavePageLoadActions if any of the following applies :
+         * 1. Layout's graph fields are null : allOnPageLoadActionNames, allOnPageLoadActionEdges, actionsUsedInDynamicBindings
+         * 2. action's name exists in allOnPageLoadActionNames. If yes, then using the dynamic bindings of the action,
+         * we should create all the edges and check if they exist in the graph. We should also check if there are any other
+         * edges in the graph which didnt get created now. This would signal that the dynamic bindings changed. If yes,
+         * recompute on load actions.
+         * If the actions name does not exist in allOnPageLoadActionNames, we should bail on this computation.
+         */
+
+
         // First update the action
         return updateUnpublishedAction
                 // Now update the page layout for any on load changes that may have occured.
@@ -475,9 +487,9 @@ public class LayoutActionServiceImpl implements LayoutActionService {
         }
 
         Set<String> widgetNames = new HashSet<>();
-        Set<String> dynamicBindings = new HashSet<>();
+        Set<String> dslJsSnippets = new HashSet<>();
         try {
-            extractAllWidgetNamesAndDynamicBindingsFromDSL(dsl, widgetNames, dynamicBindings);
+            extractAllWidgetNamesAndDynamicBindingsFromDSL(dsl, widgetNames, dslJsSnippets);
         } catch (Throwable t) {
             throw Exceptions.propagate(t);
         }
@@ -486,27 +498,46 @@ public class LayoutActionServiceImpl implements LayoutActionService {
         // dynamicBindingNames is a set of all words extracted from mustaches which should also contain the names
         // of the actions being used to read data from into the widget fields
         Set<String> dynamicBindingNames = new HashSet<>();
-        if (!CollectionUtils.isEmpty(dynamicBindings)) {
-            for (String mustacheKey : dynamicBindings) {
+        if (!CollectionUtils.isEmpty(dslJsSnippets)) {
+            for (String mustacheKey : dslJsSnippets) {
                 // Extract all the words in the dynamic bindings
                 extractWordsAndAddToSet(dynamicBindingNames, mustacheKey);
             }
         }
+
+        /**
+         * TODO
+         * Check if page load actions must be computed here. If not, we should just set the DSL and widget names in
+         * the DSL and return.
+         * Page load actions should be computed in the following scenarios :
+         * 1. graph fields are null : allOnPageLoadActionNames, allOnPageLoadActionEdges, actionsUsedInDynamicBindings
+         * 2. Check actionNames in DSL and compare with actionsUsedInDynamicBindings. If different, re-compute page load
+         */
+
+        return computeAndSavePageLoadActions(pageId, layoutId, layout, dynamicBindingNames, true);
+    }
+
+    private Mono<Layout> computeAndSavePageLoadActions(String pageId, String layoutId, Layout layout, Set<String> dynamicBindingNames, Boolean updateActions) {
 
         Set<String> actionNames = new HashSet<>();
         Set<ActionDependencyEdge> edges = new HashSet<>();
         Set<String> actionsUsedInDSL = new HashSet<>();
         List<ActionDTO> flatmapPageLoadActions = new ArrayList<>();
 
-        Mono<List<HashSet<DslActionDTO>>> allOnLoadActionsMono = pageLoadActionsUtil
-                .findAllOnLoadActions(dynamicBindingNames, actionNames, pageId, edges, actionsUsedInDSL, flatmapPageLoadActions)
+        Mono<List<HashSet<DslActionDTO>>> allOnLoadActionsMono = pageLoadActionsUtil.findAllOnLoadActions(dynamicBindingNames,
+                actionNames, pageId, edges, actionsUsedInDSL, flatmapPageLoadActions)
                 .cache();
 
-        // Update these actions to be executed on load, unless the user has touched the executeOnLoad setting for this
-        Mono<Boolean> actionsUpdatedMono = allOnLoadActionsMono
-                .then(newActionService.setOnLoad(flatmapPageLoadActions));
+        // Update these actions to be executed on load
+        Mono<Boolean> actionsUpdatedMono;
+        if (Boolean.TRUE.equals(updateActions)) {
+            actionsUpdatedMono = allOnLoadActionsMono
+                    .then(newActionService.setOnLoad(flatmapPageLoadActions));
+        } else {
+            actionsUpdatedMono = Mono.just(Boolean.TRUE);
+        }
 
-        // First update the actions and set execute on load to true
+        // First update the actions and set execute on load to true (if required)
         return actionsUpdatedMono
                 .then(allOnLoadActionsMono)
                 .zipWith(newPageService.findByIdAndLayoutsId(pageId, layoutId, MANAGE_PAGES, false)
