@@ -22,7 +22,7 @@ app_name=gu-appsmith
 echo "$app_name" >app_name.txt
 
 # Create app
-heroku create $app_name
+heroku create --team=appsmith $app_name
 
 # Create Redis add-on
 heroku addons:create heroku-redis:hobby-dev --as=APPSMITH_REDIS -a $app_name
