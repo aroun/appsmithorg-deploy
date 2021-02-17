@@ -1,4 +1,4 @@
-FROM appsmith/appsmith-editor as frontend
+FROM legodevops/appsmith:latest as frontend
 
 FROM appsmith/appsmith-server:latest
 
