@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image:  appsmith/appsmith-editor
+        image:  shrikantappsmith/appsmith-editor-ce
         ports:
           - containerPort: 80
         envFrom:
