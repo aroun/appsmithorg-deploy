@@ -11,7 +11,7 @@ version: "3.7"
 
 services:
   nginx:
-    image: legodevops/appsmith:latest
+    image: shrikantappsmith/appsmith-editor-ce:latest
     env_file: ./docker.env
     ports:
       - "80:80"
