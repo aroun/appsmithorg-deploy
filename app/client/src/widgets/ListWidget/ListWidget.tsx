@@ -23,6 +23,7 @@ import { ContainerWidgetProps } from "../ContainerWidget";
 import propertyPaneConfig from "./ListPropertyPaneConfig";
 import { EventType } from "constants/ActionConstants";
 import { getDynamicBindings } from "utils/DynamicBindingUtils";
+import ListPagination from "./ListPagination";
 
 class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   static getPropertyValidationMap(): WidgetPropertyValidationType {
@@ -324,7 +325,11 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   getPageView() {
     const children = this.renderChildren();
 
-    return <ListComponent {...this.props}>{children}</ListComponent>;
+    return (
+      <>
+        <ListComponent {...this.props}>{children}</ListComponent>
+      </>
+    );
   }
 
   /**
