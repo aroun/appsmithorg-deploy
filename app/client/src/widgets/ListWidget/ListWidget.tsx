@@ -90,7 +90,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       });
     }
 
-    if (prevProps.paginationPerPage !== this.props.paginationPerPage) {
+    if (prevProps.paginationPerPage !== this.props.paginationPerPage && false) {
       this.setState({ perPage: this.props.paginationPerPage });
     }
   }
@@ -140,10 +140,9 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
 
     childWidgetData.parentId = this.props.widgetId;
     childWidgetData.shouldScrollContents = this.props.shouldScrollContents;
-    childWidgetData.canExtend =
-      childWidgetData.virtualizedEnabled && false
-        ? true
-        : this.props.shouldScrollContents;
+    childWidgetData.canExtend = childWidgetData.virtualizedEnabled
+      ? true
+      : this.props.shouldScrollContents;
     childWidgetData.isVisible = this.props.isVisible;
     childWidgetData.minHeight = componentHeight;
     childWidgetData.rightColumn = componentWidth;
@@ -278,7 +277,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   paginateItems = (children: ContainerWidgetProps<WidgetProps>[]) => {
     const { page, perPage } = this.state;
 
-    if (this.canPaginate()) {
+    if (this.canPaginate() && false) {
       return children.slice((page - 1) * perPage, page * perPage);
     }
 
@@ -369,7 +368,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       <ListComponent {...this.props}>
         <div>{children}</div>
 
-        {this.canPaginate() && (
+        {this.canPaginate() && false && (
           <ListPagination
             total={this.props.items.length}
             current={this.state.page}

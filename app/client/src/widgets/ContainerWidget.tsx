@@ -113,7 +113,7 @@ class ContainerWidget extends BaseWidget<
     const isVirtualized = this.props.virtualizedEnabled;
 
     // if container is virtualized, render a virtualized list
-    if (isVirtualized && false) {
+    if (isVirtualized) {
       if (this.props.renderMode !== RenderModes.CANVAS) {
         return this.renderVirtualizedContainer();
       } else {
