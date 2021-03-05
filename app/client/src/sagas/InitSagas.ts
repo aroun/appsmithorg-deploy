@@ -40,7 +40,7 @@ import * as Sentry from "@sentry/react";
 function* initializeEditorSaga(
   initializeEditorAction: ReduxAction<InitializeEditorPayload>,
 ) {
-  const { applicationId, pageId } = initializeEditorAction.payload;
+  const { applicationId } = initializeEditorAction.payload;
   try {
     yield put(setAppMode(APP_MODE.EDIT));
     yield put({ type: ReduxActionTypes.START_EVALUATION });
@@ -48,20 +48,17 @@ function* initializeEditorSaga(
       put(fetchPageList(applicationId, APP_MODE.EDIT)),
       put(fetchEditorConfigs()),
       put(fetchActions(applicationId)),
-      put(fetchPage(pageId)),
       put(fetchApplication(applicationId, APP_MODE.EDIT)),
     ]);
 
     const resultOfPrimaryCalls = yield race({
       success: all([
         take(ReduxActionTypes.FETCH_PAGE_LIST_SUCCESS),
-        take(ReduxActionTypes.FETCH_PAGE_SUCCESS),
         take(ReduxActionTypes.FETCH_APPLICATION_SUCCESS),
         take(ReduxActionTypes.FETCH_ACTIONS_SUCCESS),
       ]),
       failure: take([
         ReduxActionErrorTypes.FETCH_PAGE_LIST_ERROR,
-        ReduxActionErrorTypes.FETCH_PAGE_ERROR,
         ReduxActionErrorTypes.FETCH_APPLICATION_ERROR,
         ReduxActionErrorTypes.FETCH_ACTIONS_ERROR,
       ]),

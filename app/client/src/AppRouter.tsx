@@ -16,6 +16,7 @@ import {
   USER_AUTH_URL,
   USERS_URL,
   PROFILE,
+  APPLICATION_URL,
 } from "constants/routes";
 import OrganizationLoader from "pages/organization/loader";
 import ApplicationListLoader from "pages/Applications/loader";
@@ -101,7 +102,7 @@ class AppRouter extends React.Component<any, any> {
                   path={APPLICATIONS_URL}
                   component={ApplicationListLoader}
                 />
-                <SentryRoute path={BUILDER_URL} component={EditorLoader} />
+                <SentryRoute path={APPLICATION_URL} component={EditorLoader} />
                 <SentryRoute
                   path={getApplicationViewerPageURL()}
                   component={AppViewerLoader}

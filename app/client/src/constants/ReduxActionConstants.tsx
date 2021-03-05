@@ -553,5 +553,4 @@ export interface LoadWidgetSidebarPayload {
 
 export type InitializeEditorPayload = {
   applicationId: string;
-  pageId: string;
 };

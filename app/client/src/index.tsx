@@ -2,6 +2,8 @@ import React from "react";
 import "./wdyr";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
+import { HotkeysProvider } from "@blueprintjs/core";
+
 import "./index.css";
 import { ThemeProvider } from "constants/DefaultTheme";
 import { appInitializer } from "utils/AppsmithUtils";
@@ -28,11 +30,13 @@ appInitializer();
 const App = () => {
   return (
     <Sentry.ErrorBoundary fallback={"An error has occured"}>
-      <Provider store={store}>
-        <LayersContext.Provider value={Layers}>
-          <ThemedAppWithProps />
-        </LayersContext.Provider>
-      </Provider>
+      <HotkeysProvider>
+        <Provider store={store}>
+          <LayersContext.Provider value={Layers}>
+            <ThemedAppWithProps />
+          </LayersContext.Provider>
+        </Provider>
+      </HotkeysProvider>
     </Sentry.ErrorBoundary>
   );
 };
