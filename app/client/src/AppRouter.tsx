@@ -9,7 +9,6 @@ import {
   BASE_LOGIN_URL,
   BASE_SIGNUP_URL,
   BASE_URL,
-  BUILDER_URL,
   getApplicationViewerPageURL,
   ORG_URL,
   SIGN_UP_URL,

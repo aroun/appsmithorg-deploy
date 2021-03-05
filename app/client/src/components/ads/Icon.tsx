@@ -38,6 +38,7 @@ import { ReactComponent as DesktopIcon } from "assets/icons/ads/desktop.svg";
 import { ReactComponent as MobileIcon } from "assets/icons/ads/mobile.svg";
 import { ReactComponent as TabletIcon } from "assets/icons/ads/tablet.svg";
 import { ReactComponent as FluidIcon } from "assets/icons/ads/fluid.svg";
+import { ReactComponent as DragHandleIcon } from "assets/icons/ads/drag-handle.svg";
 
 import styled from "styled-components";
 import { CommonComponentProps, Classes } from "./common";
@@ -131,6 +132,7 @@ export const IconCollection = [
   "mobile",
   "tablet",
   "fluid",
+  "drag-handle",
 ] as const;
 
 export type IconName = typeof IconCollection[number];
@@ -297,6 +299,9 @@ const Icon = forwardRef(
         break;
       case "fluid":
         returnIcon = <FluidIcon />;
+        break;
+      case "drag-handle":
+        returnIcon = <DragHandleIcon />;
         break;
 
       default:

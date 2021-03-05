@@ -3,7 +3,8 @@ export const ORG_URL = "/org";
 export const PAGE_NOT_FOUND_URL = "/404";
 export const SERVER_ERROR_URL = "/500";
 export const APPLICATIONS_URL = `/applications`;
-export const APPLICATION_URL = "/applications/:applicationId/";
+export const APPLICATION_URL = "/applications/:applicationId";
+export const APPLICATION_PAGE_LIST_URL = `${APPLICATION_URL}/pages`;
 export const BUILDER_URL = "/applications/:applicationId/pages/:pageId/edit";
 export const USER_AUTH_URL = "/user";
 export const PROFILE = "/profile";
@@ -45,6 +46,20 @@ export type QueryEditorRouteParams = {
 export const BUILDER_BASE_URL = (applicationId = ":applicationId"): string =>
   `/applications/${applicationId}`;
 
+/**
+ * /applications/<applicationID>/pages
+ *
+ * @param applicationId
+ * @param params
+ */
+export const getApplicationPageListUrl = (
+  applicationId?: string,
+  params?: Record<string, string>,
+): string => {
+  const queryParams = convertToQueryParams(params);
+  return `${BUILDER_BASE_URL(applicationId)}/pages` + queryParams;
+};
+
 export const BUILDER_PAGE_URL = (
   applicationId?: string,
   pageId?: string,
@@ -61,11 +76,6 @@ export const API_EDITOR_URL = (
   applicationId = ":applicationId",
   pageId = ":pageId",
 ): string => `${BUILDER_PAGE_URL(applicationId, pageId)}/api`;
-
-export const PAGE_LIST_EDITOR_URL = (
-  applicationId = ":applicationId",
-  pageId = ":pageId",
-): string => `${BUILDER_PAGE_URL(applicationId, pageId)}/pages`;
 
 export const DATA_SOURCES_EDITOR_URL = (
   applicationId = ":applicationId",

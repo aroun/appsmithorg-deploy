@@ -4,7 +4,7 @@ import { pageGroupIcon } from "../ExplorerIcons";
 import { useDispatch, useSelector } from "react-redux";
 import { getNextEntityName } from "utils/AppsmithUtils";
 import { createPage } from "actions/pageActions";
-import { useParams } from "react-router";
+import { useHistory, useParams } from "react-router";
 import { ExplorerURLParams } from "../helpers";
 import { Page } from "constants/ReduxActionConstants";
 import ExplorerPageEntity from "./PageEntity";
@@ -12,6 +12,7 @@ import { AppState } from "reducers";
 import { CanvasStructure } from "reducers/uiReducers/pageCanvasStructure";
 import { Datasource } from "entities/Datasource";
 import { Plugin } from "api/PluginApi";
+import { getApplicationPageListUrl } from "constants/routes";
 
 type ExplorerPageGroupProps = {
   searchKeyword?: string;
@@ -37,6 +38,7 @@ const pageGroupEqualityCheck = (
 
 export const ExplorerPageGroup = memo((props: ExplorerPageGroupProps) => {
   const dispatch = useDispatch();
+  const history = useHistory();
   const params = useParams<ExplorerURLParams>();
 
   const pages = useSelector((state: AppState) => {
@@ -54,8 +56,11 @@ export const ExplorerPageGroup = memo((props: ExplorerPageGroupProps) => {
     const pageWidgets = props.widgets && props.widgets[page.pageId];
     const pageActions = props.actions[page.pageId] || [];
     const datasources = props.datasources[page.pageId] || [];
-    if (!pageWidgets && pageActions.length === 0 && datasources.length === 0)
+
+    if (!pageWidgets && pageActions.length === 0 && datasources.length === 0) {
       return null;
+    }
+
     return (
       <ExplorerPageEntity
         key={page.pageId}
@@ -81,6 +86,10 @@ export const ExplorerPageGroup = memo((props: ExplorerPageGroupProps) => {
       isDefaultExpanded
       entityId="Pages"
       step={props.step}
+      disabled
+      action={() =>
+        history.push(getApplicationPageListUrl(params.applicationId))
+      }
       onCreate={createPageCallback}
       searchKeyword={props.searchKeyword}
     >

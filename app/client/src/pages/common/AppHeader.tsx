@@ -6,9 +6,9 @@ import PageHeader from "pages/common/PageHeader";
 import LoginHeader from "pages/common/LoginHeader";
 import { Route, Switch } from "react-router";
 import {
+  APPLICATION_URL,
   APP_VIEW_URL,
   BASE_URL,
-  BUILDER_URL,
   USER_AUTH_URL,
 } from "constants/routes";
 import { withRouter, RouteComponentProps } from "react-router";
@@ -35,7 +35,7 @@ class AppHeader extends React.Component<Props, any> {
     return (
       <React.Fragment>
         <Switch>
-          <Route path={BUILDER_URL} component={AppEditorHeader} />
+          <Route path={APPLICATION_URL} component={AppEditorHeader} />
           <Route path={APP_VIEW_URL} component={AppViewerHeader} />
           <Route path={USER_AUTH_URL} component={LoginHeader} />
           <Route path={BASE_URL} component={PageHeader} />

@@ -106,7 +106,8 @@ export type EventName =
   | "ONBOARDING_NEXT_MISSION"
   | "ONBOARDING_GO_HOME"
   | "END_ONBOARDING"
-  | "ONBOARDING_COMPLETE";
+  | "ONBOARDING_COMPLETE"
+  | "PAGE_LIST_LOAD";
 
 function getApplicationId(location: Location) {
   const pathSplit = location.pathname.split("/");

@@ -97,6 +97,7 @@ const Editor: FC = () => {
       </CenteredWrapper>
     );
   }
+
   return (
     <div onKeyDown={handleKeyDown} onKeyUp={handleKeyUp}>
       <ThemeProvider theme={lightTheme}>
