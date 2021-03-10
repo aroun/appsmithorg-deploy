@@ -3,6 +3,7 @@ import styled from "styled-components";
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Tooltip, Position } from "@blueprintjs/core";
 
 import { AppState } from "reducers";
 import AnalyticsUtil from "utils/AnalyticsUtil";
@@ -11,30 +12,13 @@ import Icon, { IconSize } from "components/ads/Icon";
 import { getCurrentApplication } from "selectors/applicationSelectors";
 import { Colors } from "constants/Colors";
 import Button, { Size } from "components/ads/Button";
+import { FormIcons } from "icons/FormIcons";
+import { ControlIcons } from "icons/ControlIcons";
+import { theme } from "constants/DefaultTheme";
 
-const PageWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  overflow: hidden;
-  background: ${(props) => {
-    return props.theme.colors.artboard;
-  }};
-  padding: 20px;
-  height: calc(100vh - ${(props) => props.theme.smallHeaderHeight});
-`;
+const CopyIcon = ControlIcons.COPY_CONTROL;
+const DeleteIcon = FormIcons.DELETE_ICON;
 
-const PageList = styled.div``;
-const PageListItem = styled.div`
-  padding: 10px;
-  margin-top: 10px;
-  background: ${(props) => {
-    return props.theme.colors.appBackground;
-  }};
-  display: flex;
-  align-items-center
-`;
 const DragHandler = styled.div`
   cursor: move !important;
   display: flex;
@@ -64,8 +48,8 @@ const PagesEditor = () => {
   };
 
   return (
-    <PageWrapper>
-      <div>
+    <div className="py-6 px-8 bg-appsmith-artboard h-full">
+      <div className="flex">
         <Button
           text="New Page"
           tag="button"
@@ -74,13 +58,18 @@ const PagesEditor = () => {
           onClick={() => {
             console.log("hi");
           }}
-          className="t--apiFormRunBtn"
+          className="t--apiFormRunBtn ml-auto"
         />
       </div>
+
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId={`droppable-pages-list-${currentApp?.id}`}>
           {(provided) => (
-            <PageList ref={provided.innerRef} {...provided.droppableProps}>
+            <div
+              className="pt-4"
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
               {pages.map((page, index) => (
                 <Draggable
                   draggableId={page.pageId}
@@ -88,28 +77,53 @@ const PagesEditor = () => {
                   index={index}
                 >
                   {(provided) => (
-                    <PageListItem
+                    <div
                       ref={provided.innerRef}
                       {...provided.draggableProps}
+                      className="flex items-center p-4 mt-2 bg-appsmith-app"
                     >
                       <DragHandler {...provided.dragHandleProps}>
+                        {/* drag handler */}
                         <Icon
+                          className="opacity-30"
                           fillColor={Colors.BLACK}
                           name={"drag-handle"}
                           size={IconSize.SMALL}
                         />
                       </DragHandler>
-                      {page.pageName}
-                    </PageListItem>
+                      <div className="flex-1 pl-2">
+                        <p className="text-gray-800">{page.pageName}</p>
+                      </div>
+                      <Tooltip
+                        content="Copy Widget"
+                        position={Position.TOP}
+                        hoverOpenDelay={200}
+                      >
+                        <CopyIcon
+                          className="t--copy-widget"
+                          width={14}
+                          height={14}
+                          color={theme.colors.paneSectionLabel}
+                        />
+                      </Tooltip>
+                      <div className="ml-3">
+                        <DeleteIcon
+                          className=""
+                          width={16}
+                          height={16}
+                          color={theme.colors.paneSectionLabel}
+                        />
+                      </div>
+                    </div>
                   )}
                 </Draggable>
               ))}
               {provided.placeholder}
-            </PageList>
+            </div>
           )}
         </Droppable>
       </DragDropContext>
-    </PageWrapper>
+    </div>
   );
 };
 
