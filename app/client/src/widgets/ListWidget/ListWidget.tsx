@@ -110,7 +110,9 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     }
   }
 
-  static getDefaultPropertiesMap(): Record<string, string> {
+  static getDefaultPropertiesMap(
+    props: ListWidgetProps<WidgetProps>,
+  ): Record<string, string> {
     return {
       itemBackgroundColor: "#FFFFFF",
     };

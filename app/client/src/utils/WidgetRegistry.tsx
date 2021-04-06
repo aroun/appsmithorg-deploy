@@ -446,7 +446,7 @@ export default class WidgetBuilderRegistry {
       },
       ListWidget.getPropertyValidationMap(),
       ListWidget.getDerivedPropertiesMap(),
-      ListWidget.getDefaultPropertiesMap(),
+      ListWidget.getDefaultPropertiesMap,
       ListWidget.getMetaPropertiesMap(),
       ListWidget.getPropertyPaneConfig(),
     );

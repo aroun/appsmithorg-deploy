@@ -63,7 +63,7 @@ class WidgetFactory {
   > = new Map();
   static defaultPropertiesMap: Map<
     WidgetType,
-    Record<string, string>
+    Record<string, string> | ((props: WidgetProps) => Record<string, string>)
   > = new Map();
   static metaPropertiesMap: Map<WidgetType, Record<string, any>> = new Map();
   static propertyPaneConfigsMap: Map<
@@ -76,7 +76,9 @@ class WidgetFactory {
     widgetBuilder: WidgetBuilder<WidgetProps, WidgetState>,
     widgetPropertyValidation: WidgetPropertyValidationType,
     derivedPropertiesMap: DerivedPropertiesMap,
-    defaultPropertiesMap: Record<string, string>,
+    defaultPropertiesMap:
+      | Record<string, string>
+      | ((props: WidgetProps) => Record<string, string>),
     metaPropertiesMap: Record<string, any>,
     propertyPaneConfig?: PropertyPaneConfig[],
   ) {
@@ -146,7 +148,7 @@ class WidgetFactory {
 
   static getWidgetDefaultPropertiesMap(
     widgetType: WidgetType,
-  ): Record<string, string> {
+  ): Record<string, string> | ((props: WidgetProps) => Record<string, string>) {
     const map = this.defaultPropertiesMap.get(widgetType);
     if (!map) {
       console.error("Widget default properties not defined", widgetType);
