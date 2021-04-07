@@ -67,7 +67,7 @@ abstract class BaseWidget<
     return {};
   }
 
-  static getDefaultPropertiesMap(): Record<string, string> {
+  static getDefaultPropertiesMap(props?: WidgetProps): Record<string, string> {
     return {};
   }
   // TODO Find a way to enforce this, (dont let it be set)

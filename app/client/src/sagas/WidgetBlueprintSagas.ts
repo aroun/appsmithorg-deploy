@@ -69,7 +69,9 @@ export type BlueprintOperationChildOperationsFn = (
   widgetId: string,
   parentId: string,
   widgetPropertyMaps: {
-    defaultPropertyMap: Record<string, string>;
+    defaultPropertyMap:
+      | Record<string, string>
+      | ((props: WidgetProps) => Record<string, string>);
   },
 ) => ChildOperationFnResponse;
 

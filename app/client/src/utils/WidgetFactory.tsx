@@ -198,7 +198,9 @@ export type WidgetTypeConfigMap = Record<
   {
     validations: WidgetPropertyValidationType;
     derivedProperties: WidgetDerivedPropertyType;
-    defaultProperties: Record<string, string>;
+    defaultProperties:
+      | Record<string, string>
+      | ((props: WidgetProps) => Record<string, string>);
     metaProperties: Record<string, any>;
   }
 >;

@@ -110,11 +110,27 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     }
   }
 
-  static getDefaultPropertiesMap(
-    props: ListWidgetProps<WidgetProps>,
-  ): Record<string, string> {
+  static getDefaultPropertiesMap(props: WidgetProps): Record<string, string> {
+    const template = props.template;
+    let childrenDefaultPropertiesMap = {};
+
+    Object.keys(template).map((key: string) => {
+      const currentTemplate = template[key];
+      const defaultProperties = WidgetFactory.getWidgetDefaultPropertiesMap(
+        currentTemplate.type,
+      );
+
+      Object.keys(defaultProperties).map((defaultPropertyKey: string) => {
+        childrenDefaultPropertiesMap = {
+          ...childrenDefaultPropertiesMap,
+          [`${key}.${defaultPropertyKey}`]: currentTemplate[defaultPropertyKey],
+        };
+      });
+    });
+
     return {
       itemBackgroundColor: "#FFFFFF",
+      ...childrenDefaultPropertiesMap,
     };
   }
 
