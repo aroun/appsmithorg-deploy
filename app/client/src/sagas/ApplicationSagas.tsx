@@ -381,6 +381,7 @@ export function* createApplicationSaga(
     reject: any;
   }>,
 ) {
+  console.log("create application saga payload", action);
   const { applicationName, icon, color, orgId, reject } = action.payload;
   try {
     const userOrgs = yield select(getUserApplicationsOrgsList);
