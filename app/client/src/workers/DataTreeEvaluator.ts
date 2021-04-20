@@ -530,14 +530,14 @@ export default class DataTreeEvaluator {
     }
     if (stringSegments.length) {
       // Get the Data Tree value of those "binding "paths
-      const values = jsSnippets.map((jsSnippet, index) => {
+      const values: any = jsSnippets.map((jsSnippet, index) => {
         if (jsSnippet) {
           const result = this.evaluateDynamicBoundValue(
             data,
             jsSnippet,
             callBackData,
           );
-          return result.result;
+          return result;
         } else {
           return stringSegments[index];
         }
@@ -568,7 +568,7 @@ export default class DataTreeEvaluator {
           binding: js,
         },
       });
-      return { result: undefined, triggers: [] };
+      return { result: undefined, triggers: [], error: "Error: " + e.message };
     }
   }
 
@@ -589,7 +589,9 @@ export default class DataTreeEvaluator {
     isDefaultProperty: boolean,
   ): any {
     const entityPropertyName = _.drop(propertyPath.split(".")).join(".");
-    let valueToValidate = evalPropertyValue;
+    const properTyValue = evalPropertyValue.result;
+    let valueToValidate = evalPropertyValue && evalPropertyValue.result;
+    const errorInValue = evalPropertyValue && evalPropertyValue.error;
     if (isPathADynamicTrigger(widget, propertyPath)) {
       const { triggers } = this.getDynamicValue(
         unEvalPropertyValue,
@@ -610,9 +612,13 @@ export default class DataTreeEvaluator {
     const evaluatedValue = isValid
       ? parsed
       : _.isUndefined(transformed)
-      ? evalPropertyValue
+      ? properTyValue
       : transformed;
-    const safeEvaluatedValue = removeFunctions(evaluatedValue);
+    const safeEvaluatedValue =
+      errorInValue && errorInValue.length > 0
+        ? errorInValue
+        : removeFunctions(evaluatedValue);
+    // const safeEvaluatedValue = removeFunctions(evaluatedValue);
     _.set(widget, `evaluatedValues.${entityPropertyName}`, safeEvaluatedValue);
     if (!isValid) {
       _.set(widget, `invalidProps.${entityPropertyName}`, true);
@@ -1066,14 +1072,20 @@ const isDynamicValue = (value: string): boolean => DATA_BIND_REGEX.test(value);
 const createDynamicValueString = (
   binding: string,
   subBindings: string[],
-  subValues: string[],
-): string => {
+  subValues: any,
+): any => {
   // Replace the string with the data tree values
   let finalValue = binding;
+  const finalResult: Array<string> = [];
+  let finalError;
   subBindings.forEach((b, i) => {
-    let value = subValues[i];
+    let value = subValues[i].result;
+    const error = subValues[i].error;
     if (Array.isArray(value) || _.isObject(value)) {
       value = JSON.stringify(value);
+    }
+    if (error) {
+      finalResult.push(error);
     }
     try {
       if (JSON.parse(value)) {
@@ -1083,8 +1095,9 @@ const createDynamicValueString = (
       // do nothing
     }
     finalValue = finalValue.replace(b, value);
+    finalError = finalResult.join("\n");
   });
-  return finalValue;
+  return { result: finalValue, error: finalError };
 };
 
 function isValidEntity(entity: DataTreeEntity): entity is DataTreeObjectEntity {
