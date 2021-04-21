@@ -302,7 +302,10 @@ export function getValidatedTree(
           : _.isUndefined(transformed)
           ? value
           : transformed;
-        const safeEvaluatedValue = removeFunctions(evaluatedValue);
+        const evalValue = _.get(entity, "evaluatedValues." + property);
+        const safeEvaluatedValue = evalValue
+          ? evalValue
+          : removeFunctions(evaluatedValue);
         _.set(parsedEntity, `evaluatedValues.${property}`, safeEvaluatedValue);
         if (!isValid) {
           _.set(parsedEntity, `invalidProps.${property}`, true);

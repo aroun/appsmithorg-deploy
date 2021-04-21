@@ -382,7 +382,11 @@ export default class DataTreeEvaluator {
               evalPropertyValue = undefined;
             }
           } else {
-            evalPropertyValue = unEvalPropertyValue;
+            evalPropertyValue = {
+              result: unEvalPropertyValue,
+              error: undefined,
+              triggers: [],
+            };
           }
           if (isWidget(entity)) {
             const widgetEntity = entity;
@@ -419,9 +423,21 @@ export default class DataTreeEvaluator {
               }
               return _.set(currentTree, propertyPath, parsedValue);
             }
-            return _.set(currentTree, propertyPath, evalPropertyValue);
+            return _.set(
+              currentTree,
+              propertyPath,
+              evalPropertyValue.error
+                ? evalPropertyValue.error
+                : evalPropertyValue.result,
+            );
           } else {
-            return _.set(currentTree, propertyPath, evalPropertyValue);
+            return _.set(
+              currentTree,
+              propertyPath,
+              evalPropertyValue.error
+                ? evalPropertyValue.error
+                : evalPropertyValue.result,
+            );
           }
         },
         tree,
