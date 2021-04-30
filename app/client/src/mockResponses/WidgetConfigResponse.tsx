@@ -265,12 +265,13 @@ const WidgetConfigResponse: WidgetConfigReducerState = {
       label: "",
       selectionType: "SINGLE_SELECT",
       options: [
-        { label: "Vegetarian", value: "VEG" },
-        { label: "Non-Vegetarian", value: "NON_VEG" },
-        { label: "Vegan", value: "VEGAN" },
+        { label: "Leonardo", value: "Leo" },
+        { label: "Raphael", value: "Raphael" },
+        { label: "Michelangelo", value: "Michelangelo" },
+        { label: "Donatello", value: "Donatello" }
       ],
       widgetName: "Dropdown",
-      defaultOptionValue: "VEG",
+      defaultOptionValue: "Leo",
       version: 1,
       isRequired: false,
       isDisabled: false,
@@ -291,10 +292,10 @@ const WidgetConfigResponse: WidgetConfigReducerState = {
       columns: 3,
       label: "",
       options: [
-        { label: "Male", value: "M" },
-        { label: "Female", value: "F" },
+        { label: "Star Wars", value: "A" },
+        { label: "Star Trek", value: "B" },
       ],
-      defaultOptionValue: "M",
+      defaultOptionValue: "A",
       widgetName: "RadioGroup",
       version: 1,
       isRequired: false,
@@ -546,11 +547,11 @@ const WidgetConfigResponse: WidgetConfigReducerState = {
                 view: [
                   {
                     type: "TEXT_WIDGET",
-                    size: { rows: 1, cols: 12 },
+                    size: { rows: 1, cols: 6 },
                     position: { top: 0, left: 0 },
                     props: {
-                      text: "Form",
-                      textStyle: "HEADING",
+                      text: "Form Title",
+                      fontSize: "HEADING1",
                       version: 1,
                     },
                   },
