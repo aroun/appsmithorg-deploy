@@ -69,6 +69,8 @@ export default class DataTreeEvaluator {
 
   // kaushik - Hetu call : check here
   createFirstTree(unEvalTree: DataTree) {
+    // Kaushik - Test: print tree here
+    console.log("createFirstTree unEvalTree: ", unEvalTree);
     const totalStart = performance.now();
     // Create dependency map
     const createDependencyStart = performance.now();
@@ -129,6 +131,8 @@ export default class DataTreeEvaluator {
 
   // kaushik - Hetu call: check here
   updateDataTree(unEvalTree: DataTree) {
+    // Kaushik - Test: print tree here
+    console.log("updateDataTree unEvalTree: ", unEvalTree);
     const totalStart = performance.now();
     // Calculate diff
     const diffCheckTimeStart = performance.now();
@@ -184,6 +188,8 @@ export default class DataTreeEvaluator {
       }
       return false;
     });
+    // Kaushik - Test: print tree here
+    console.log("createFirstTree evaluationOrder: ", evaluationOrder);
 
     // Remove any deleted paths from the eval tree
     removedPaths.forEach((removedPath) => {

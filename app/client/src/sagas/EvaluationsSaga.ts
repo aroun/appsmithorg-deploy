@@ -118,7 +118,7 @@ function* postEvalActionDispatcher(
   }
 }
 
-// kaushik: catch here the eval order
+// kaushik - Hetu call: catch here the eval order
 function* evaluateTreeSaga(
   postEvalActions?: Array<ReduxAction<unknown> | ReduxActionWithoutPayload>,
 ) {
@@ -135,7 +135,7 @@ function* evaluateTreeSaga(
       widgetTypeConfigMap,
     },
   );
-  // kaushik: also get sort order
+  // kaushik - Hetu call: also get sort order
   const { errors, dataTree, dependencies, logs } = workerResponse;
   log.debug({ dataTree: dataTree });
   logs.forEach((evalLog: any) => log.debug(evalLog));
