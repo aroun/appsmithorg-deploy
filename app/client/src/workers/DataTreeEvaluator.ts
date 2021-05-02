@@ -67,7 +67,9 @@ export default class DataTreeEvaluator {
     this.widgetConfigMap = widgetConfigMap;
   }
 
+  // kaushik - Hetu call: check here
   createFirstTree(unEvalTree: DataTree) {
+    console.log("createFirstTree unEvalTree:", unEvalTree);
     const totalStart = performance.now();
     // Create dependency map
     const createDependencyStart = performance.now();
@@ -172,6 +174,13 @@ export default class DataTreeEvaluator {
 
     // Remove anything from the sort order that is not a dynamic leaf since only those need evaluation
     // kaushik - Hetu call: return this to know what changed eg input
+    // kaushik - Hetu call: Inverse dependency map is only filled if an API is connected to
+    // kaushik - Hetu call: the widgets
+    // kaushik - Hetu call: Call the APIs dependent
+    // kaushik - Hetu call: TODO: Learn how to call APIs
+    // kaushik - Hetu call: Check pages/Editor/APIEditor/Form.tsx
+    // kaushik - Hetu call: And see how they call run click
+    console.log("inverseDependencyMap: ", this.inverseDependencyMap);
     const evaluationOrder = subTreeSortOrder.filter((propertyPath) => {
       // We are setting all values from our uneval tree to the old eval tree we have
       // So that the actual uneval value can be evaluated
@@ -182,6 +191,10 @@ export default class DataTreeEvaluator {
       }
       return false;
     });
+    // kaushik - Hetu call: Think evaluationOrder is values of
+    // subtree sort order filtered if it is a dynamic leaf
+    // and to track it's changes
+    console.log("updateDataTree evaluationOrder: ", evaluationOrder);
 
     // Remove any deleted paths from the eval tree
     removedPaths.forEach((removedPath) => {
