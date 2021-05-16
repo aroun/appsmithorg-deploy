@@ -12,6 +12,14 @@ import "codemirror/addon/edit/closebrackets";
 import "codemirror/addon/display/autorefresh";
 import "codemirror/addon/mode/multiplex";
 import "codemirror/addon/tern/tern.css";
+import "codemirror/addon/lint/lint";
+import "codemirror/addon/lint/javascript-lint";
+import "codemirror/addon/lint/json-lint";
+import "codemirror/addon/lint/lint.css";
+import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/sql/sql";
+import { JSHINT } from "jshint";
+import jsonlint from "jsonlint-mod";
 import { getDataTreeForAutocomplete } from "selectors/dataTreeSelectors";
 import EvaluatedValuePopup from "components/editorComponents/CodeEditor/EvaluatedValuePopup";
 import { WrappedFieldInputProps, WrappedFieldMetaProps } from "redux-form";
@@ -51,6 +59,8 @@ import "codemirror/addon/fold/foldgutter.css";
 import * as Sentry from "@sentry/react";
 import { removeNewLineChars, getInputValue } from "./codeEditorUtils";
 
+window.JSHINT = JSHINT;
+window.jsonlint = jsonlint;
 const LightningMenu = lazy(() =>
   retryPromise(() => import("components/editorComponents/LightningMenu")),
 );
@@ -138,9 +148,11 @@ class CodeEditor extends Component<Props, State> {
         autoCloseBrackets: true,
         indentWithTabs: this.props.tabBehaviour === TabBehaviour.INDENT,
         lineWrapping: this.props.size !== EditorSize.COMPACT,
-        lineNumbers: this.props.showLineNumbers,
+        lineNumbers: false,
         addModeClass: true,
         matchBrackets: false,
+        gutters: ["CodeMirror-lint-markers"],
+        lint: true,
         scrollbarStyle:
           this.props.size !== EditorSize.COMPACT ? "native" : "null",
       };
