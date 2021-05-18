@@ -57,6 +57,7 @@ class TernServer {
   server: Server;
   docs: TernDocs = Object.create(null);
   cachedArgHints: ArgHints | null = null;
+  active: any;
 
   constructor(
     dataTree: DataTree,
@@ -76,7 +77,23 @@ class TernServer {
   }
 
   complete(cm: CodeMirror.Editor) {
-    cm.showHint({ hint: this.getHint.bind(this), completeSingle: false });
+    cm.showHint({
+      hint: this.getHint.bind(this),
+      completeSingle: false,
+      extraKeys: {
+        Down: (cm: any, handler: any) => {
+          console.log("ArrowDown", this.active);
+          handler.moveFocus(1);
+          if (this.active.displayText === "Input3") {
+            handler.moveFocus(1);
+          }
+        },
+        Up: (cm: any, handler: any) => {
+          // console.log("ArrowUp", this.active);
+          handler.moveFocus(-1);
+        },
+      },
+    });
   }
 
   showType(cm: CodeMirror.Editor) {
@@ -149,6 +166,7 @@ class TernServer {
       obj,
       "select",
       (cur: { data: { doc: string } }, node: any) => {
+        this.active = cur;
         this.remove(tooltip);
         const content = cur.data.doc;
         if (content) {
