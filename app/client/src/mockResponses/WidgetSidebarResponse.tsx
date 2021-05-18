@@ -105,6 +105,11 @@ const WidgetSidebarResponse: WidgetCardProps[] = [
     widgetCardName: "Modal",
     key: generateReactKey(),
   },
+  {
+    type: "ICON_WIDGET",
+    widgetCardName: "Icon",
+    key: generateReactKey(),
+  },
 ];
 
 export default WidgetSidebarResponse;

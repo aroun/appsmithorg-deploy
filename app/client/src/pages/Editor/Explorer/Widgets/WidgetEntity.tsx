@@ -26,7 +26,7 @@ import CurrentPageEntityProperties from "../Entity/CurrentPageEntityProperties";
 
 export type WidgetTree = WidgetProps & { children?: WidgetTree[] };
 
-const UNREGISTERED_WIDGETS: WidgetType[] = [WidgetTypes.ICON_WIDGET];
+const UNREGISTERED_WIDGETS: WidgetType[] = [];
 
 export const navigateToCanvas = (
   params: ExplorerURLParams,

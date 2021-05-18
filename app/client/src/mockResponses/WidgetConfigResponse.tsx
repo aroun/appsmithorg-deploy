@@ -82,6 +82,8 @@ const WidgetConfigResponse: WidgetConfigReducerState = {
     },
     ICON_WIDGET: {
       widgetName: "Icon",
+      iconName: "widget",
+      iconSize: 16,
       rows: 1,
       columns: 1,
       version: 1,

@@ -11,7 +11,11 @@ const FIELD_VALUES: Record<
     path: "string",
   },
   CANVAS_WIDGET: {},
-  ICON_WIDGET: {},
+  ICON_WIDGET: {
+    iconName: "string",
+    isVisible: "boolean",
+    // onClick: "Function Call",
+  },
   SKELETON_WIDGET: {},
   TABS_MIGRATOR_WIDGET: {},
   CONTAINER_WIDGET: {

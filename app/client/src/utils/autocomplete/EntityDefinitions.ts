@@ -245,6 +245,12 @@ export const entityDefinitions = {
     gridGap: "number",
     selectedItem: generateTypeDef(widget.selectedItem),
   }),
+  ICON_WIDGET: {
+    "!doc":
+      "Icons widget can be used as a compact clickable element or just a visual enhancement for input labels and forms.",
+    isVisible: isVisible,
+    iconName: "string",
+  },
 };
 
 export const GLOBAL_DEFS = {

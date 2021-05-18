@@ -142,6 +142,11 @@ export const WidgetIcons: {
       <ListIcon />
     </IconWrapper>
   ),
+  ICON_WIDGET: (props: IconProps) => (
+    <IconWrapper {...props}>
+      <SpinnerIcon />
+    </IconWrapper>
+  ),
 };
 
 export type WidgetIcon = typeof WidgetIcons[keyof typeof WidgetIcons];
