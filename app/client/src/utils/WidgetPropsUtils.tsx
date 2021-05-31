@@ -27,6 +27,7 @@ import log from "loglevel";
 import {
   migrateTablePrimaryColumnsBindings,
   tableWidgetPropertyPaneMigrations,
+  migrateTableWidgetParentRowSpaceProperty,
 } from "utils/migrations/TableWidget";
 import { migrateIncorrectDynamicBindingPathLists } from "utils/migrations/IncorrectDynamicBindingPathLists";
 import * as Sentry from "@sentry/react";
@@ -740,6 +741,11 @@ const transformDSL = (currentDSL: ContainerWidgetProps<WidgetProps>) => {
 
   if (currentDSL.version === 20) {
     currentDSL = migrateNewlyAddedTabsWidgetsMissingData(currentDSL);
+    currentDSL.version = 21;
+  }
+
+  if (currentDSL.version === 21) {
+    currentDSL = migrateTableWidgetParentRowSpaceProperty(currentDSL);
     currentDSL.version = LATEST_PAGE_VERSION;
   }
 
