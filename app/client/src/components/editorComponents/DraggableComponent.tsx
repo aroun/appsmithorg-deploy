@@ -187,12 +187,15 @@ function DraggableComponent(props: DraggableComponentProps) {
     .toLowerCase()}`;
 
   const className = `${classNameForTesting}`;
-
   return (
     <DraggableWrapper
       className={className}
+      draggable
+      onDragStart={(e) => {
+        e.preventDefault();
+        setIsDragging && setIsDragging(true);
+      }}
       onMouseOver={handleMouseOver}
-      ref={drag}
       style={style}
     >
       {shouldRenderComponent && props.children}
