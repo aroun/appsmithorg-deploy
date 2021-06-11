@@ -8,7 +8,7 @@ import {
   GridDefaults,
   MAIN_CONTAINER_WIDGET_ID,
 } from "constants/WidgetConstants";
-import { throttle } from "lodash";
+import { omit, throttle } from "lodash";
 import React, { memo, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "reducers";
@@ -27,6 +27,7 @@ import {
   isDropZoneOccupied,
   isWidgetOverflowingParentBounds,
 } from "utils/WidgetPropsUtils";
+import { getSnappedXY } from "components/editorComponents/Dropzone";
 
 const StyledSelectionCanvas = styled.canvas`
   position: absolute;
@@ -133,35 +134,35 @@ export const CanvasDraggingArena = memo(
         draggingCanvas.width = width;
         draggingCanvas.height = height;
         const canvasCtx = draggingCanvas.getContext("2d");
+        canvasCtx.globalCompositeOperation = "destination-over";
         const startPoints = {
           left: 0,
           top: 0,
         };
-        let isDragging = false;
+        let canvasIsDragging = false;
         const onMouseUp = (e: any) => {
           startPoints.left = 0;
           startPoints.top = 0;
           draggingCanvas.style.zIndex = null;
           canvasCtx.clearRect(0, 0, width, height);
           setIsDragging(false);
-          isDragging = false;
+          canvasIsDragging = false;
         };
         const onMouseDown = (e: any) => {
-          if (!isDragging) {
-            isDragging = true;
+          if (isDragging && !canvasIsDragging) {
+            canvasIsDragging = true;
             startPoints.left = e.offsetX;
             startPoints.top = e.offsetY;
-            draggingCanvas.style.zIndex = 2;
+            draggingCanvas.style.zIndex = 1;
           }
         };
         const onMouseMove = (e: any) => {
-          if (isDragging) {
+          if (canvasIsDragging) {
             canvasCtx.clearRect(0, 0, width, height);
             const diff = {
               left: e.offsetX - draggingCanvas.offsetLeft - startPoints.left,
               top: e.offsetY - draggingCanvas.offsetTop - startPoints.top,
             };
-            console.log(diff);
             const newRectanglesToDraw = rectanglesToDraw.map((each) => ({
               ...each,
               left: each.left + diff.left,
@@ -176,6 +177,25 @@ export const CanvasDraggingArena = memo(
         };
         draggingCanvas.addEventListener("mousemove", onMouseMove, false);
         draggingCanvas.addEventListener("mouseup", onMouseUp, false);
+        // draggingCanvas.addEventListener(
+        //   "mouseenter",
+        //   () => {
+        //     canvasIsDragging = true;
+        //     draggingCanvas.style.zIndex = 1;
+        //   },
+        //   false,
+        // );
+        draggingCanvas.addEventListener(
+          "mouseleave",
+          () => {
+            startPoints.left = 0;
+            startPoints.top = 0;
+            draggingCanvas.style.zIndex = null;
+            canvasCtx.clearRect(0, 0, width, height);
+            canvasIsDragging = false;
+          },
+          false,
+        );
 
         const drawRectangle = (selectionDimensions: {
           top: number;
@@ -186,17 +206,30 @@ export const CanvasDraggingArena = memo(
           rowHeight: number;
           widgetId: string;
         }) => {
+          const occSpaces: OccupiedSpace[] = childrenOccupiedSpaces.filter(
+            (each) => !selectedWidgetsToDrag.includes(each.id),
+          );
           const isNotColliding = noCollision(
             { x: selectionDimensions.left, y: selectionDimensions.top },
             snapColumnSpace,
             snapRowSpace,
-            { x: bounds.x, y: bounds.y },
+            { x: 0, y: 0 },
             selectionDimensions.columnWidth,
             selectionDimensions.rowHeight,
             selectionDimensions.widgetId,
-            occupiedSpaces[widgetId],
+            occSpaces,
             snapRows,
             GridDefaults.DEFAULT_GRID_COLUMNS,
+          );
+          const snappedXY = getSnappedXY(
+            snapColumnSpace,
+            snapRowSpace,
+            {
+              x:
+                selectionDimensions.left + (noPad ? 0 : CONTAINER_GRID_PADDING),
+              y: selectionDimensions.top + (noPad ? 0 : CONTAINER_GRID_PADDING),
+            },
+            { x: 0, y: 0 },
           );
           const strokeWidth = 1;
           canvasCtx.setLineDash([5]);
@@ -216,7 +249,17 @@ export const CanvasDraggingArena = memo(
             selectionDimensions.width,
             selectionDimensions.height,
           );
+          canvasCtx.fillStyle = `${
+            isNotColliding ? "rgb(84, 132, 236, 0.5)" : "red"
+          }`;
+          canvasCtx.fillRect(
+            snappedXY.X,
+            snappedXY.Y,
+            selectionDimensions.width,
+            selectionDimensions.height,
+          );
         };
+
         rectanglesToDraw.forEach((each) => {
           drawRectangle(each);
         });
