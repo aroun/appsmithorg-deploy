@@ -1,6 +1,6 @@
 import Api from "api/Api";
 import { WidgetType } from "constants/WidgetConstants";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { WidgetConfigProps } from "reducers/entityReducers/widgetConfigReducer";
 import { AxiosPromise } from "axios";
 

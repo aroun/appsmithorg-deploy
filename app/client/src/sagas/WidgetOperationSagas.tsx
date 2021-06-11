@@ -53,7 +53,7 @@ import {
   isPathADynamicBinding,
   isPathADynamicTrigger,
 } from "utils/DynamicBindingUtils";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import _, { cloneDeep, flattenDeep, isString, set, remove } from "lodash";
 import WidgetFactory from "utils/WidgetFactory";
 import {

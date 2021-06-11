@@ -5,7 +5,7 @@ import {
   WidgetOperations,
   WidgetRowCols,
   WidgetProps,
-} from "widgets/BaseWidget";
+} from "widgets/BaseWidgetConstants";
 import { EditorContext } from "components/editorComponents/EditorContextProvider";
 import { generateClassName } from "utils/generators";
 import { DropTargetContext } from "./DropTargetComponent";

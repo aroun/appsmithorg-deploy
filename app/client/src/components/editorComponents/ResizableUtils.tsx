@@ -1,5 +1,5 @@
 import { XYCoord } from "react-dnd";
-import { WidgetProps, WidgetRowCols } from "widgets/BaseWidget";
+import { WidgetProps, WidgetRowCols } from "widgets/BaseWidgetConstants";
 import { GridDefaults } from "constants/WidgetConstants";
 
 export type UIElementSize = { height: number; width: number };

@@ -1,5 +1,6 @@
 import React from "react";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { WidgetType, TextSize } from "constants/WidgetConstants";
 import TextComponent from "components/designSystems/blueprint/TextComponent";
 import { VALIDATION_TYPES } from "constants/WidgetValidation";

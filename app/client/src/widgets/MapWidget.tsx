@@ -1,5 +1,6 @@
 import React from "react";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { WidgetType } from "constants/WidgetConstants";
 import MapComponent from "components/designSystems/appsmith/MapComponent";
 import { VALIDATION_TYPES } from "constants/WidgetValidation";

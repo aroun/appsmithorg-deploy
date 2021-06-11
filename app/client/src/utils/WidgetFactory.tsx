@@ -4,7 +4,7 @@ import {
   WidgetProps,
   WidgetDataProps,
   WidgetState,
-} from "widgets/BaseWidget";
+} from "widgets/BaseWidgetConstants";
 import React from "react";
 import {
   PropertyPaneConfig,

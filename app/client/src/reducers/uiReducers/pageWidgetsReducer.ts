@@ -1,7 +1,7 @@
 import { createImmerReducer } from "utils/AppsmithUtils";
 import { ReduxActionTypes, ReduxAction } from "constants/ReduxActionConstants";
 import { DSL } from "reducers/uiReducers/pageCanvasStructureReducer";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import CanvasWidgetsNormalizer from "normalizers/CanvasWidgetsNormalizer";
 
 export interface PageWidgetsReduxState {

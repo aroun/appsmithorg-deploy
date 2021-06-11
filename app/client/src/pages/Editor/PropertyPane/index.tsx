@@ -17,7 +17,7 @@ import Popper from "pages/Editor/Popper";
 import { generateClassName } from "utils/generators";
 import { ReduxActionTypes } from "constants/ReduxActionConstants";
 import styled from "constants/DefaultTheme";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import PropertyPaneTitle from "pages/Editor/PropertyPaneTitle";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import * as log from "loglevel";

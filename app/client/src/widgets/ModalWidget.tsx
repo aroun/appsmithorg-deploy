@@ -2,7 +2,8 @@ import React, { ReactNode } from "react";
 
 import { connect } from "react-redux";
 import { ReduxActionTypes } from "constants/ReduxActionConstants";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { EventType } from "constants/AppsmithActionConstants/ActionConstants";
 import WidgetFactory from "utils/WidgetFactory";
 import ModalComponent from "components/designSystems/blueprint/ModalComponent";

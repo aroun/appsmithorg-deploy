@@ -1,6 +1,6 @@
 import { createReducer } from "utils/AppsmithUtils";
 import { ReduxActionTypes, ReduxAction } from "constants/ReduxActionConstants";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import WidgetConfigResponse from "mockResponses/WidgetConfigResponse";
 import { ButtonWidgetProps } from "widgets/ButtonWidget";
 import { TextWidgetProps } from "widgets/TextWidget";

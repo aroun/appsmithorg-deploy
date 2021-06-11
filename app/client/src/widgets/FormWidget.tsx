@@ -1,6 +1,6 @@
 import React from "react";
 import _ from "lodash";
-import { WidgetProps } from "./BaseWidget";
+import { WidgetProps } from "./BaseWidgetConstants";
 import { WidgetType } from "constants/WidgetConstants";
 import ContainerWidget, { ContainerWidgetProps } from "widgets/ContainerWidget";
 import { ContainerComponentProps } from "components/designSystems/appsmith/ContainerComponent";

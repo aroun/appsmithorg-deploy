@@ -4,7 +4,7 @@ import {
   ReactTableFilter,
   TableStyles,
 } from "components/designSystems/appsmith/TableComponent/Constants";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { WithMeta } from "widgets/MetaHOC";
 
 export interface TableWidgetProps extends WidgetProps, WithMeta, TableStyles {

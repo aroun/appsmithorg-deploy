@@ -1,4 +1,5 @@
-import BaseWidget, { WidgetState } from "widgets/BaseWidget";
+import BaseWidget from "widgets/BaseWidget";
+import { WidgetState } from "widgets/BaseWidgetConstants";
 import { TabContainerWidgetProps, TabsWidgetProps } from "./TabsWidget";
 import { WidgetType, WidgetTypes } from "constants/WidgetConstants";
 import withMeta from "widgets/MetaHOC";

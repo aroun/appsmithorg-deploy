@@ -5,7 +5,7 @@ import {
 } from "constants/BindingsConstants";
 import { Action } from "entities/Action";
 import moment from "moment-timezone";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import parser from "fast-xml-parser";
 
 export type DependencyMap = Record<string, Array<string>>;

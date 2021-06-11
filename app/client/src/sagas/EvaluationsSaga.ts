@@ -24,7 +24,7 @@ import {
   EvalErrorTypes,
 } from "utils/DynamicBindingUtils";
 import log from "loglevel";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import PerformanceTracker, {
   PerformanceTransactionName,
 } from "../utils/PerformanceTracker";

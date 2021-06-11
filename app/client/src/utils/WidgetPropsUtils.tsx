@@ -7,7 +7,7 @@ import {
   WidgetOperation,
   WidgetOperations,
   WidgetProps,
-} from "widgets/BaseWidget";
+} from "widgets/BaseWidgetConstants";
 import {
   GridDefaults,
   LATEST_PAGE_VERSION,

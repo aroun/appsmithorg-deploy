@@ -1,4 +1,4 @@
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { PropertyPaneConfig } from "constants/PropertyControlConstants";
 import { get, isObject, isUndefined } from "lodash";
 import { FlattenedWidgetProps } from "reducers/entityReducers/canvasWidgetsReducer";

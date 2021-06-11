@@ -1,5 +1,6 @@
 import React from "react";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { WidgetType } from "constants/WidgetConstants";
 import RadioGroupComponent from "components/designSystems/blueprint/RadioGroupComponent";
 import { EventType } from "constants/AppsmithActionConstants/ActionConstants";

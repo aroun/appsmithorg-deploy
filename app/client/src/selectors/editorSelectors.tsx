@@ -6,7 +6,7 @@ import {
   WIDGET_STATIC_PROPS,
   WidgetCardProps,
   WidgetProps,
-} from "widgets/BaseWidget";
+} from "widgets/BaseWidgetConstants";
 import { WidgetSidebarReduxState } from "reducers/uiReducers/widgetSidebarReducer";
 import CanvasWidgetsNormalizer from "normalizers/CanvasWidgetsNormalizer";
 import {

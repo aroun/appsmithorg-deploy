@@ -1,4 +1,4 @@
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { ContainerWidgetProps } from "widgets/ContainerWidget";
 import {
   tableWidgetPropertyPaneMigrations,

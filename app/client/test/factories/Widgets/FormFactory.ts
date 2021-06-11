@@ -3,7 +3,7 @@
 
 import * as Factory from "factory.ts";
 import { generateReactKey } from "utils/generators";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 
 export const FormFactory = Factory.Sync.makeFactory<WidgetProps>({
   backgroundColor: "Gray",

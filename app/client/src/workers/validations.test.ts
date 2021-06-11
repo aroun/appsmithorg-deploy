@@ -1,5 +1,5 @@
 import { VALIDATORS, validateDateString } from "workers/validations";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { RenderModes, WidgetTypes } from "constants/WidgetConstants";
 import moment from "moment";
 import { VALIDATION_TYPES } from "constants/WidgetValidation";

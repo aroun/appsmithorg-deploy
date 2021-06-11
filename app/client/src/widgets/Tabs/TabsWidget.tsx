@@ -1,12 +1,13 @@
 import React from "react";
 import TabsComponent from "components/designSystems/appsmith/TabsComponent";
 import { WidgetType, WidgetTypes } from "constants/WidgetConstants";
-import BaseWidget, { WidgetProps, WidgetState } from "../BaseWidget";
+import BaseWidget from "../BaseWidget";
+import { WidgetProps, WidgetState } from "../BaseWidgetConstants";
 import WidgetFactory from "utils/WidgetFactory";
 import { VALIDATION_TYPES } from "constants/WidgetValidation";
 import _ from "lodash";
 import { EventType } from "constants/AppsmithActionConstants/ActionConstants";
-import { WidgetOperations } from "widgets/BaseWidget";
+import { WidgetOperations } from "widgets/BaseWidgetConstants";
 import * as Sentry from "@sentry/react";
 import { generateReactKey } from "utils/generators";
 import withMeta, { WithMeta } from "../MetaHOC";

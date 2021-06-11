@@ -7,7 +7,7 @@ import {
   UpdateCanvasPayload,
 } from "constants/ReduxActionConstants";
 import AnalyticsUtil from "utils/AnalyticsUtil";
-import { WidgetOperation } from "widgets/BaseWidget";
+import { WidgetOperation } from "widgets/BaseWidgetConstants";
 import { FetchPageRequest, PageLayout, SavePageResponse } from "api/PageApi";
 import { APP_MODE, UrlDataState } from "reducers/entityReducers/appReducer";
 import { CanvasWidgetsReduxState } from "reducers/entityReducers/canvasWidgetsReducer";

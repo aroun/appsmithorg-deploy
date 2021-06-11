@@ -12,7 +12,8 @@ import ContainerComponent, {
   ContainerStyle,
 } from "components/designSystems/appsmith/ContainerComponent";
 import { WidgetType, WidgetTypes } from "constants/WidgetConstants";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { VALIDATION_TYPES } from "constants/WidgetValidation";
 
 class ContainerWidget extends BaseWidget<

@@ -1,5 +1,5 @@
 import { createReducer } from "utils/AppsmithUtils";
-import { WidgetCardProps } from "widgets/BaseWidget";
+import { WidgetCardProps } from "widgets/BaseWidgetConstants";
 import WidgetSidebarResponse from "mockResponses/WidgetSidebarResponse";
 import {
   LoadWidgetSidebarPayload,

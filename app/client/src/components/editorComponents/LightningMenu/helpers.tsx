@@ -2,7 +2,7 @@ import React from "react";
 import { toUpper, get } from "lodash";
 import { Action } from "entities/Action";
 import { Directions } from "utils/helpers";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import CustomizedDropdown, {
   CustomizedDropdownOption,
 } from "pages/common/CustomizedDropdown";

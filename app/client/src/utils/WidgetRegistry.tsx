@@ -1,4 +1,5 @@
-import BaseWidget, { WidgetProps } from "widgets/BaseWidget";
+import BaseWidget from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { WidgetTypes } from "constants/WidgetConstants";
 import ContainerWidget, {
   ContainerWidgetProps,

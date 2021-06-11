@@ -1,6 +1,6 @@
 import * as Factory from "factory.ts";
 import { generateReactKey } from "utils/generators";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 
 export const FilepickerFactory = Factory.Sync.makeFactory<WidgetProps>({
   rightColumn: 8,

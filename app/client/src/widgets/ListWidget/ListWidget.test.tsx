@@ -1,5 +1,5 @@
 import React from "react";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import ListWidget, { ListWidgetProps } from "./ListWidget";
 import configureStore from "redux-mock-store";
 import { render } from "@testing-library/react";

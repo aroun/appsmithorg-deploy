@@ -4,7 +4,7 @@ import {
   UpdateCanvasPayload,
   ReduxAction,
 } from "constants/ReduxActionConstants";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { UpdateCanvasLayout } from "actions/controlActions";
 import { set } from "lodash";
 import { MAIN_CONTAINER_WIDGET_ID } from "constants/WidgetConstants";

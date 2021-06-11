@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
-import BaseWidget, { WidgetState } from "../BaseWidget";
+import BaseWidget from "../BaseWidget";
+import { WidgetState } from "../BaseWidgetConstants";
 import { RenderModes, WidgetType } from "constants/WidgetConstants";
 import { EventType } from "constants/AppsmithActionConstants/ActionConstants";
 import {

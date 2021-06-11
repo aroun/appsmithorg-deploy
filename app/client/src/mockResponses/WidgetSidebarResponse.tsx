@@ -1,4 +1,4 @@
-import { WidgetCardProps } from "widgets/BaseWidget";
+import { WidgetCardProps } from "widgets/BaseWidgetConstants";
 import { generateReactKey } from "utils/generators";
 import { keyBy } from "lodash";
 /* eslint-disable no-useless-computed-key */

@@ -4,7 +4,7 @@ import {
   ReduxActionErrorTypes,
   ReduxAction,
 } from "constants/ReduxActionConstants";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { compareAndGenerateImmutableCanvasStructure } from "utils/canvasStructureHelpers";
 import { WidgetType } from "constants/WidgetConstants";
 

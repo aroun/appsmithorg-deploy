@@ -3,7 +3,7 @@ import styled from "styled-components";
 import React, { RefObject, ReactNode, useMemo } from "react";
 
 import { ListWidgetProps } from "./ListWidget";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { generateClassName, getCanvasClassName } from "utils/generators";
 import { ComponentProps } from "components/designSystems/appsmith/BaseComponent";
 import { getBorderCSSShorthand } from "constants/DefaultTheme";

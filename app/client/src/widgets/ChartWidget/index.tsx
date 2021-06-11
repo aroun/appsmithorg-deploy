@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
-import BaseWidget, { WidgetProps, WidgetState } from "widgets/BaseWidget";
+import BaseWidget from "widgets/BaseWidget";
+import { WidgetProps, WidgetState } from "widgets/BaseWidgetConstants";
 import { WidgetType } from "constants/WidgetConstants";
 import Skeleton from "components/utils/Skeleton";
 import * as Sentry from "@sentry/react";

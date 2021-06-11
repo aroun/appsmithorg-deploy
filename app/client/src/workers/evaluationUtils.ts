@@ -5,7 +5,7 @@ import {
   isChildPropertyPath,
   isDynamicValue,
 } from "utils/DynamicBindingUtils";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { VALIDATORS } from "./validations";
 import { Diff } from "deep-diff";
 import {

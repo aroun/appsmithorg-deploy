@@ -1,5 +1,8 @@
 import { WidgetConfigReducerState } from "reducers/entityReducers/widgetConfigReducer";
-import { WidgetProps, WIDGET_INTERNAL_PROPS } from "widgets/BaseWidget";
+import {
+  WidgetProps,
+  WIDGET_INTERNAL_PROPS,
+} from "widgets/BaseWidgetConstants";
 import moment from "moment-timezone";
 import { cloneDeep, get, indexOf, isString } from "lodash";
 import { generateReactKey } from "utils/generators";

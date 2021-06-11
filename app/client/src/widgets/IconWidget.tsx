@@ -1,5 +1,6 @@
 import React from "react";
-import BaseWidget, { WidgetProps, WidgetState } from "./BaseWidget";
+import BaseWidget from "./BaseWidget";
+import { WidgetProps, WidgetState } from "./BaseWidgetConstants";
 import { WidgetType, WidgetTypes } from "constants/WidgetConstants";
 import styled from "styled-components";
 import IconComponent, {

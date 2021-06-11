@@ -1,4 +1,4 @@
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { DataTree } from "entities/DataTree/dataTreeFactory";
 import { EXECUTION_PARAM_KEY } from "constants/AppsmithActionConstants/ActionConstants";
 

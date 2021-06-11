@@ -1,5 +1,5 @@
 import Api from "api/Api";
-import { WidgetCardProps } from "widgets/BaseWidget";
+import { WidgetCardProps } from "widgets/BaseWidgetConstants";
 import { AxiosPromise } from "axios";
 
 export interface WidgetSidebarResponse {

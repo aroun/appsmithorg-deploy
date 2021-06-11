@@ -1,5 +1,5 @@
 import React, { CSSProperties, ReactNode, useCallback, useMemo } from "react";
-import { BaseStyle } from "widgets/BaseWidget";
+import { BaseStyle } from "widgets/BaseWidgetConstants";
 import { WIDGET_PADDING } from "constants/WidgetConstants";
 import { generateClassName } from "utils/generators";
 import styled from "styled-components";

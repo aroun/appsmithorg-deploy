@@ -1,5 +1,5 @@
 import { ContainerWidgetProps } from "widgets/ContainerWidget";
-import { WidgetProps } from "widgets/BaseWidget";
+import { WidgetProps } from "widgets/BaseWidgetConstants";
 import { WidgetTypes } from "constants/WidgetConstants";
 import { FontStyleTypes, TextSizes } from "constants/WidgetConstants";
 

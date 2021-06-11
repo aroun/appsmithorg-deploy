@@ -15,7 +15,8 @@ import * as Sentry from "@sentry/react";
 
 import WidgetFactory from "utils/WidgetFactory";
 import { removeFalsyEntries } from "utils/helpers";
-import BaseWidget, { WidgetProps, WidgetState } from "../BaseWidget";
+import BaseWidget from "../BaseWidget";
+import { WidgetProps, WidgetState } from "../BaseWidgetConstants";
 import {
   RenderModes,
   WidgetType,

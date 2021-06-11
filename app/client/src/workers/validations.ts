@@ -18,7 +18,7 @@ import _, {
   toNumber,
   toString,
 } from "lodash";
-import { WidgetProps } from "../widgets/BaseWidget";
+import { WidgetProps } from "../widgets/BaseWidgetConstants";
 import {
   CUSTOM_CHART_TYPES,
   CUSTOM_CHART_DEFAULT_PARSED,
