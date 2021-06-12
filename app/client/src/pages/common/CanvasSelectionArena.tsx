@@ -30,40 +30,43 @@ export interface SelectedArenaDimensions {
   height: number;
 }
 
-export const CanvasSelectionArena = memo(
-  ({ widgetId }: { widgetId: string }) => {
-    const dispatch = useDispatch();
-    const mainContainer = useSelector((state: AppState) =>
-      getWidget(state, MAIN_CONTAINER_WIDGET_ID),
-    );
-    const currentPageId = useSelector(getCurrentPageId);
-    const appLayout = useSelector(getCurrentApplicationLayout);
-    const throttledWidgetSelection = useCallback(
-      throttle(
-        (
-          selectionDimensions: SelectedArenaDimensions,
-          snapToNextColumn: boolean,
-          snapToNextRow: boolean,
-          isMultiSelect: boolean,
-        ) => {
-          dispatch(
-            selectAllWidgetsInAreaAction(
-              selectionDimensions,
-              snapToNextColumn,
-              snapToNextRow,
-              isMultiSelect,
-            ),
-          );
-        },
-        150,
-        {
-          leading: true,
-          trailing: true,
-        },
-      ),
-      [widgetId],
-    );
-    useEffect(() => {
+export function CanvasSelectionArena({ widgetId }: { widgetId: string }) {
+  const dispatch = useDispatch();
+  const mainContainer = useSelector((state: AppState) =>
+    getWidget(state, MAIN_CONTAINER_WIDGET_ID),
+  );
+  const currentPageId = useSelector(getCurrentPageId);
+  const appLayout = useSelector(getCurrentApplicationLayout);
+  const isDragging = useSelector(
+    (state: AppState) => state.ui.widgetDragResize.isDragging,
+  );
+  const throttledWidgetSelection = useCallback(
+    throttle(
+      (
+        selectionDimensions: SelectedArenaDimensions,
+        snapToNextColumn: boolean,
+        snapToNextRow: boolean,
+        isMultiSelect: boolean,
+      ) => {
+        dispatch(
+          selectAllWidgetsInAreaAction(
+            selectionDimensions,
+            snapToNextColumn,
+            snapToNextRow,
+            isMultiSelect,
+          ),
+        );
+      },
+      150,
+      {
+        leading: true,
+        trailing: true,
+      },
+    ),
+    [widgetId],
+  );
+  useEffect(() => {
+    if (!isDragging) {
       const selectionCanvas: any = document.getElementById(
         `canvas-${widgetId}`,
       );
@@ -218,19 +221,20 @@ export const CanvasSelectionArena = memo(
         selectionCanvas.removeEventListener("mouseenter", onMouseEnter);
         selectionCanvas.removeEventListener("click", onClick);
       };
-    }, [
-      appLayout,
-      currentPageId,
-      mainContainer.rightColumn,
-      mainContainer.bottomRow,
-    ]);
+    }
+  }, [
+    appLayout,
+    currentPageId,
+    mainContainer.rightColumn,
+    mainContainer.bottomRow,
+    isDragging,
+  ]);
 
-    return (
-      <StyledSelectionCanvas
-        data-testid={`canvas-${widgetId}`}
-        id={`canvas-${widgetId}`}
-      />
-    );
-  },
-);
+  return isDragging ? null : (
+    <StyledSelectionCanvas
+      data-testid={`canvas-${widgetId}`}
+      id={`canvas-${widgetId}`}
+    />
+  );
+}
 CanvasSelectionArena.displayName = "CanvasSelectionArena";

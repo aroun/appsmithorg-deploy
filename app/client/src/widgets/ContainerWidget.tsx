@@ -129,7 +129,6 @@ class ContainerWidget extends BaseWidget<
 
     return (
       <ContainerComponent {...props}>
-        <CanvasSelectionArena widgetId={props.widgetId} />
         <CanvasDraggingArena
           {...this.getSnapSpaces()}
           childWidgets={childWidgets}
@@ -137,6 +136,7 @@ class ContainerWidget extends BaseWidget<
           snapRows={snapRows}
           widgetId={props.widgetId}
         />
+        <CanvasSelectionArena widgetId={props.widgetId} />
         {/* without the wrapping div onClick events are triggered twice */}
         <>{this.renderChildren()}</>
       </ContainerComponent>

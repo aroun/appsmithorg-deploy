@@ -69,7 +69,7 @@ function DraggableComponent(props: DraggableComponentProps) {
 
   // Dispatch hook handy to set any `DraggableComponent` as dragging/ not dragging
   // The value is boolean
-  const { setIsDragging } = useWidgetDragResize();
+  const { setDragItemsInitialParent, setIsDragging } = useWidgetDragResize();
 
   // This state tells us which widget is selected
   // The value is the widgetId of the selected widget
@@ -118,7 +118,6 @@ function DraggableComponent(props: DraggableComponentProps) {
 
       // Tell the rest of the application that a widget has started dragging
       setIsDragging && setIsDragging(true);
-
       AnalyticsUtil.logEvent("WIDGET_DRAG", {
         widgetName: props.widgetName,
         widgetType: props.type,
@@ -193,7 +192,7 @@ function DraggableComponent(props: DraggableComponentProps) {
       draggable
       onDragStart={(e) => {
         e.preventDefault();
-        setIsDragging && setIsDragging(true);
+        setDragItemsInitialParent(true, props.parentId || "", props.widgetId);
       }}
       onMouseOver={handleMouseOver}
       style={style}
