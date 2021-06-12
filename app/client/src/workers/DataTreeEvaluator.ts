@@ -380,6 +380,11 @@ export default class DataTreeEvaluator {
     sortedDependencies: Array<string>,
   ): DataTree {
     const tree = _.cloneDeep(oldUnevalTree);
+    console.log(
+      "Kaushik deep inside evaluateTree: ",
+      oldUnevalTree,
+      sortedDependencies,
+    );
     try {
       return sortedDependencies.reduce(
         (currentTree: DataTree, fullPropertyPath: string) => {
@@ -394,6 +399,7 @@ export default class DataTreeEvaluator {
             currentTree as any,
             fullPropertyPath,
           );
+          console.log("Kaushik unEvalPropertyValue: ", unEvalPropertyValue);
           const isABindingPath =
             (isAction(entity) || isWidget(entity)) &&
             isPathADynamicBinding(entity, propertyPath);
@@ -418,6 +424,7 @@ export default class DataTreeEvaluator {
                 undefined,
                 fullPropertyPath,
               );
+              console.log("kaushik evalPropertyValue: ", evalPropertyValue);
             } catch (e) {
               this.errors.push({
                 type: EvalErrorTypes.EVAL_PROPERTY_ERROR,
@@ -464,6 +471,10 @@ export default class DataTreeEvaluator {
             }
             return _.set(currentTree, fullPropertyPath, evalPropertyValue);
           } else {
+            console.log(
+              "Kaushik this is not a widget: ",
+              _.set(currentTree, fullPropertyPath, evalPropertyValue),
+            );
             return _.set(currentTree, fullPropertyPath, evalPropertyValue);
           }
         },

@@ -47,6 +47,12 @@ import { IconSize } from "components/ads/Icon";
 import get from "lodash/get";
 import DataSourceList from "./DatasourceList";
 import { Datasource } from "entities/Datasource";
+import { CurrentValueViewer } from "components/editorComponents/CodeEditor/EvaluatedValuePopup";
+import { getDataTree } from "selectors/dataTreeSelectors";
+import DataTreeEvaluator from "workers/DataTreeEvaluator";
+
+let dataTreeEvaluator: DataTreeEvaluator | undefined;
+
 const Form = styled.form`
   display: flex;
   flex-direction: column;
@@ -93,8 +99,20 @@ const HelpSection = styled.div`
     ${(props) => props.theme.spaces[12]}px;
 `;
 
+const PopOveronHover = styled.div`
+  display: none;
+  position: absolute;
+  top: 100px;
+  border: 1px solid red;
+  background-color: #eee;
+  z-index: 10;
+`;
+
 const DatasourceWrapper = styled.div`
   width: 100%;
+  &:hover > .popover-on-api-hover {
+    display: block;
+  }
 `;
 
 const SecondaryWrapper = styled.div`
@@ -183,6 +201,7 @@ const Wrapper = styled.div`
   position: relative;
 `;
 interface APIFormProps {
+  dataTree?: any;
   pluginId: string;
   onRunClick: (paginationField?: PaginationField) => void;
   onDeleteClick: () => void;
@@ -473,6 +492,17 @@ function ApiEditorForm(props: Props) {
     dispatch(toggleShowGlobalSearchModal());
     AnalyticsUtil.logEvent("OPEN_OMNIBAR", { source: "LEARN_HOW_DATASOURCE" });
   };
+  // const evalTree = useSelector(getDataTree);
+  // console.log("Kaushik settingsConfig", evalTree);
+  if (dataTreeEvaluator) {
+    const evaluated = dataTreeEvaluator.evaluateActionBindings(
+      props.dataTree.Api1.bindingPaths,
+      props.dataTree.Api1.config.queryParameters,
+    );
+    console.log("Kaushik dataTreeEvaluator: ", evaluated);
+  } else {
+    console.log("No tree evaluator");
+  }
   return (
     <Form onSubmit={handleSubmit}>
       <MainConfiguration>
@@ -520,6 +550,13 @@ function ApiEditorForm(props: Props) {
               pluginId={pluginId}
               theme={theme}
             />
+            <PopOveronHover className="popover-on-api-hover">
+              <CurrentValueViewer
+                evaluatedValue={`${actionName}.config.headers`}
+                hideLabel
+                theme={EditorTheme.DARK}
+              />
+            </PopOveronHover>
           </DatasourceWrapper>
         </FormRow>
       </MainConfiguration>

@@ -43,6 +43,7 @@ const LoadingContainer = styled(CenteredWrapper)`
 `;
 
 interface ReduxStateProps {
+  dataTree?: any;
   actions: ActionDataState;
   isRunning: boolean;
   isDeleting: boolean;
@@ -172,7 +173,7 @@ class ApiEditor extends React.Component<Props> {
         </LoadingContainer>
       );
     }
-
+    console.log("Kaushik from index, actions", this.props);
     let formUiComponent: string | undefined;
     if (apiId) {
       if (pluginId) {
@@ -260,7 +261,9 @@ const mapStateToProps = (state: AppState, props: any): ReduxStateProps => {
   const { isCreating, isDeleting, isRunning } = state.ui.apiPane;
   const pluginId = _.get(apiAction, "pluginId", "");
   const settingsConfig = getPluginSettingConfigs(state, pluginId);
+  console.log("Kaushik from mapStateToProps: ", state);
   return {
+    dataTree: state.evaluations.tree,
     actions: state.entities.actions,
     currentApplication: getCurrentApplication(state),
     currentPageName: getCurrentPageName(state),

@@ -108,6 +108,7 @@ interface APIFormProps {
   location: {
     pathname: string;
   };
+  dataTree?: any;
   apiName: string;
   apiId: string;
   dispatch: any;
