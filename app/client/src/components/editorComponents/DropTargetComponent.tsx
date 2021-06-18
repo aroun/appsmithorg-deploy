@@ -277,7 +277,7 @@ export function DropTargetComponent(props: DropTargetComponentProps) {
           !props.parentId && <Onboarding />}
         <DragLayerComponent
           canDropTargetExtend={canDropTargetExtend}
-          force={isDragging && !isOver && !props.parentId}
+          force
           isOver={isExactlyOver}
           isResizing={isChildResizing}
           noPad={props.noPad || false}

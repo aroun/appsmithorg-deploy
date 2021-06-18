@@ -193,6 +193,7 @@ function DraggableComponent(props: DraggableComponentProps) {
       onDragStart={(e) => {
         e.preventDefault();
         setDragItemsInitialParent(true, props.parentId || "", props.widgetId);
+        e.stopPropagation();
       }}
       onMouseOver={handleMouseOver}
       style={style}

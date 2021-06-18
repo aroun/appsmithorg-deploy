@@ -181,7 +181,7 @@ export function CanvasDraggingArena({
       };
       const onMouseMove = (e: any) => {
         if (canvasIsDragging) {
-          console.log(startPoints, e.offsetX, draggingCanvas.offsetLeft);
+          // console.log(startPoints, e.offsetX, draggingCanvas.offsetLeft);
           canvasCtx.clearRect(0, 0, width, height);
           const diff = {
             left: e.offsetX - startPoints.left - parentDiff.left,
@@ -195,6 +195,7 @@ export function CanvasDraggingArena({
           newRectanglesToDraw.forEach((each) => {
             drawRectangle(each);
           });
+          console.log(newRectanglesToDraw);
         } else {
           onMouseDown(e);
         }

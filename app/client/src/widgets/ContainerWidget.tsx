@@ -129,14 +129,16 @@ class ContainerWidget extends BaseWidget<
 
     return (
       <ContainerComponent {...props}>
-        <CanvasDraggingArena
-          {...this.getSnapSpaces()}
-          childWidgets={childWidgets}
-          noPad={this.props.noPad}
-          snapRows={snapRows}
-          widgetId={props.widgetId}
-        />
-        <CanvasSelectionArena widgetId={props.widgetId} />
+        {props.type === "CANVAS_WIDGET" && (
+          <CanvasDraggingArena
+            {...this.getSnapSpaces()}
+            childWidgets={childWidgets}
+            noPad={this.props.noPad}
+            snapRows={snapRows}
+            widgetId={props.widgetId}
+          />
+        )}
+        {/* <CanvasSelectionArena widgetId={props.widgetId} /> */}
         {/* without the wrapping div onClick events are triggered twice */}
         <>{this.renderChildren()}</>
       </ContainerComponent>
