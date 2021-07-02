@@ -132,9 +132,7 @@ import {
 import { getSelectedWidgets } from "selectors/ui";
 import { getParentWithEnhancementFn } from "./WidgetEnhancementHelpers";
 import { widgetSelectionSagas } from "./WidgetSelectionSagas";
-import { Editor } from "codemirror";
-import TernServer from "utils/autocomplete/TernServer";
-import { WIDGET_DATA_FIELD_MAP } from "components/editorComponents/ActionRightPane/SuggestedWidgets";
+
 function* getChildWidgetProps(
   parent: FlattenedWidgetProps,
   params: WidgetAddChild,
@@ -1875,12 +1873,6 @@ function* addWidget(action: any) {
   const widgets = yield select(getWidgets);
   const widgetName = getNextWidgetName(widgets, widgetConfig.type, evalTree);
 
-  // const columns = 6 * GRID_DENSITY_MIGRATION_V1;
-  // const rows = 1 * GRID_DENSITY_MIGRATION_V1;
-  // const dimensions = {
-  //   rows,
-  //   columns,
-  // };
   try {
     let newWidget = {
       newWidgetId: generateReactKey(),
@@ -1888,7 +1880,6 @@ function* addWidget(action: any) {
       parentId: "0",
       renderMode: RenderModes.CANVAS,
       isLoading: false,
-      // ...dimensions,
       ...defaultConfig,
       widgetName,
       ...widgetConfig,
@@ -1932,24 +1923,6 @@ function* addWidget(action: any) {
     );
     yield delay(100);
     yield put(forceOpenPropertyPane(newWidget.newWidgetId));
-
-    // Show autocomplete
-    yield delay(100);
-
-    const label = WIDGET_DATA_FIELD_MAP[widgetConfig.type].label;
-    const propertyPane = document.getElementsByClassName("t--propertypane");
-    const control = propertyPane[0].getElementsByClassName(
-      `t--property-control-${label}`,
-    );
-    const editorInstance: any = control[0].querySelector(".CodeMirror");
-    const cm: Editor = editorInstance?.CodeMirror;
-
-    cm.focus();
-    cm.setCursor(0, cm.getValue().length - 2);
-
-    const ternServer = new TernServer(evalTree);
-    const some: any = undefined;
-    ternServer.complete(cm, some, some);
   } catch (error) {
     console.log(error, "Error");
   }
