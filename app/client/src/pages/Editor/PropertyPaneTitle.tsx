@@ -25,8 +25,10 @@ import { Classes as BlueprintClasses } from "@blueprintjs/core";
 import TooltipComponent from "components/ads/Tooltip";
 
 const FixedTitle = styled.div`
-  width: ${(props) => props.theme.propertyPane.width - 24}px;
-  margin: 0px 12px;
+  position: fixed;
+  z-index: 3;
+  width: ${(props) => props.theme.propertyPane.width}px;
+  padding: 0px ${(props) => props.theme.spaces[5]}px;
 `;
 
 const Wrapper = styled.div<{ iconCount: number }>`

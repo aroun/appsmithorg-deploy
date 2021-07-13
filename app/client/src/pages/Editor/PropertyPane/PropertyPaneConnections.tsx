@@ -1,8 +1,10 @@
-import React, { useMemo } from "react";
+import React, { memo, useMemo } from "react";
 import styled from "styled-components";
 import Icon, { IconSize } from "components/ads/Icon";
-import Dropdown from "components/ads/Dropdown";
-import { DependencyMap } from "utils/DynamicBindingUtils";
+import Dropdown, {
+  DefaultDropDownValueNodeProps,
+} from "components/ads/Dropdown";
+import Tooltip from "components/ads/Tooltip";
 import { AppState } from "reducers";
 import { useSelector } from "react-redux";
 import { getDataTree } from "selectors/dataTreeSelectors";
@@ -14,6 +16,7 @@ import { isStoredDatasource } from "entities/Action";
 import Text, { TextType } from "components/ads/Text";
 import { Classes } from "components/ads/common";
 import { useEntityLink } from "components/editorComponents/Debugger/hooks";
+import { getDependenciesFromInverseDependencies } from "components/editorComponents/Debugger/helpers";
 
 const TopLayer = styled.div`
   display: flex;
@@ -28,18 +31,14 @@ const TopLayer = styled.div`
   }
 `;
 
-const SelectedNodeWrapper = styled.div<{ iconAlignment: "LEFT" | "RIGHT" }>`
+const SelectedNodeWrapper = styled.div<{ entityCount: number }>`
   display: flex;
   align-items: center;
   justify-content: center;
   color: #090707;
   font-size: 12px;
   width: 114px;
-
-  ${(props) =>
-    props.iconAlignment === "LEFT"
-      ? `border-right: 0.5px solid #e0dede;`
-      : `border-left: 0.5px solid #e0dede;`}
+  opacity: ${(props) => (!!props.entityCount ? 1 : 0.5)};
 
   & > *:nth-child(2) {
     padding: 0 4px;
@@ -50,43 +49,64 @@ const SelectedNodeWrapper = styled.div<{ iconAlignment: "LEFT" | "RIGHT" }>`
   }
 `;
 
-export function getDependenciesFromInverseDependencies(
-  deps: DependencyMap,
-  entityName: string | null,
-) {
-  if (!entityName) return null;
+const OptionWrapper = styled.div`
+  padding: ${(props) => props.theme.spaces[2] + 1}px
+    ${(props) => props.theme.spaces[5]}px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  line-height: 8px;
 
-  const directDependencies = new Set<string>();
-  const inverseDependencies = new Set<string>();
+  span:first-child {
+    font-size: 10px;
+    font-weight: normal;
+  }
 
-  Object.entries(deps).forEach(([dependant, dependencies]) => {
-    (dependencies as any).map((dependency: any) => {
-      if (!dependant.includes(entityName) && dependency.includes(entityName)) {
-        const entity = dependant
-          .split(".")
-          .slice(0, 1)
-          .join("");
+  .${Classes.TEXT} {
+    margin-left: 6px;
+    letter-spacing: 0px;
+    overflow: hidden;
+    white-space: initial;
+    text-overflow: ellipsis;
+    color: ${(props) => props.theme.colors.propertyPane.label};
+  }
 
-        directDependencies.add(entity);
-      } else if (
-        dependant.includes(entityName) &&
-        !dependency.includes(entityName)
-      ) {
-        const entity = dependency
-          .split(".")
-          .slice(0, 1)
-          .join("");
+  .${Classes.ICON} {
+    margin-right: ${(props) => props.theme.spaces[5]}px;
+  }
 
-        inverseDependencies.add(entity);
+  &:not(:hover) {
+    svg {
+      path {
+        fill: #6a86ce;
       }
-    });
-  });
+    }
+  }
 
-  return {
-    inverseDependencies: Array.from(inverseDependencies),
-    directDependencies: Array.from(directDependencies),
-  };
-}
+  &:hover {
+    background-color: ${(props) => props.theme.colors.dropdown.hovered.bg};
+
+    &&& svg {
+      rect {
+        fill: ${(props) => props.theme.colors.textOnDarkBG};
+      }
+    }
+
+    .${Classes.TEXT} {
+      color: ${(props) => props.theme.colors.textOnDarkBG};
+    }
+  }
+`;
+
+type PropertyPaneConnectionsProps = {
+  widgetName: string;
+};
+
+type TriggerNodeProps = DefaultDropDownValueNodeProps & {
+  entityCount: number;
+  iconAlignment: "LEFT" | "RIGHT";
+  connectionType: "INCOMING" | "OUTGOING";
+};
 
 const useGetEntityInfo = (name: string) => {
   const dataTree = useSelector(getDataTree);
@@ -125,10 +145,12 @@ const useGetEntityInfo = (name: string) => {
 
 const useDependencyList = (name: string) => {
   const deps = useSelector((state: AppState) => state.evaluations.dependencies);
-  const entityDependencies = getDependenciesFromInverseDependencies(
-    deps.inverseDependencyMap,
-    name,
-  );
+  const entityDependencies = useMemo(() => {
+    return getDependenciesFromInverseDependencies(
+      deps.inverseDependencyMap,
+      name,
+    );
+  }, [name, deps.inverseDependencyMap]);
   const dependencyOptions =
     entityDependencies?.directDependencies.map((e) => ({
       label: e,
@@ -146,30 +168,11 @@ const useDependencyList = (name: string) => {
   };
 };
 
-const OptionWrapper = styled.div`
-  align-items: center;
-  display: flex;
-  line-height: 8px;
-
-  span:first-child {
-    font-size: 10px;
-    font-weight: normal;
-  }
-
-  .${Classes.TEXT} {
-    margin-left: 6px;
-    letter-spacing: 0px;
-    overflow: hidden;
-    white-space: initial;
-    text-overflow: ellipsis;
-  }
-`;
-
-function DummyOption(props: any) {
+function OptionNode(props: any) {
   const entityInfo = useGetEntityInfo(props.option.value);
 
   return (
-    <OptionWrapper>
+    <OptionWrapper onClick={props.optionClickHandler}>
       <span>{entityInfo?.icon}</span>
       <Text type={TextType.H6}>
         {props.option.label}{" "}
@@ -181,14 +184,21 @@ function DummyOption(props: any) {
   );
 }
 
-function TriggerNode(props: any) {
+const TriggerNode = memo((props: TriggerNodeProps) => {
+  const ENTITY = props.entityCount > 1 ? "entities" : "entity";
+  const tooltipText = !!props.entityCount
+    ? `See ${props.connectionType.toLowerCase()} connections`
+    : `No ${props.connectionType.toLowerCase()} connections`;
+
   return (
-    <SelectedNodeWrapper iconAlignment={props.iconAlignment}>
+    <SelectedNodeWrapper entityCount={props.entityCount}>
       {props.iconAlignment === "LEFT" && (
         <Icon keepColors name="trending-flat" size={IconSize.MEDIUM} />
       )}
       <span>
-        {props.entityCount ? `${props.entityCount} entities` : "No Entity"}
+        <Tooltip content={tooltipText} disabled={props.isOpen}>
+          {props.entityCount ? `${props.entityCount} ${ENTITY}` : "No Entity"}
+        </Tooltip>
       </span>
       {props.iconAlignment === "RIGHT" && (
         <Icon keepColors name="trending-flat" size={IconSize.MEDIUM} />
@@ -196,22 +206,21 @@ function TriggerNode(props: any) {
       <Icon keepColors name="expand-more" size={IconSize.XS} />
     </SelectedNodeWrapper>
   );
-}
+});
+TriggerNode.displayName = "TriggerNode";
 
-function PropertyPaneConnections(props: any) {
+function PropertyPaneConnections(props: PropertyPaneConnectionsProps) {
   const dependencies = useDependencyList(props.widgetName);
   const { navigateToEntity } = useEntityLink();
 
   return (
     <TopLayer>
       <Dropdown
-        OptionValueNode={(OptionValueNodeProps) => (
-          <DummyOption {...OptionValueNodeProps} />
-        )}
         SelectedValueNode={(selectedValueProps) => (
           <TriggerNode
             iconAlignment={"LEFT"}
             {...selectedValueProps}
+            connectionType="INCOMING"
             entityCount={dependencies.dependencyOptions.length}
           />
         )}
@@ -219,8 +228,17 @@ function PropertyPaneConnections(props: any) {
         disabled={!dependencies.dependencyOptions.length}
         headerLabel="Incoming connections"
         height="28px"
-        onSelect={navigateToEntity}
         options={dependencies.dependencyOptions}
+        renderOption={(optionProps) => {
+          return (
+            <OptionNode
+              option={optionProps.option}
+              optionClickHandler={() =>
+                navigateToEntity(optionProps.option.value)
+              }
+            />
+          );
+        }}
         selected={{ label: "", value: "" }}
         showDropIcon={false}
         showLabelOnly
@@ -228,13 +246,11 @@ function PropertyPaneConnections(props: any) {
       />
       {/* <PopperDragHandle /> */}
       <Dropdown
-        OptionValueNode={(OptionValueNodeProps) => (
-          <DummyOption {...OptionValueNodeProps} />
-        )}
         SelectedValueNode={(selectedValueProps) => (
           <TriggerNode
             iconAlignment={"RIGHT"}
             {...selectedValueProps}
+            connectionType="OUTGOING"
             entityCount={dependencies.inverseDependencyOptions.length}
           />
         )}
@@ -244,6 +260,16 @@ function PropertyPaneConnections(props: any) {
         height="28px"
         onSelect={navigateToEntity}
         options={dependencies.inverseDependencyOptions}
+        renderOption={(optionProps) => {
+          return (
+            <OptionNode
+              option={optionProps.option}
+              optionClickHandler={() =>
+                navigateToEntity(optionProps.option.value)
+              }
+            />
+          );
+        }}
         selected={{ label: "", value: "" }}
         showDropIcon={false}
         showLabelOnly
@@ -253,4 +279,4 @@ function PropertyPaneConnections(props: any) {
   );
 }
 
-export default PropertyPaneConnections;
+export default memo(PropertyPaneConnections);

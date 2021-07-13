@@ -743,9 +743,12 @@ function* executeCommand(
   }>,
 ) {
   const pageId = yield select(getCurrentPageId);
+  const applicationId = yield select(getCurrentApplicationId);
   switch (actionPayload.payload.actionType) {
     case "NEW_DATASOURCE":
-      history.push(QUERY_EDITOR_URL_WITH_SELECTED_PAGE_ID());
+      history.push(
+        INTEGRATION_EDITOR_URL(applicationId, pageId, INTEGRATION_TABS.NEW),
+      );
       break;
     case "NEW_QUERY":
       const datasource = get(actionPayload, "payload.args.datasource");
