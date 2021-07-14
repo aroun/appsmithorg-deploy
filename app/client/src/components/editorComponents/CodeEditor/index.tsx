@@ -93,7 +93,6 @@ export type EditorStyleProps = {
   disabled?: boolean;
   link?: string;
   showLightningMenu?: boolean;
-  mutedHinting?: boolean;
   dataTreePath?: string;
   evaluatedValue?: any;
   expected?: string;
@@ -290,11 +289,9 @@ class CodeEditor extends Component<Props, State> {
     showLightningMenu?: boolean,
     additionalDynamicData?: Record<string, Record<string, unknown>>,
   ) {
-    return (showLightningMenu !== false ? hinting : [bindingHint]).map(
-      (helper) => {
-        return helper(editor, dynamicData, additionalDynamicData);
-      },
-    );
+    return hinting.map((helper) => {
+      return helper(editor, dynamicData, additionalDynamicData);
+    });
   }
 
   onFocusTrigger = (cm: CodeMirror.Editor) => {
@@ -337,9 +334,8 @@ class CodeEditor extends Component<Props, State> {
       this.handleAutocompleteVisibility(this.editor);
   };
 
-  handleEditorBlur = () => {
+  handleEditorBlur = (cm: CodeMirror.Editor) => {
     this.handleChange();
-    // on blur closing the binding prompt for an editor regardless.
     this.setState({ isFocused: false });
     if (this.props.size === EditorSize.COMPACT) {
       this.editor.setOption("lineWrapping", false);
@@ -375,7 +371,8 @@ class CodeEditor extends Component<Props, State> {
     const inputValue = this.props.input.value || "";
     if (
       this.props.input.onChange &&
-      value !== inputValue &&
+      (value !== inputValue ||
+        _.get(this.editor, "state.completionActive.startLen") === 0) &&
       this.state.isFocused
     ) {
       this.props.input.onChange(value);
@@ -383,17 +380,18 @@ class CodeEditor extends Component<Props, State> {
     CodeEditor.updateMarkings(this.editor, this.props.marking);
   };
 
-  handleAutocompleteVisibility = (cm: CodeMirror.Editor, force?: boolean) => {
+  handleAutocompleteVisibility = (cm: CodeMirror.Editor) => {
     const expected = this.props.expected ? this.props.expected : "";
     const { entityName } = getEntityNameAndPropertyPath(
       this.props.dataTreePath || "",
     );
     let hinterOpen = false;
+    if (!this.state.isFocused) return;
     for (let i = 0; i < this.hinters.length; i++) {
       hinterOpen = this.hinters[i].showHint(cm, expected, entityName, {
         datasources: this.props.datasources.list,
         pluginIdToImageLocation: this.props.pluginIdToImageLocation,
-        updatePropertyValue: this.updatePropertyValue.bind(this),
+        updatePropertyValue: this.handleEditorBlur.bind(this), //this.updatePropertyValue.bind(this),
         recentEntities: this.props.recentEntities,
         executeCommand: (payload: any) => {
           this.props.executeCommand({
@@ -431,15 +429,8 @@ class CodeEditor extends Component<Props, State> {
       this.editor.setValue(value);
     }
     this.editor.focus();
-    if (cursor === undefined) {
-      if (value) {
-        cursor = value.length - 2;
-      } else {
-        cursor = 1;
-      }
-    }
     this.editor.setCursor({
-      line: this.editor.lineCount() - 1,
+      line: cursor || this.editor.lineCount() - 1,
       ch: this.editor.getLine(this.editor.lineCount() - 1).length - 2,
     });
     this.setState({ isFocused: true }, () => {
@@ -595,12 +586,14 @@ class CodeEditor extends Component<Props, State> {
             {this.props.rightIcon && (
               <IconContainer>{this.props.rightIcon}</IconContainer>
             )}
-            <BindingPrompt
-              editorTheme={this.props.theme}
-              isOpen={showBindingPrompt(showEvaluatedValue, input.value)}
-              promptMessage={this.props.promptMessage}
-              showLightningMenu={this.props.showLightningMenu}
-            />
+            {!_.get(this.editor, "state.completionActive") && (
+              <BindingPrompt
+                editorTheme={this.props.theme}
+                isOpen={showBindingPrompt(showEvaluatedValue, input.value)}
+                promptMessage={this.props.promptMessage}
+                showLightningMenu={this.props.showLightningMenu}
+              />
+            )}
             <ScrollIndicator containerRef={this.editorWrapperRef} />
           </EditorWrapper>
         </EvaluatedValuePopup>

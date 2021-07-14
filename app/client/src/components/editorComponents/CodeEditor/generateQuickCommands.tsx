@@ -6,7 +6,13 @@ import sortBy from "lodash/sortBy";
 import { PluginType } from "entities/Action";
 import { ReactComponent as ApisIcon } from "assets/icons/menu/api-colored.svg";
 import { ReactComponent as DataSourcesColoredIcon } from "assets/icons/menu/datasource-colored.svg";
+import { ReactComponent as NewPlus } from "assets/icons/menu/new-plus.svg";
+import { ReactComponent as Binding } from "assets/icons/menu/binding.svg";
 
+enum Shortcuts {
+  PLUS = "PLUS",
+  BINDING = "BINDING",
+}
 export const generateQuickCommands = (
   entitiesForSuggestions: any[],
   currentEntityType: string,
@@ -29,7 +35,7 @@ export const generateQuickCommands = (
   const newBinding: CommandsCompletion = generateCreateNewCommand({
     text: "{{}}",
     displayText: "New Binding",
-    shortcut: "{{",
+    shortcut: Shortcuts.BINDING,
   });
   const newIntegration: CommandsCompletion = generateCreateNewCommand({
     text: "",
@@ -38,7 +44,7 @@ export const generateQuickCommands = (
       executeCommand({
         actionType: "NEW_INTEGRATION",
       }),
-    shortcut: "+",
+    shortcut: Shortcuts.PLUS,
   });
   const suggestions = entitiesForSuggestions.map((suggestion: any) => {
     const name = suggestion.name || suggestion.widgetName;
@@ -183,7 +189,7 @@ function Command(props: {
   pluginType?: PluginType;
   imgSrc?: string;
   name: string;
-  shortcut: string;
+  shortcut: Shortcuts;
   customText?: string;
 }) {
   return (
@@ -196,7 +202,10 @@ function Command(props: {
             SAAS: <DataSourcesColoredIcon />,
           }[props.pluginType]}
         {props.imgSrc && <img src={props.imgSrc} />}
-        {props.shortcut && <span className="shortcut">{props.shortcut}</span>}
+        {props.shortcut &&
+          { [Shortcuts.BINDING]: <Binding />, [Shortcuts.PLUS]: <NewPlus /> }[
+            props.shortcut
+          ]}
         <span>{props.name}</span>
       </div>
     </div>
