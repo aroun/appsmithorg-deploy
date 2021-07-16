@@ -30,11 +30,14 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.internal.Base64;
 import org.pf4j.Extension;
 import org.pf4j.PluginWrapper;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -46,6 +49,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
@@ -80,6 +85,8 @@ public class RestApiPlugin extends BasePlugin {
     @Slf4j
     @Extension
     public static class RestApiPluginExecutor implements PluginExecutor<APIConnection>, SmartSubstitutionInterface {
+
+        private final Scheduler scheduler = Schedulers.elastic();
 
         private final String IS_SEND_SESSION_ENABLED_KEY = "isSendSessionEnabled";
         private final String SESSION_SIGNATURE_KEY_KEY = "sessionSignatureKey";
@@ -311,14 +318,38 @@ public class RestApiPlugin extends BasePlugin {
 
             WebClient client = webClientBuilder.exchangeStrategies(EXCHANGE_STRATEGIES).build();
 
+            Mono<ClientResponse> clientResponseMono = httpCall(client, httpMethod, uri, requestBodyObj, 0, reqContentType)
+                    .cache();
+
+//            Mono<ResponseEntity<byte[]>> responseEntityMono = clientResponseMono
+//                    .flatMap(clientResponse -> clientResponse.toEntity(byte[].class));
+
+//            Mono<byte[]> bodyAsByteArrayMono = clientResponseMono
+//                    .flatMap(response -> response.bodyToMono(ByteArrayResource.class))
+//                    .map(ByteArrayResource::getByteArray);
+
             // Triggering the actual REST API call
-            return httpCall(client, httpMethod, uri, requestBodyObj, 0, reqContentType)
-                    .flatMap(clientResponse -> clientResponse.toEntity(byte[].class))
-                    .map(stringResponseEntity -> {
+            return  clientResponseMono
+                    .flatMap(response -> {
+                        ResponseEntity<DataBuffer> block = response.toEntity(DataBuffer.class).block();
+                        DataBuffer body = block.getBody();
+
+                        Mono<ByteArrayResource> byteArrayResourceMono = response.bodyToMono(ByteArrayResource.class);
+                        Mono<ResponseEntity<byte[]>> responseEntityMono = response.toEntity(byte[].class);
+                        return Mono.zip(responseEntityMono, byteArrayResourceMono);
+                    })
+                    .map(tuple2 -> {
+                        ResponseEntity<byte[]> stringResponseEntity = tuple2.getT1();
+                        ByteArrayResource byteArrayBody = tuple2.getT2();
                         HttpHeaders headers = stringResponseEntity.getHeaders();
                         // Find the media type of the response to parse the body as required.
                         MediaType contentType = headers.getContentType();
                         byte[] body = stringResponseEntity.getBody();
+//                        System.out.println("Got the response body : ");
+//                        for (int i=0; i<10; i++) {
+//                            System.out.println(body[i]+ " ");
+//                        }
+
                         HttpStatus statusCode = stringResponseEntity.getStatusCode();
 
                         ActionExecutionResult result = new ActionExecutionResult();
@@ -377,6 +408,9 @@ public class RestApiPlugin extends BasePlugin {
                                     MediaType.IMAGE_PNG.equals(contentType)) {
                                 String encode = Base64.encode(body);
                                 result.setBody(encode);
+                            } else if(contentType.toString().equals("application/zip")) {
+
+                                result.setBody(byteArrayBody);
                             } else {
                                 // If the body is not of JSON type, just set it as is.
                                 String bodyString = new String(body, StandardCharsets.UTF_8);
