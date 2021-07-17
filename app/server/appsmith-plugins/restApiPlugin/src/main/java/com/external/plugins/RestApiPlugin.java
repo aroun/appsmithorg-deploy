@@ -30,14 +30,11 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.internal.Base64;
 import org.pf4j.Extension;
 import org.pf4j.PluginWrapper;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -330,17 +327,16 @@ public class RestApiPlugin extends BasePlugin {
 
             // Triggering the actual REST API call
             return  clientResponseMono
-                    .flatMap(response -> {
-                        ResponseEntity<DataBuffer> block = response.toEntity(DataBuffer.class).block();
-                        DataBuffer body = block.getBody();
-
-                        Mono<ByteArrayResource> byteArrayResourceMono = response.bodyToMono(ByteArrayResource.class);
-                        Mono<ResponseEntity<byte[]>> responseEntityMono = response.toEntity(byte[].class);
-                        return Mono.zip(responseEntityMono, byteArrayResourceMono);
-                    })
-                    .map(tuple2 -> {
-                        ResponseEntity<byte[]> stringResponseEntity = tuple2.getT1();
-                        ByteArrayResource byteArrayBody = tuple2.getT2();
+                    .flatMap(response -> response.toEntity(byte[].class))
+//                    .flatMap(response -> {
+////                        ResponseEntity<DataBuffer> block = response.toEntity(DataBuffer.class).block();
+////                        DataBuffer body = block.getBody();
+////
+////                        Mono<ByteArrayResource> byteArrayResourceMono = response.bodyToMono(ByteArrayResource.class);
+//                        Mono<ResponseEntity<byte[]>> responseEntityMono = response.toEntity(byte[].class);
+//                        return Mono.zip(responseEntityMono, byteArrayResourceMono);
+//                    })
+                    .map(stringResponseEntity -> {
                         HttpHeaders headers = stringResponseEntity.getHeaders();
                         // Find the media type of the response to parse the body as required.
                         MediaType contentType = headers.getContentType();
@@ -410,7 +406,7 @@ public class RestApiPlugin extends BasePlugin {
                                 result.setBody(encode);
                             } else if(contentType.toString().equals("application/zip")) {
 
-                                result.setBody(byteArrayBody);
+                                result.setBody(body);
                             } else {
                                 // If the body is not of JSON type, just set it as is.
                                 String bodyString = new String(body, StandardCharsets.UTF_8);
