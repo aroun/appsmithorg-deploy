@@ -9,6 +9,7 @@ export const ReduxSagaChannels: { [key: string]: string } = {
 };
 
 export const ReduxActionTypes: { [key: string]: string } = {
+  SET_IS_LOCAL_DEV_MODE: "SET_IS_LOCAL_DEV_MODE",
   INCREMENT_COMMENT_THREAD_UNREAD_COUNT:
     "INCREMENT_COMMENT_THREAD_UNREAD_COUNT",
   DECREMENT_COMMENT_THREAD_UNREAD_COUNT:

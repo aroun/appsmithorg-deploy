@@ -82,6 +82,7 @@ class AppRouter extends React.Component<any, any> {
     // This is needed for the theme switch.
     changeAppBackground(currentTheme);
 
+    // TODO (rishabh s) LOCAL DEV add redirect to until settings done
     return (
       <Router history={history}>
         <Suspense fallback={loadingIndicator}>

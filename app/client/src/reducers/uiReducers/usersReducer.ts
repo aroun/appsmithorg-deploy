@@ -58,7 +58,7 @@ const usersReducer = createReducer(initialState, {
         fetchingUser: false,
       },
       users,
-      currentUser: action.payload,
+      // currentUser: action.payload,
     };
   },
   [ReduxActionTypes.UPDATE_USER_DETAILS_SUCCESS]: (
@@ -79,7 +79,7 @@ const usersReducer = createReducer(initialState, {
         fetchingUser: false,
       },
       users,
-      currentUser: action.payload,
+      // currentUser: action.payload,
     };
   },
   [ReduxActionTypes.FETCH_USER_SUCCESS]: (

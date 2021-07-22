@@ -99,6 +99,20 @@ export function* getCurrentUserSaga() {
       ) {
         AnalyticsUtil.identifyUser(response.data);
       }
+
+      // TODO: (rishabh s) LOCAL DEV handle redirections post fetch user success
+      // - First time setup not done
+      //     - User opens the client url in the browser
+      //     - We detect from back-end that the initial settings / onboarding is not done (part of /me response)
+      //         - Initially the settings would just include local vs cloud mode (this can be updated only by the super admin user or one time)
+      //         - Later it would include onboarding for bringing up the instance and updating the settings
+
+      // - If first time setup is done:
+      //     - Based on local vs cloud
+      //         - Local mode: route to applications page
+      //         - Cloud mode: check if logged
+      //             - If not logged in route to auth
+      //             - Else to applications
       if (window.location.pathname === BASE_URL) {
         if (response.data.isAnonymous) {
           history.replace(AUTH_LOGIN_URL);

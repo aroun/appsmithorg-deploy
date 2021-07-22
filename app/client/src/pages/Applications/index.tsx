@@ -871,6 +871,7 @@ function ApplicationsSection(props: any) {
 
   return (
     <ApplicationContainer className="t--applications-container">
+      {/* TODO (rishabh s) LOCAL DEV directly load application instead of orgs */}
       {organizationsListComponent}
       <HelpModal page={"Applications"} />
       <WelcomeHelper />
@@ -965,6 +966,7 @@ class Applications extends Component<
         ) : (
           <>
             <ProductUpdatesModal />
+            {/* TODO: (rishabh s) LOCAL DEV : we probably won't have a left section since no orgs */}
             <LeftPane />
             <SubHeader
               search={{
