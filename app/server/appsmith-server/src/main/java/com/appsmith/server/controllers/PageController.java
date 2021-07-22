@@ -11,7 +11,10 @@ import com.appsmith.server.solutions.CreateDBTablePageSolution;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,6 +29,10 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 @RestController
 @RequestMapping(Url.PAGE_URL)
@@ -131,4 +138,16 @@ public class PageController {
         return newPageService.updatePage(id, resource)
                 .map(updatedResource -> new ResponseDTO<>(HttpStatus.OK.value(), updatedResource, null));
     }
+
+    @GetMapping(value = "/download", produces = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @GetMapping("/download")
+    public ResponseEntity<InputStreamResource> getPageViewDownload() throws FileNotFoundException {
+        File initialFile = new File("/Users/trisha/Downloads/appsmith-share.zip");
+        InputStream targetStream = new FileInputStream(initialFile);
+        final InputStreamResource inputStreamResource = new InputStreamResource(targetStream);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=fromLocalhost.zip")
+                .body(inputStreamResource);
+    }
+
 }

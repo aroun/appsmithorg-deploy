@@ -33,6 +33,7 @@ import org.apache.commons.lang.StringUtils;
 import org.bson.internal.Base64;
 import org.pf4j.Extension;
 import org.pf4j.PluginWrapper;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
@@ -320,11 +322,62 @@ public class RestApiPlugin extends BasePlugin {
 
             WebClient client = webClientBuilder.exchangeStrategies(EXCHANGE_STRATEGIES).build();
 
-            // Triggering the actual REST API call
+            if (httpMethod.equals(HttpMethod.GET)) {
+                Object finalRequestBodyObj = requestBodyObj;
+                String finalReqContentType = reqContentType;
+
+                return getHeadersThroughHEAD(client, uri)
+                        .flatMap(headers -> {
+                            System.out.println(headers);
+                            MediaType contentType = headers.getContentType();
+                            if (contentType.equals(MediaType.MULTIPART_FORM_DATA_VALUE)) {
+                                // handle response type of multi part form data
+                                return null;
+                            } else {
+                                return triggerGenericRestApiCall(client, httpMethod, uri, finalRequestBodyObj, finalReqContentType,
+                                        actionExecutionRequest, hintMessages, errorResult);
+                            }
+                        });
+            } else {
+                return triggerGenericRestApiCall(client, httpMethod, uri, requestBodyObj, reqContentType, actionExecutionRequest, hintMessages, errorResult);
+            }
+        }
+
+        private Mono<ActionExecutionResult> triggerMultiPartGetCall(WebClient client, URI uri,
+                                                                    ActionExecutionRequest actionExecutionRequest,
+                                                                    Set<String> hintMessages,
+                                                                    ActionExecutionResult errorResult) {
+
+            Flux<DataBuffer> dataBufferFlux = client
+                    .get()
+                    .uri(uri)
+                    .accept(MediaType.valueOf(MediaType.MULTIPART_FORM_DATA_VALUE))
+                    .retrieve()
+                    .bodyToFlux(DataBuffer.class);
+
+            return null;
+
+        }
+
+        private Mono<HttpHeaders> getHeadersThroughHEAD(WebClient client, URI uri) {
+            return client
+                    .head()
+                    .uri(uri)
+                    .retrieve()
+                    .toEntity(String.class)
+                    .map(aResponse -> aResponse.getHeaders());
+        }
+
+        private Mono<ActionExecutionResult> triggerGenericRestApiCall(WebClient client, HttpMethod httpMethod, URI uri,
+                                                                      Object requestBodyObj, String reqContentType,
+                                                                      ActionExecutionRequest actionExecutionRequest,
+                                                                      Set<String> hintMessages,
+                                                                      ActionExecutionResult errorResult) {
             return httpCall(client, httpMethod, uri, requestBodyObj, 0, reqContentType)
                     .flatMap(clientResponse -> clientResponse.toEntity(byte[].class))
                     .map(stringResponseEntity -> {
                         HttpHeaders headers = stringResponseEntity.getHeaders();
+                        System.out.println("Headers from actual call : " + headers);
                         // Find the media type of the response to parse the body as required.
                         MediaType contentType = headers.getContentType();
                         byte[] body = stringResponseEntity.getBody();
