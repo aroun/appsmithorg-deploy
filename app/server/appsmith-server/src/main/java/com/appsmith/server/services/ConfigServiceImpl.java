@@ -10,14 +10,10 @@ import com.appsmith.server.repositories.ApplicationRepository;
 import com.appsmith.server.repositories.ConfigRepository;
 import com.appsmith.server.repositories.DatasourceRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
 
-import javax.validation.Validator;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,25 +21,21 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Slf4j
 @Service
-public class ConfigServiceImpl extends BaseService<ConfigRepository, Config, String> implements ConfigService {
+public class ConfigServiceImpl implements ConfigService {
 
     private static final String TEMPLATE_ORGANIZATION_CONFIG_NAME = "template-organization";
 
+    private final ConfigRepository repository;
     private final ApplicationRepository applicationRepository;
     private final DatasourceRepository datasourceRepository;
 
     // This is permanently cached through the life of the JVM process as this is not intended to change at runtime ever.
     private String instanceId = null;
 
-    public ConfigServiceImpl(Scheduler scheduler,
-                             Validator validator,
-                             MongoConverter mongoConverter,
-                             ReactiveMongoTemplate reactiveMongoTemplate,
-                             ConfigRepository repository,
-                             AnalyticsService analyticsService,
+    public ConfigServiceImpl(ConfigRepository repository,
                              ApplicationRepository applicationRepository,
                              DatasourceRepository datasourceRepository) {
-        super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
+        this.repository = repository;
         this.applicationRepository = applicationRepository;
         this.datasourceRepository = datasourceRepository;
     }
