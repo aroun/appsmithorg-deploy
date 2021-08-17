@@ -326,6 +326,10 @@ function getChildren(
           ? parentProps.shouldScrollContents
           : false,
       needsChildrenDSL,
+      isVisible:
+        childProps.type === "CANVAS_WIDGET"
+          ? parentProps.isVisible
+          : childProps.isVisible,
     };
   });
 }
