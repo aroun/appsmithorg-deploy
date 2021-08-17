@@ -137,7 +137,7 @@ export function getExpectedValue(
       };
     case ValidationTypes.OBJECT_ARRAY:
       return {
-        type: `Array<Object>`,
+        type: `Array<Objects>`,
         example: [{ id: 1 }],
         autocompleteDataType: AutocompleteDataType.ARRAY,
       };
