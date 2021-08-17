@@ -27,6 +27,7 @@ import { MAIN_CONTAINER_WIDGET_ID } from "constants/WidgetConstants";
 import Debugger from "components/editorComponents/Debugger";
 import { closePropertyPane, closeTableFilterPane } from "actions/widgetActions";
 import { useWidgetSelection } from "utils/hooks/useWidgetSelection";
+import CrudInfoModal from "./GeneratePage/components/CrudInfoModal";
 
 const EditorWrapper = styled.div`
   display: flex;
@@ -134,6 +135,7 @@ function WidgetsEditor() {
         {node}
       </CanvasContainer>
       <Debugger />
+      <CrudInfoModal />
     </EditorWrapper>
   );
 }

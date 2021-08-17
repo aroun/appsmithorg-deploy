@@ -115,6 +115,10 @@ export const HelpMap: Record<string, { path: string; searchKey: string }> = {
     path: "/widget-reference/switch",
     searchKey: "Switch",
   },
+  MULTI_SELECT_WIDGET: {
+    path: "",
+    searchKey: "",
+  },
   RATE_WIDGET: {
     path: "/widget-reference/rate",
     searchKey: "Rate",
@@ -130,6 +134,10 @@ export const HelpMap: Record<string, { path: string; searchKey: string }> = {
   MENU_BUTTON_WIDGET: {
     path: "/widget-reference/menu-button",
     searchKey: "Menu Button",
+  },
+  ICON_BUTTON_WIDGET: {
+    path: "/widget-reference/icon-button",
+    searchKey: "Icon Button",
   },
 };
 

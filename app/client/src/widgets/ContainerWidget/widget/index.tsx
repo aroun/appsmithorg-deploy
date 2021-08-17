@@ -2,7 +2,6 @@ import React from "react";
 
 import ContainerComponent, { ContainerStyle } from "../component";
 import WidgetFactory, { DerivedPropertiesMap } from "utils/WidgetFactory";
-import { MAIN_CONTAINER_WIDGET_ID } from "constants/WidgetConstants";
 
 import BaseWidget, {
   WidgetProps,
@@ -14,6 +13,9 @@ import { ValidationTypes } from "constants/WidgetValidation";
 
 import WidgetsMultiSelectBox from "pages/Editor/WidgetsMultiSelectBox";
 import { CanvasSelectionArena } from "pages/common/CanvasSelectionArena";
+import { CanvasDraggingArena } from "pages/common/CanvasDraggingArena";
+import { getSnapSpaces } from "widgets/WidgetUtils";
+import { getCanvasSnapRows } from "utils/WidgetPropsUtils";
 
 class ContainerWidget extends BaseWidget<
   ContainerWidgetProps<WidgetProps>,
@@ -97,12 +99,31 @@ class ContainerWidget extends BaseWidget<
   };
 
   renderAsContainerComponent(props: ContainerWidgetProps<WidgetProps>) {
+    const snapRows = getCanvasSnapRows(props.bottomRow, props.canExtend);
+
     return (
       <ContainerComponent {...props}>
-        {this.props.widgetId === MAIN_CONTAINER_WIDGET_ID && (
-          <CanvasSelectionArena widgetId={MAIN_CONTAINER_WIDGET_ID} />
+        {props.type === "CANVAS_WIDGET" && (
+          <>
+            <CanvasDraggingArena
+              {...getSnapSpaces(this.props)}
+              canExtend={props.canExtend}
+              dropDisabled={!!props.dropDisabled}
+              noPad={this.props.noPad}
+              snapRows={snapRows}
+              widgetId={props.widgetId}
+            />
+            <CanvasSelectionArena
+              {...getSnapSpaces(this.props)}
+              canExtend={props.canExtend}
+              parentId={props.parentId}
+              snapRows={snapRows}
+              widgetId={props.widgetId}
+            />
+          </>
         )}
         <WidgetsMultiSelectBox
+          {...getSnapSpaces(this.props)}
           widgetId={this.props.widgetId}
           widgetType={this.props.type}
         />

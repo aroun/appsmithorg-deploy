@@ -5,6 +5,7 @@ import { Plugin } from "api/PluginApi";
 import {
   ReduxActionErrorTypes,
   ReduxActionTypes,
+  WidgetReduxActionTypes,
 } from "constants/ReduxActionConstants";
 import { AppState } from "reducers";
 import {
@@ -440,8 +441,7 @@ function* listenForCreateAction() {
     setHelperConfig({
       ...helperConfig,
       image: {
-        src:
-          "https://res.cloudinary.com/drako999/image/upload/v1611839705/Appsmith/Onboarding/run.gif",
+        src: "https://assets.appsmith.com/Run.gif",
       },
     }),
   );
@@ -675,7 +675,7 @@ function* addWidget(widgetConfig: any) {
     };
 
     yield put({
-      type: ReduxActionTypes.WIDGET_ADD_CHILD,
+      type: WidgetReduxActionTypes.WIDGET_ADD_CHILD,
       payload: newWidget,
     });
 

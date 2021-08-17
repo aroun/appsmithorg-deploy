@@ -10,6 +10,7 @@ import {
   RenderModes,
 } from "constants/WidgetConstants";
 import { generateClassName } from "utils/generators";
+import { ClickContentToOpenPropPane } from "utils/hooks/useClickOpenPropPane";
 
 const MODAL_SIZE: { [id: string]: { width: number; height: number } } = {
   MODAL_SMALL: {
@@ -95,16 +96,16 @@ export class ModalWidget extends BaseWidget<ModalWidgetProps, WidgetState> {
 
   renderChildWidget = (props: WidgetProps): ReactNode => {
     // const childWidgetProps = produce(props, (childWidgetData) => {
-    //   childWidgetData.parentId = this.props.widgetId;
-    //   childWidgetData.shouldScrollContents = false;
-    //   childWidgetData.canExtend = this.props.shouldScrollContents;
-    //   childWidgetData.bottomRow = this.props.shouldScrollContents
-    //     ? childWidgetData.bottomRow
-    //     : MODAL_SIZE[this.props.size].height;
-    //   childWidgetData.isVisible = this.props.isVisible;
-    //   childWidgetData.containerStyle = "none";
-    //   childWidgetData.minHeight = MODAL_SIZE[this.props.size].height;
-    //   childWidgetData.rightColumn = this.getModalWidth();
+    // childWidgetData.parentId = this.props.widgetId;
+    // childWidgetData.shouldScrollContents = false;
+    // childWidgetData.canExtend = this.props.shouldScrollContents;
+    // childWidgetData.bottomRow = this.props.shouldScrollContents
+    //   ? Math.max(childWidgetData.bottomRow, MODAL_SIZE[this.props.size].height)
+    //   : MODAL_SIZE[this.props.size].height;
+    // childWidgetData.isVisible = this.props.isVisible;
+    // childWidgetData.containerStyle = "none";
+    // childWidgetData.minHeight = MODAL_SIZE[this.props.size].height;
+    // childWidgetData.rightColumn = this.getModalWidth();
     // });
 
     return WidgetFactory.createWidget(props);
@@ -141,6 +142,15 @@ export class ModalWidget extends BaseWidget<ModalWidgetProps, WidgetState> {
     }
   }
 
+  makeModalSelectable(content: ReactNode): ReactNode {
+    // substitute coz the widget lacks draggable and position containers.
+    return (
+      <ClickContentToOpenPropPane widgetId={this.props.widgetId}>
+        {content}
+      </ClickContentToOpenPropPane>
+    );
+  }
+
   makeModalComponent(content: ReactNode) {
     console.log("Rendering modal ==== ");
     return (
@@ -160,13 +170,13 @@ export class ModalWidget extends BaseWidget<ModalWidgetProps, WidgetState> {
   }
 
   render() {
-    console.log("Rendering modal widget =====");
+    const children = this.getChildren();
+
     if (this.props.renderMode === RenderModes.CANVAS) {
-      const children = this.getChildren();
       // children = this.props.showWidgetName(children, true);
       return this.makeModalComponent(children);
     }
-    const children = this.getChildren();
+
     return this.makeModalComponent(children);
   }
 

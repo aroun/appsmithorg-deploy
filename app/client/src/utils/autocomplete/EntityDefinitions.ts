@@ -83,6 +83,10 @@ export const entityDefinitions: Record<string, unknown> = {
       "Select is used to capture user input/s from a specified list of permitted inputs. A Select can capture a single choice as well as multiple choices",
     "!url": "https://docs.appsmith.com/widget-reference/dropdown",
     isVisible: isVisible,
+    filterText: {
+      "!type": "[string]",
+      "!doc": "The filter text for Server side filtering",
+    },
     selectedOptionValue: {
       "!type": "string",
       "!doc": "The value selected in a single select dropdown",
@@ -92,6 +96,28 @@ export const entityDefinitions: Record<string, unknown> = {
       "!type": "string",
       "!doc": "The selected option label in a single select dropdown",
       "!url": "https://docs.appsmith.com/widget-reference/dropdown",
+    },
+    selectedOptionValues: {
+      "!type": "[string]",
+      "!doc": "The array of values selected in a multi select dropdown",
+      "!url": "https://docs.appsmith.com/widget-reference/dropdown",
+    },
+    selectedOptionLabels: {
+      "!type": "[string]",
+      "!doc": "The array of selected option labels in a multi select dropdown",
+      "!url": "https://docs.appsmith.com/widget-reference/dropdown",
+    },
+    isDisabled: "bool",
+    options: "[dropdownOption]",
+  },
+  MULTI_SELECT_WIDGET: {
+    "!doc":
+      "MultiSelect is used to capture user input/s from a specified list of permitted inputs. A MultiSelect captures multiple choices from a list of options",
+    "!url": "https://docs.appsmith.com/widget-reference/dropdown",
+    isVisible: isVisible,
+    filterText: {
+      "!type": "[string]",
+      "!doc": "The filter text for Server side filtering",
     },
     selectedOptionValues: {
       "!type": "[string]",
@@ -268,6 +294,12 @@ export const entityDefinitions: Record<string, unknown> = {
     "!url": "https://docs.appsmith.com/widget-reference/menu-button",
     isVisible: isVisible,
     label: "string",
+  },
+  ICON_BUTTON_WIDGET: {
+    "!doc":
+      "Icon button widget is just an icon, along with all other button properties.",
+    "!url": "https://docs.appsmith.com/widget-reference/icon-button",
+    isVisible: isVisible,
   },
 };
 

@@ -31,7 +31,7 @@ export function AppPage(props: AppPageProps) {
     });
   }, [props.pageId, props.pageName]);
   return (
-    <PageView width={props.width}>
+    <PageView className="t--app-viewer-page" width={props.width}>
       {props.dsl.widgetId && WidgetFactory.createWidget(props.dsl)}
     </PageView>
   );

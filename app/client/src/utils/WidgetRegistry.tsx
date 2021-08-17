@@ -64,6 +64,11 @@ import TabsMigratorWidget, {
   CONFIG as TABS_MIGRATOR_WIDGET_CONFIG,
 } from "widgets/TabsMigrator";
 import RateWidget, { CONFIG as RATE_WIDGET_CONFIG } from "widgets/RateWidget";
+
+import MultiSelectWidget, {
+  CONFIG as MULTI_SELECT_WIDGET_CONFIG,
+} from "widgets/MultiSelectWidget";
+
 import IframeWidget, {
   CONFIG as IFRAME_WIDGET_CONFIG,
 } from "widgets/IframeWidget";
@@ -108,5 +113,6 @@ export const registerWidgets = () => {
   registerWidget(TabsMigratorWidget, TABS_MIGRATOR_WIDGET_CONFIG);
   registerWidget(DividerWidget, DIVIDER_WIDGET_CONFIG);
   registerWidget(MenuButtonWidget, MENU_BUTTON_WIDGET_CONFIG);
+  registerWidget(MultiSelectWidget, MULTI_SELECT_WIDGET_CONFIG);
   console.log("Widget registration took: ", performance.now() - start, "ms");
 };

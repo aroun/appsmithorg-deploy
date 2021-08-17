@@ -17,18 +17,17 @@ import {
   MAIN_CONTAINER_WIDGET_ID,
   RenderMode,
   RenderModes,
-  WidgetType,
   WIDGET_PADDING,
   WIDGET_STATIC_PROPS,
 } from "constants/WidgetConstants";
-import { findKey, groupBy } from "lodash";
+import { findKey } from "lodash";
 import produce from "immer";
 import { getAppMode } from "./applicationSelectors";
-import { APP_MODE } from "reducers/entityReducers/appReducer";
 import { getWidgetDimensions } from "widgets/WidgetUtils";
 import WidgetFactory from "utils/WidgetFactory";
 import CanvasWidgetsNormalizer from "normalizers/CanvasWidgetsNormalizer";
 import { DataTree, DataTreeWidget } from "entities/DataTree/dataTreeFactory";
+import { APP_MODE } from "entities/App";
 
 const STATIC_PROPS_LIST = Object.keys(WIDGET_STATIC_PROPS);
 const excludedProps = [
