@@ -31,7 +31,7 @@ import { ContainerWidgetProps } from "../ContainerWidget";
 import propertyPaneConfig from "./ListPropertyPaneConfig";
 import { EventType } from "constants/AppsmithActionConstants/ActionConstants";
 import { getDynamicBindings } from "utils/DynamicBindingUtils";
-import ListPagination from "./ListPagination";
+import ListPagination, { ServerSideListPagination } from "./ListPagination";
 import withMeta from "./../MetaHOC";
 import { GridDefaults, WIDGET_PADDING } from "constants/WidgetConstants";
 import { ValidationTypes } from "constants/WidgetValidation";
@@ -213,9 +213,22 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     return {};
   }
 
-  static getMetaPropertiesMap(): Record<string, string> {
-    return {};
+  static getMetaPropertiesMap(): Record<string, any> {
+    return {
+      pageNo: 1,
+      pageSize: 2,
+    };
   }
+
+  onPageChange = (page: number) => {
+    this.props.updateWidgetMetaProperty("pageNo", page, {
+      triggerPropertyName: "onPageChange",
+      dynamicString: this.props.onPageChange,
+      event: {
+        type: EventType.ON_LIST_PAGE_CHANGE,
+      },
+    });
+  };
 
   /**
    * on click item action
@@ -584,6 +597,9 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
    * @param children
    */
   paginateItems = (children: ContainerWidgetProps<WidgetProps>[]) => {
+    // return all children if serverside pagination
+    // if (this.props.serverSidePaginationEnabled) return children;
+    // else calculate and paginate based on size
     const { page } = this.state;
     const { perPage, shouldPaginate } = this.shouldPaginate();
 
@@ -670,9 +686,13 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
    */
   shouldPaginate = () => {
     let { gridGap } = this.props;
-    const { children, listData } = this.props;
+    const { children, listData, serverSidePaginationEnabled } = this.props;
+
     if (!listData?.length) {
-      return { shouldPaginate: false, perPage: 0 };
+      return {
+        shouldPaginate: serverSidePaginationEnabled || false,
+        perPage: 0,
+      };
     }
     const { componentHeight } = this.getComponentDimensions();
     const templateBottomRow = get(children, "0.children.0.bottomRow");
@@ -689,19 +709,29 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       gridGap = 0;
     }
 
-    const shouldPaginate =
-      templateHeight * listData.length +
-        parseInt(gridGap) * (listData.length - 1) >
-      componentHeight;
+    const shouldPaginate = serverSidePaginationEnabled
+      ? true
+      : templateHeight * listData.length +
+          parseInt(gridGap) * (listData.length - 1) >
+        componentHeight;
 
     const totalSpaceAvailable =
       componentHeight - (LIST_WIDGEY_PAGINATION_HEIGHT + WIDGET_PADDING * 2);
     const spaceTakenByOneContainer =
       templateHeight + (gridGap * (listData.length - 1)) / listData.length;
 
-    const perPage = totalSpaceAvailable / spaceTakenByOneContainer;
+    let perPage = totalSpaceAvailable / spaceTakenByOneContainer;
+    perPage = isNaN(perPage) ? 0 : floor(perPage);
 
-    return { shouldPaginate, perPage: isNaN(perPage) ? 0 : floor(perPage) };
+    this.props.updateWidgetMetaProperty("pageSize", perPage, {
+      triggerPropertyName: "onPageSizeChanged",
+      dynamicString: this.props.onPageSizeChanged,
+      event: {
+        type: EventType.ON_PAGE_SIZE_CHANGE,
+      },
+    });
+
+    return { shouldPaginate, perPage };
   };
 
   /**
@@ -711,6 +741,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     const children = this.renderChildren();
     const { componentHeight } = this.getComponentDimensions();
     const { perPage, shouldPaginate } = this.shouldPaginate();
+    const { pageNo, serverSidePaginationEnabled } = this.props;
     const templateBottomRow = get(
       this.props.children,
       "0.children.0.bottomRow",
@@ -770,15 +801,22 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       >
         {children}
 
-        {shouldPaginate && (
-          <ListPagination
-            current={this.state.page}
-            disabled={false && this.props.renderMode === RenderModes.CANVAS}
-            onChange={(page: number) => this.setState({ page })}
-            perPage={perPage}
-            total={this.props.listData.length}
-          />
-        )}
+        {shouldPaginate &&
+          (serverSidePaginationEnabled ? (
+            <ServerSideListPagination
+              nextPageClick={() => this.onPageChange(pageNo + 1)}
+              pageNo={this.props.pageNo}
+              prevPageClick={() => this.onPageChange(pageNo - 1)}
+            />
+          ) : (
+            <ListPagination
+              current={this.state.page}
+              disabled={false && this.props.renderMode === RenderModes.CANVAS}
+              onChange={(page: number) => this.setState({ page })}
+              perPage={perPage}
+              total={this.props.listData.length}
+            />
+          ))}
       </ListComponent>
     );
   }
