@@ -87,6 +87,13 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
         currentIndex: "",
       });
     }
+    if (this.props.serverSidePaginationEnabled) {
+      this.props.updateWidgetMetaProperty("pageNo", 1);
+      this.props.updateWidgetMetaProperty(
+        "pageSize",
+        this.shouldPaginate().perPage,
+      );
+    }
 
     // generate childMetaPropertyMap
     this.generateChildrenDefaultPropertiesMap(this.props);
@@ -211,6 +218,19 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       this.generateChildrenMetaPropertiesMap(this.props);
       this.generateChildrenEntityDefinitions(this.props);
     }
+
+    if (this.props.serverSidePaginationEnabled) {
+      const { perPage } = this.shouldPaginate();
+      if (prevProps.pageSize !== perPage) {
+        this.props.updateWidgetMetaProperty("pageSize", perPage, {
+          triggerPropertyName: "onPageSizeChange",
+          dynamicString: this.props.onPageSizeChange,
+          event: {
+            type: EventType.ON_PAGE_SIZE_CHANGE,
+          },
+        });
+      }
+    }
   }
 
   static getDefaultPropertiesMap(): Record<string, string> {
@@ -218,10 +238,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   }
 
   static getMetaPropertiesMap(): Record<string, any> {
-    return {
-      pageNo: 1,
-      pageSize: 2,
-    };
+    return {};
   }
 
   onPageChange = (page: number) => {
@@ -602,7 +619,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
    */
   paginateItems = (children: ContainerWidgetProps<WidgetProps>[]) => {
     // return all children if serverside pagination
-    // if (this.props.serverSidePaginationEnabled) return children;
+    if (this.props.serverSidePaginationEnabled) return children;
     // else calculate and paginate based on size
     const { page } = this.state;
     const { perPage, shouldPaginate } = this.shouldPaginate();
@@ -692,11 +709,8 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     let { gridGap } = this.props;
     const { children, listData, serverSidePaginationEnabled } = this.props;
 
-    if (!listData?.length) {
-      return {
-        shouldPaginate: serverSidePaginationEnabled || false,
-        perPage: 0,
-      };
+    if (!serverSidePaginationEnabled && !listData?.length) {
+      return { shouldPaginate: false, perPage: 0 };
     }
     const { componentHeight } = this.getComponentDimensions();
     const templateBottomRow = get(children, "0.children.0.bottomRow");
@@ -721,19 +735,12 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
 
     const totalSpaceAvailable =
       componentHeight - (LIST_WIDGEY_PAGINATION_HEIGHT + WIDGET_PADDING * 2);
-    const spaceTakenByOneContainer =
-      templateHeight + (gridGap * (listData.length - 1)) / listData.length;
+    const spaceTakenByOneContainer = serverSidePaginationEnabled
+      ? templateHeight + (gridGap * 2) / 3 // get approx pageSize, serverSide pagination will not have listData before fetch
+      : templateHeight + (gridGap * (listData.length - 1)) / listData.length;
 
     let perPage = totalSpaceAvailable / spaceTakenByOneContainer;
     perPage = isNaN(perPage) ? 0 : floor(perPage);
-
-    this.props.updateWidgetMetaProperty("pageSize", perPage, {
-      triggerPropertyName: "onPageSizeChanged",
-      dynamicString: this.props.onPageSizeChanged,
-      event: {
-        type: EventType.ON_PAGE_SIZE_CHANGE,
-      },
-    });
 
     return { shouldPaginate, perPage };
   };
