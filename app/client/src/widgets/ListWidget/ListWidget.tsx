@@ -729,15 +729,19 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
 
     const shouldPaginate = serverSidePaginationEnabled
       ? true
-      : templateHeight * listData.length +
+      : !!listData
+      ? templateHeight * listData.length +
           parseInt(gridGap) * (listData.length - 1) >
-        componentHeight;
+        componentHeight
+      : false;
 
     const totalSpaceAvailable =
       componentHeight - (LIST_WIDGEY_PAGINATION_HEIGHT + WIDGET_PADDING * 2);
     const spaceTakenByOneContainer = serverSidePaginationEnabled
       ? templateHeight + (gridGap * 2) / 3 // get approx pageSize, serverSide pagination will not have listData before fetch
-      : templateHeight + (gridGap * (listData.length - 1)) / listData.length;
+      : !!listData
+      ? templateHeight + (gridGap * (listData.length - 1)) / listData.length
+      : templateHeight;
 
     let perPage = totalSpaceAvailable / spaceTakenByOneContainer;
     perPage = isNaN(perPage) ? 0 : floor(perPage);
