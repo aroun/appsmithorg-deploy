@@ -127,6 +127,11 @@ import IconButtonWidget, {
   IconButtonWidgetProps,
   ProfiledIconButtonWidget,
 } from "widgets/IconButtonWidget";
+import StatboxWidget, { ProfiledStatboxWidget } from "widgets/StatboxWidget";
+import CheckboxGroupWidget, {
+  CheckboxGroupWidgetProps,
+  ProfiledCheckboxGroupWidget,
+} from "widgets/CheckboxGroupWidget";
 
 export default class WidgetBuilderRegistry {
   static registerWidgetBuilders() {
@@ -554,6 +559,34 @@ export default class WidgetBuilderRegistry {
       IconButtonWidget.getDefaultPropertiesMap(),
       IconButtonWidget.getMetaPropertiesMap(),
       IconButtonWidget.getPropertyPaneConfig(),
+    );
+
+    WidgetFactory.registerWidgetBuilder(
+      WidgetTypes.STATBOX_WIDGET,
+      {
+        buildWidget(
+          widgetProps: ContainerWidgetProps<WidgetProps>,
+        ): JSX.Element {
+          return <ProfiledStatboxWidget {...widgetProps} />;
+        },
+      },
+      StatboxWidget.getDerivedPropertiesMap(),
+      StatboxWidget.getDefaultPropertiesMap(),
+      StatboxWidget.getMetaPropertiesMap(),
+      StatboxWidget.getPropertyPaneConfig(),
+    );
+
+    WidgetFactory.registerWidgetBuilder(
+      WidgetTypes.CHECKBOX_GROUP_WIDGET,
+      {
+        buildWidget(widgetData: CheckboxGroupWidgetProps): JSX.Element {
+          return <ProfiledCheckboxGroupWidget {...widgetData} />;
+        },
+      },
+      CheckboxGroupWidget.getDerivedPropertiesMap(),
+      CheckboxGroupWidget.getDefaultPropertiesMap(),
+      CheckboxGroupWidget.getMetaPropertiesMap(),
+      CheckboxGroupWidget.getPropertyPaneConfig(),
     );
   }
 }

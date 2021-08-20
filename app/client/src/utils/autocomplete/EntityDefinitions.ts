@@ -303,6 +303,21 @@ export const entityDefinitions = {
     "!url": "https://docs.appsmith.com/widget-reference/icon-button",
     isVisible: isVisible,
   },
+  CHECKBOX_GROUP_WIDGET: {
+    "!doc":
+      "Checkbox group widget allows users to easily configure multiple checkboxes together.",
+    "!url": "https://docs.appsmith.com/widget-reference/checkbox-group",
+    isVisible: isVisible,
+    isDisabled: "bool",
+    isValid: "bool",
+    options: "[dropdownOption]",
+    selectedValues: "[string]",
+  },
+  STATBOX_WIDGET: {
+    "!doc": "Show and highlight stats from your data sources",
+    "!url": "https://docs.appsmith.com/widget-reference/stat-box",
+    isVisible: isVisible,
+  },
 };
 
 export const GLOBAL_DEFS = {

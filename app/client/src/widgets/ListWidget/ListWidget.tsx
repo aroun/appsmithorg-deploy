@@ -81,7 +81,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
         this.props.listData &&
         Array.isArray(this.props.listData))
     ) {
-      const structure = this.getCurrentItemStructure(this.props.listData);
+      const structure = this.getCurrentItemStructure(this.props.listData || []);
       this.props.updateWidgetMetaProperty("childAutoComplete", {
         currentItem: structure,
         currentIndex: "",
@@ -185,8 +185,12 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   };
 
   componentDidUpdate(prevProps: ListWidgetProps<WidgetProps>) {
-    const oldRowStructure = this.getCurrentItemStructure(prevProps.listData);
-    const newRowStructure = this.getCurrentItemStructure(this.props.listData);
+    const oldRowStructure = this.getCurrentItemStructure(
+      prevProps.listData || [],
+    );
+    const newRowStructure = this.getCurrentItemStructure(
+      this.props.listData || [],
+    );
 
     if (
       xor(Object.keys(oldRowStructure), Object.keys(newRowStructure)).length > 0
@@ -257,7 +261,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     if (!action) return;
 
     try {
-      const rowData = [this.props.listData[rowIndex]];
+      const rowData = [this.props.listData?.[rowIndex]] || [];
       const { jsSnippets } = getDynamicBindings(action);
       const modifiedAction = jsSnippets.reduce((prev: string, next: string) => {
         return prev + `{{(currentItem) => { ${next} }}} `;
@@ -414,7 +418,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
           propertyValue.indexOf("{{((currentItem) => {") === -1
         ) {
           const { jsSnippets } = getDynamicBindings(propertyValue);
-          const listItem = this.props.listData[itemIndex];
+          const listItem = this.props.listData?.[itemIndex] || {};
 
           const newPropertyValue = jsSnippets.reduce(
             (prev: string, next: string) => {
@@ -798,6 +802,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
         {...this.props}
         hasPagination={shouldPaginate}
         key={`list-widget-page-${this.state.page}`}
+        listData={this.props.listData || []}
       >
         {children}
 
@@ -814,7 +819,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
               disabled={false && this.props.renderMode === RenderModes.CANVAS}
               onChange={(page: number) => this.setState({ page })}
               perPage={perPage}
-              total={this.props.listData.length}
+              total={(this.props.listData || []).length}
             />
           ))}
       </ListComponent>
@@ -834,7 +839,7 @@ export interface ListWidgetProps<T extends WidgetProps> extends WidgetProps {
   containerStyle?: ContainerStyle;
   shouldScrollContents?: boolean;
   onListItemClick?: string;
-  listData: Array<Record<string, unknown>>;
+  listData?: Array<Record<string, unknown>>;
   currentItemStructure?: Record<string, string>;
 }
 
