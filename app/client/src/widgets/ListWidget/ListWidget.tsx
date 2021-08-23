@@ -89,6 +89,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     }
     if (this.props.serverSidePaginationEnabled) {
       this.props.updateWidgetMetaProperty("pageNo", 1);
+      console.log("file: ListWidget calc", this.shouldPaginate().perPage);
       this.props.updateWidgetMetaProperty(
         "pageSize",
         this.shouldPaginate().perPage,
@@ -220,8 +221,15 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     }
 
     if (this.props.serverSidePaginationEnabled) {
-      const { perPage } = this.shouldPaginate();
-      if (prevProps.pageSize !== perPage) {
+      if (!this.props.pageNo) this.props.updateWidgetMetaProperty("pageNo", 1);
+      if (
+        get(prevProps, "children.0.bottomRow") !==
+        get(this.props, "children.0.bottomRow")
+      ) {
+        // get new pageSize
+        const { perPage } = this.shouldPaginate();
+        // set new pageSize value and run onPageSizeChange handler
+        console.log("file: ListWidget calc", perPage);
         this.props.updateWidgetMetaProperty("pageSize", perPage, {
           triggerPropertyName: "onPageSizeChange",
           dynamicString: this.props.onPageSizeChange,
