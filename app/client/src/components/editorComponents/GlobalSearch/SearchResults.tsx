@@ -52,21 +52,21 @@ export const SearchItemContainer = styled.div<{
     `${props.theme.spaces[4]}px ${props.theme.spaces[4]}px`};
   color: ${(props) =>
     props.isActiveItem
-      ? "white"
+      ? "#090707"
       : props.theme.colors.globalSearch.searchItemText};
   margin: ${(props) => props.theme.spaces[1]}px 0;
   background-color: ${(props) =>
     props.isActiveItem &&
     props.itemType !== SEARCH_ITEM_TYPES.sectionTitle &&
     props.itemType !== SEARCH_ITEM_TYPES.placeholder
-      ? `${props.theme.colors.globalSearch.activeSearchItemBackground} !important`
+      ? `#EBEBEB !important`
       : "unset"};
 
   .text {
     max-width: 300px;
     color: ${(props) =>
       props.isActiveItem
-        ? "white"
+        ? "#090707"
         : props.theme.colors.globalSearch.searchItemText};
     font-size: ${(props) => props.theme.fontSizes[3]}px;
     font-weight: ${(props) => props.theme.fontWeights[1]};
@@ -77,7 +77,7 @@ export const SearchItemContainer = styled.div<{
   .subtext {
     color: ${(props) =>
       props.isActiveItem
-        ? "white"
+        ? "#090707"
         : props.theme.colors.globalSearch.searchItemSubText};
     font-size: ${(props) => props.theme.fontSizes[2]}px;
     font-weight: ${(props) => props.theme.fontWeights[1]};
@@ -87,19 +87,20 @@ export const SearchItemContainer = styled.div<{
     ${overflowCSS}
   }
 
+  .category-title {
+    color: #4b4848;
+  }
+  .category-desc {
+    color: #4b4848;
+  }
+
   &:hover {
     background-color: ${(props) =>
       props.itemType !== SEARCH_ITEM_TYPES.sectionTitle &&
       props.itemType !== SEARCH_ITEM_TYPES.placeholder
         ? "#E8E8E8"
         : "unset"};
-    color: ${(props) => (props.isActiveItem ? "white" : "#484848")};
-    .category-title {
-      color: ${(props) => (props.isActiveItem ? "white" : "#484848")};
-    }
-    .category-desc {
-      color: ${(props) => (props.isActiveItem ? "white" : "#484848")};
-    }
+    color: #090707;
     ${StyledActionLink} {
       visibility: visible;
     }
@@ -120,6 +121,7 @@ export const SearchItemContainer = styled.div<{
   [class^="ais-"] {
     ${(props) => getTypographyByKey(props, "p3")};
   }
+  font-size: 14px;
 `;
 
 const ItemTitle = styled.div`
@@ -132,6 +134,7 @@ const ItemTitle = styled.div`
   font-w [class^="ais-"] {
     ${(props) => getTypographyByKey(props, "p3")};
   }
+  font-weight: 14px;
 `;
 
 const StyledDocumentIcon = styled(DocumentIcon)<{ isActiveItem: boolean }>`
@@ -139,8 +142,7 @@ const StyledDocumentIcon = styled(DocumentIcon)<{ isActiveItem: boolean }>`
     width: 14px;
     height: 14px;
     path {
-      fill: ${(props) =>
-        props.isActiveItem ? "transparent" : "#6a86ce !important"};
+      fill: grey;
     }
   }
   display: flex;
@@ -336,7 +338,6 @@ const CategoryContainer = styled.div`
   flex-direction: row;
   align-item: center;
   justify-content: space-between;
-  padding: 12px 10px;
   width: 100%;
 `;
 
@@ -351,21 +352,14 @@ const CategoryListItem = styled.div<{ isActiveItem: boolean }>`
     flex-direction: column;
     .category-title {
       ${(props) => getTypographyByKey(props, "h5")}
-      color: ${(props) =>
-        props.isActiveItem
-          ? props.theme.colors.globalSearch.searchItemAltText
-          : props.theme.colors.globalSearch.searchItemText};
+      color: #090707;
     }
     .category-desc {
       ${(props) => getTypographyByKey(props, "p3")}
-      color: ${(props) =>
-        props.isActiveItem
-          ? props.theme.colors.globalSearch.searchItemAltText
-          : props.theme.colors.globalSearch.searchItemSubText};
+      color: #4b4848;
     }
   }
   .action-msg {
-    color: ${(props) => props.theme.colors.globalSearch.searchItemAltText};
     ${(props) => getTypographyByKey(props, "p3")}
     flex-shrink: 0;
   }
@@ -468,7 +462,6 @@ const SearchResultsContainer = styled.div`
     overflow: auto;
     height: 100%;
     width: 100%;
-    padding-bottom: 50px;
   }
 `;
 

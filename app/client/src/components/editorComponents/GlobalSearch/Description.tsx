@@ -84,6 +84,7 @@ const Container = styled.div`
       props.theme.colors.globalSearch.codeBackground} !important;
     white-space: pre-wrap;
     overflow: hidden;
+    padding: 10px;
   }
   .CodeMirror {
     pre {

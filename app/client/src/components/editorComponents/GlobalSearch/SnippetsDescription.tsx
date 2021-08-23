@@ -71,6 +71,8 @@ const SnippetContainer = styled.div`
     }
     pre {
       padding: 1.5em 1em !important;
+      border: 1.2px solid #e0dede !important;
+      background: white !important;
     }
   }
   .snippet-title {

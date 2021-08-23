@@ -65,7 +65,7 @@ import SnippetsFilter from "./SnippetsFilter";
 
 const StyledContainer = styled.div`
   width: 785px;
-  height: 530px;
+  max-height: 530px;
   background: ${(props) => props.theme.colors.globalSearch.containerBackground};
   box-shadow: ${(props) => props.theme.colors.globalSearch.containerShadow};
   display: flex;
@@ -74,10 +74,8 @@ const StyledContainer = styled.div`
     display: flex;
     flex: 1;
     overflow: hidden;
-    background-color: ${(props) =>
-      props.theme.colors.globalSearch.mainContainerBackground};
-    padding: ${(props) => props.theme.spaces[4]}px
-      ${(props) => props.theme.spaces[7]}px;
+    background-color: white;
+    padding: 2px ${(props) => props.theme.spaces[7]}px;
   }
   ${algoliaHighlightTag},
   & .ais-Highlight-highlighted,

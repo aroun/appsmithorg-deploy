@@ -33,24 +33,29 @@ const Container = styled.div`
 const InputContainer = styled.div`
   display: flex;
   align-items: center;
-  background: ${(props) =>
-    props.theme.colors.globalSearch.mainContainerBackground};
+  background: #ffffff;
+  border: 1.2px solid #f86a2b;
   padding: ${(props) => `0 ${props.theme.spaces[6]}px`};
 `;
 
 const CategoryDisplay = styled.div`
-  color: ${(props) => props.theme.colors.globalSearch.activeCategory};
-  background: ${(props) => props.theme.colors.globalSearch.searchItemHighlight};
+  background: white;
   height: 32px;
   padding: ${(props) => `${props.theme.spaces[3]}px`};
   display: flex;
   align-items: center;
-  border: 1px solid ${(props) => props.theme.colors.globalSearch.activeCategory};
+  border: 1.2px solid #e0dede;
+  font-size: 14px;
+  color: #090707;
   margin-right: ${(props) => props.theme.spaces[4]}px;
   ${(props) => getTypographyByKey(props, "categoryBtn")}
   svg {
     cursor: pointer;
     margin-left: ${(props) => `${props.theme.spaces[4]}px`};
+    margin-top: 2px;
+    path {
+      fill: #090707;
+    }
   }
 `;
 
