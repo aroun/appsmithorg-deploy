@@ -91,9 +91,10 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     if (this.props.serverSidePaginationEnabled && !this.props.pageNo) {
       this.props.updateWidgetMetaProperty("pageNo", 1);
     }
-    if (!this.props.templateBottomRow) {
-      this.props.updateWidgetMetaProperty("templateBottomRow", 16);
-    }
+    this.props.updateWidgetMetaProperty(
+      "templateBottomRow",
+      get(this.props.children, "0.children.0.bottomRow"),
+    );
 
     // generate childMetaPropertyMap
     this.generateChildrenDefaultPropertiesMap(this.props);
