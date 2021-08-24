@@ -53,6 +53,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
 
   static getDerivedPropertiesMap() {
     return {
+      pageSize: `{{(()=>{${derivedProperties.getPageSize}})()}}`,
       selectedItem: `{{(()=>{${derivedProperties.getSelectedItem}})()}}`,
       items: `{{(() => {${derivedProperties.getItems}})()}}`,
     };
@@ -87,13 +88,11 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
         currentIndex: "",
       });
     }
-    if (this.props.serverSidePaginationEnabled) {
+    if (this.props.serverSidePaginationEnabled && !this.props.pageNo) {
       this.props.updateWidgetMetaProperty("pageNo", 1);
-      console.log("file: ListWidget calc", this.shouldPaginate().perPage);
-      this.props.updateWidgetMetaProperty(
-        "pageSize",
-        this.shouldPaginate().perPage,
-      );
+    }
+    if (!this.props.templateBottomRow) {
+      this.props.updateWidgetMetaProperty("templateBottomRow", 16);
     }
 
     // generate childMetaPropertyMap
@@ -222,15 +221,9 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
 
     if (this.props.serverSidePaginationEnabled) {
       if (!this.props.pageNo) this.props.updateWidgetMetaProperty("pageNo", 1);
-      if (
-        get(prevProps, "children.0.bottomRow") !==
-        get(this.props, "children.0.bottomRow")
-      ) {
-        // get new pageSize
-        const { perPage } = this.shouldPaginate();
-        // set new pageSize value and run onPageSizeChange handler
-        console.log("file: ListWidget calc", perPage);
-        this.props.updateWidgetMetaProperty("pageSize", perPage, {
+      // run onPageSizeChange if user resize widgets
+      if (this.props.pageSize !== prevProps.pageSize) {
+        super.executeAction({
           triggerPropertyName: "onPageSizeChange",
           dynamicString: this.props.onPageSizeChange,
           event: {
@@ -239,6 +232,22 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
         });
       }
     }
+    if (
+      get(this.props.children, "0.children.0.bottomRow") !==
+      get(prevProps.children, "0.children.0.bottomRow")
+    ) {
+      this.props.updateWidgetMetaProperty(
+        "templateBottomRow",
+        get(this.props.children, "0.children.0.bottomRow"),
+        {
+          triggerPropertyName: "onPageSizeChange",
+          dynamicString: this.props.onPageSizeChange,
+          event: {
+            type: EventType.ON_PAGE_SIZE_CHANGE,
+          },
+        },
+      );
+    }
   }
 
   static getDefaultPropertiesMap(): Record<string, string> {
@@ -246,7 +255,10 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   }
 
   static getMetaPropertiesMap(): Record<string, any> {
-    return {};
+    return {
+      pageNo: 1,
+      templateBottomRow: 16,
+    };
   }
 
   onPageChange = (page: number) => {
@@ -717,7 +729,10 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     let { gridGap } = this.props;
     const { children, listData, serverSidePaginationEnabled } = this.props;
 
-    if (!serverSidePaginationEnabled && !listData?.length) {
+    if (serverSidePaginationEnabled) {
+      return { shouldPaginate: true, perPage: this.props.pageSize };
+    }
+    if (!listData?.length) {
       return { shouldPaginate: false, perPage: 0 };
     }
     const { componentHeight } = this.getComponentDimensions();
@@ -735,26 +750,19 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       gridGap = 0;
     }
 
-    const shouldPaginate = serverSidePaginationEnabled
-      ? true
-      : !!listData
-      ? templateHeight * listData.length +
-          parseInt(gridGap) * (listData.length - 1) >
-        componentHeight
-      : false;
+    const shouldPaginate =
+      templateHeight * listData.length +
+        parseInt(gridGap) * (listData.length - 1) >
+      componentHeight;
 
     const totalSpaceAvailable =
       componentHeight - (LIST_WIDGEY_PAGINATION_HEIGHT + WIDGET_PADDING * 2);
-    const spaceTakenByOneContainer = serverSidePaginationEnabled
-      ? templateHeight + (gridGap * 2) / 3 // get approx pageSize, serverSide pagination will not have listData before fetch
-      : !!listData
-      ? templateHeight + (gridGap * (listData.length - 1)) / listData.length
-      : templateHeight;
+    const spaceTakenByOneContainer =
+      templateHeight + (gridGap * (listData.length - 1)) / listData.length;
 
-    let perPage = totalSpaceAvailable / spaceTakenByOneContainer;
-    perPage = isNaN(perPage) ? 0 : floor(perPage);
+    const perPage = totalSpaceAvailable / spaceTakenByOneContainer;
 
-    return { shouldPaginate, perPage };
+    return { shouldPaginate, perPage: isNaN(perPage) ? 0 : floor(perPage) };
   };
 
   /**
