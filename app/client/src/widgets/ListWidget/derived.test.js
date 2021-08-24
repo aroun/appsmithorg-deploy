@@ -56,6 +56,7 @@ describe("Validates Derived Properties", () => {
     const input1 = {
       bottomRow: 86,
       children: [{ children: [{ bottomRow: 16 }] }],
+      templateBottomRow: 16,
       gridGap: 0,
       parentRowSpace: 10,
       topRow: 9,
