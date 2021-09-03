@@ -18,8 +18,9 @@ const LibraryContainer = styled.div`
   width: 750px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   .react-tabs__tab-panel {
-    height: calc(100% - 80px);
+    height: calc(100% - 36px);
   }
   input {
     position: absolute;
@@ -63,15 +64,6 @@ const LibraryInfo = styled.div`
   .lib-desc {
     font-size: 12px;
   }
-  .lib-version {
-    background: #f0f0f0;
-    border: none;
-    height: 32px;
-    width: 150px;
-    .cs-text {
-      color: #090707;
-    }
-  }
 `;
 
 const LibraryActions = styled.div`
@@ -105,6 +97,11 @@ const LibraryWrapper = styled.div`
   border-top: 1px solid #ebebeb;
 `;
 
+const FlexWrapper = styled.div`
+  flex-grow: 1;
+  overflow: auto;
+`;
+
 function InstalledLibraries() {
   const libraries = useSelector(
     (state: AppState) => state.ui.customLibs.defaultLibraries,
@@ -120,7 +117,6 @@ function InstalledLibraries() {
               <span className="lib-desc">{lib.version}</span>
             </LibraryInfo>
             <LibraryActions>
-              <Button className="update-btn" text="Update to latest" />
               <Button className="uninstall-btn" text="Uninstall" />
             </LibraryActions>
           </LibraryCard>
@@ -150,21 +146,18 @@ function AllLibraries({ libraries }: any) {
   const installLibrary = (lib: any) => {
     dispatch(initializeInstallation(lib));
   };
+
+  const x = new Function();
+
   return (
     <LibraryWrapper>
       <LibraryList>
         {(libraries || []).map((lib: any, idx: number) => (
           <LibraryCard key={idx}>
-            <LibraryInfo onMouseOver={() => fetchVersions(lib.name)}>
+            <LibraryInfo>
               <span className="lib-name">{lib.name}</span>
               <span className="lib-desc">{lib.description}</span>
-              <Dropdown
-                className="lib-version"
-                enableSearch
-                options={versions[lib.name] || []}
-                selected={{ label: lib.version, value: lib.version }}
-                showLabelOnly
-              />
+              <span className="lib-desc">{lib.version}</span>
             </LibraryInfo>
             <LibraryActions>
               {currentInstallations.indexOf(lib.name) === -1 ? (
@@ -212,20 +205,22 @@ function CustomLibrary() {
     <LibraryContainer>
       <LibraryHeader>JS Libraries</LibraryHeader>
       <input onChange={handleLibSearch} placeholder="Search" value={query} />
-      <TabComponent
-        tabs={[
-          {
-            key: "installed",
-            title: "Installed",
-            panelComponent: <InstalledLibraries />,
-          },
-          {
-            key: "all",
-            title: "All",
-            panelComponent: <AllLibraries libraries={libraries} />,
-          },
-        ]}
-      />
+      <FlexWrapper>
+        <TabComponent
+          tabs={[
+            {
+              key: "installed",
+              title: "Installed",
+              panelComponent: <InstalledLibraries />,
+            },
+            {
+              key: "all",
+              title: "All",
+              panelComponent: <AllLibraries libraries={libraries} />,
+            },
+          ]}
+        />
+      </FlexWrapper>
     </LibraryContainer>
   );
 }
