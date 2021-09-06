@@ -4,10 +4,7 @@ import {
   ReduxActionErrorTypes,
   ReduxActionTypes,
 } from "constants/ReduxActionConstants";
-import ExtraLibraryClass, {
-  defaultLibraries,
-  ExtraLibrary,
-} from "utils/ExtraLibrary";
+import { defaultLibraries, ExtraLibrary } from "utils/ExtraLibrary";
 
 export type CustomLibsReduxState = {
   defaultLibraries: ExtraLibrary[];

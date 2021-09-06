@@ -371,13 +371,14 @@ export function* evaluateArgumentSaga(action: any) {
 
 export function* updateLibrariesSaga(libs: any) {
   try {
-    const workerResponse: boolean = yield call(
+    const workerResponse: { isLoaded: boolean; error?: string } = yield call(
       worker.request,
       EVAL_WORKER_ACTIONS.UPDATE_LIBRARIES,
       {
         libs,
       },
     );
+    return workerResponse;
   } catch (error) {
     log.error(error);
     Sentry.captureException(error);

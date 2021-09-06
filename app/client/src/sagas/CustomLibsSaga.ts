@@ -11,8 +11,8 @@ import {
   ReduxActionTypes,
 } from "constants/ReduxActionConstants";
 import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects";
+import TernServer from "utils/autocomplete/TernServer";
 import ExtraLibraryClass from "utils/ExtraLibrary";
-import ScriptService from "utils/importScriptUtil";
 import { validateResponse } from "./ErrorSagas";
 import { updateLibrariesSaga } from "./EvaluationsSaga";
 
@@ -24,11 +24,16 @@ export function* fetchAppLibrariesSaga(
     const response: ApiResponse = yield call(ApplicationApi.fetchAppLibraries);
     const isValid: boolean = yield call(validateResponse, response);
     if (isValid) {
-      const scriptImportService = ScriptService.getInstance();
-      const imports = yield call(
-        scriptImportService.load.bind(scriptImportService),
-        response.data,
-      );
+      const libs = response.data;
+      for (let i = libs.length; i--; ) {
+        const installationOnWorker: {
+          isLoaded: boolean;
+          error?: string;
+        } = yield call(updateLibrariesSaga, libs[i].latest);
+        if (installationOnWorker.isLoaded && libs[i].jsonTypeDefinition) {
+          TernServer.updateDef("dayjs", libs[i].jsonTypeDefinition);
+        }
+      }
     }
     yield put({ type: ReduxActionTypes.START_EVALUATION });
   } catch (error) {
@@ -44,21 +49,22 @@ export function* fetchAppLibrariesSaga(
 function* installLibrarySaga(action: ReduxAction<any>) {
   const lib = action.payload;
   //Save library and trigger definition generator;
-  const scriptService = ScriptService.getInstance();
   try {
-    const status = yield call(scriptService.load.bind(scriptService), [lib]);
-    if (status[0].loaded) {
+    // const status = yield call(scriptService.load.bind(scriptService), [lib]);
+    const installationOnWorker: {
+      isLoaded: boolean;
+      error?: string;
+    } = yield call(updateLibrariesSaga, lib.latest);
+    if (installationOnWorker.isLoaded) {
       const extraLibs = ExtraLibraryClass.getInstance();
       extraLibs.addLibrary({
         ...lib,
         lib: window[lib.name],
       });
-      const shareLibsWithWorker = yield call(updateLibrariesSaga, lib.latest);
-      yield put(installationSuccessful(lib));
-    } else {
-      yield put(installationFailed(lib));
     }
+    yield put(installationSuccessful(lib));
   } catch (error) {
+    yield put(installationFailed(lib));
     yield put({
       type: ReduxActionErrorTypes.FETCH_LIBRARY_ERROR,
       payload: {

@@ -161,7 +161,11 @@ export default function evaluate(
       // @ts-ignore: No types available
       self[key] = GLOBAL_DATA[key];
     });
-    errors = getLintingErrors(script, GLOBAL_DATA, unescapedJS);
+    errors = getLintingErrors(
+      script,
+      (self as unknown) as Record<string, unknown>,
+      unescapedJS,
+    );
 
     ///// Adding extra libraries separately
     extraLibraries.forEach((library) => {

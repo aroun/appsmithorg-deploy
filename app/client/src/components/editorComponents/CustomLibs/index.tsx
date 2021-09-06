@@ -1,6 +1,5 @@
 import { initializeInstallation } from "actions/cutomLibsActions";
 import Button from "components/ads/Button";
-import Dropdown from "components/ads/Dropdown";
 import { TabComponent } from "components/ads/Tabs";
 import { debounce } from "lodash";
 import React from "react";
@@ -127,27 +126,13 @@ function InstalledLibraries() {
 }
 
 function AllLibraries({ libraries }: any) {
-  const [versions, setVersions] = useState<any>({}),
-    dispatch = useDispatch();
+  const dispatch = useDispatch();
   const currentInstallations = useSelector(
     (state: AppState) => state.ui.customLibs.currentInstallations,
   );
-  const fetchVersions = (name: string) => {
-    if (typeof versions[name] === "undefined")
-      fetch(`https://api.cdnjs.com/libraries/${name}?fields=versions`)
-        .then((res) => res.json())
-        .then((res) =>
-          setVersions({
-            ...versions,
-            [name]: res.versions.map((v: string) => ({ label: v, value: v })),
-          }),
-        );
-  };
   const installLibrary = (lib: any) => {
     dispatch(initializeInstallation(lib));
   };
-
-  const x = new Function();
 
   return (
     <LibraryWrapper>
