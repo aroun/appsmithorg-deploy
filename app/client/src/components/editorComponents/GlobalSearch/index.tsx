@@ -516,78 +516,80 @@ function GlobalSearch() {
     <SearchContext.Provider value={searchContext}>
       <GlobalSearchHotKeys {...hotKeyProps}>
         <SearchModal modalOpen={modalOpen} toggleShow={toggleShow}>
-          {!isLibrary(category) && <AlgoliaSearchWrapper
-            category={category}
-            query={query}
-            refinements={refinements}
-            setRefinement={setRefinements}
-          >
-            <StyledContainer category={category}>
-              <SearchBox
-                category={category}
-                query={query}
-                setCategory={setCategory}
-                setQuery={setQuery}
-              />
-              {isSnippet(category) &&
-                refinements &&
-                refinements.entities &&
-                refinements.entities.length && <SnippetRefinements />}
-              <div className="main">
-                {(isMenu(category) || isDocumentation(category)) && (
-                  <Index indexName={algolia.indexName}>
-                    <SetSearchResults
-                      category={category}
-                      setSearchResults={setDocumentationSearchResultsInState}
-                    />
-                  </Index>
-                )}
-                {/* Search from default menu should search multiple indexes.
+          {!isLibrary(category) && (
+            <AlgoliaSearchWrapper
+              category={category}
+              query={query}
+              refinements={refinements}
+              setRefinement={setRefinements}
+            >
+              <StyledContainer category={category}>
+                <SearchBox
+                  category={category}
+                  query={query}
+                  setCategory={setCategory}
+                  setQuery={setQuery}
+                />
+                {isSnippet(category) &&
+                  refinements &&
+                  refinements.entities &&
+                  refinements.entities.length && <SnippetRefinements />}
+                <div className="main">
+                  {(isMenu(category) || isDocumentation(category)) && (
+                    <Index indexName={algolia.indexName}>
+                      <SetSearchResults
+                        category={category}
+                        setSearchResults={setDocumentationSearchResultsInState}
+                      />
+                    </Index>
+                  )}
+                  {/* Search from default menu should search multiple indexes.
                 Below is the code to search in the index-snippet. Index
                 component requires Hits component as its children to display the
                 results. SetSearchResults is the custom hits component. */}
-                {(isMenu(category) || isSnippet(category)) && (
-                  <Index indexName="snippet">
-                    <Configure
-                      optionalFilters={getOptionalFilters(optionalFilterMeta)}
-                    />
-                    <SetSearchResults
-                      category={category}
-                      setSearchResults={setSnippetsState}
-                    />
-                  </Index>
-                )}
-                {searchResults.length > 0 ? (
-                  <>
-                    <SearchResults
-                      category={category}
-                      query={query}
-                      searchResults={searchResults}
-                    />
-                    {showDescription && (
-                      <Description
-                        activeItem={activeItem}
-                        activeItemType={activeItemType}
-                        query={query}
-                        refinements={refinements}
-                        searchResults={searchResults}
-                        showFilter={isSnippet(category)}
+                  {(isMenu(category) || isSnippet(category)) && (
+                    <Index indexName="snippet">
+                      <Configure
+                        optionalFilters={getOptionalFilters(optionalFilterMeta)}
                       />
-                    )}
-                  </>
-                ) : (
-                  <ResultsNotFound />
-                )}
-                {isSnippet(category) && (
-                  <SnippetsFilter
-                    refinements={refinements}
-                    snippetsEmpty={snippets.length === 0}
-                  />
-                )}
-              </div>
-              {/* <Footer /> */}
-            </StyledContainer>
-          </AlgoliaSearchWrapper>}
+                      <SetSearchResults
+                        category={category}
+                        setSearchResults={setSnippetsState}
+                      />
+                    </Index>
+                  )}
+                  {searchResults.length > 0 ? (
+                    <>
+                      <SearchResults
+                        category={category}
+                        query={query}
+                        searchResults={searchResults}
+                      />
+                      {showDescription && (
+                        <Description
+                          activeItem={activeItem}
+                          activeItemType={activeItemType}
+                          query={query}
+                          refinements={refinements}
+                          searchResults={searchResults}
+                          showFilter={isSnippet(category)}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <ResultsNotFound />
+                  )}
+                  {isSnippet(category) && (
+                    <SnippetsFilter
+                      refinements={refinements}
+                      snippetsEmpty={snippets.length === 0}
+                    />
+                  )}
+                </div>
+                {/* <Footer /> */}
+              </StyledContainer>
+            </AlgoliaSearchWrapper>
+          )}
           {isLibrary(category) && <CustomLibrary />}
         </SearchModal>
       </GlobalSearchHotKeys>
