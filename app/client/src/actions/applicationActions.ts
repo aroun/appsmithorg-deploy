@@ -36,6 +36,15 @@ export const fetchApplication = (
   };
 };
 
+export const fetchAppLibraries = (applicationId: string): ReduxAction<any> => {
+  return {
+    type: ReduxActionTypes.FETCH_APP_LIB_INIT,
+    payload: {
+      applicationId,
+    },
+  };
+};
+
 export const updateApplicationLayout = (
   id: string,
   data: UpdateApplicationPayload,

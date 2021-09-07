@@ -516,7 +516,7 @@ function GlobalSearch() {
     <SearchContext.Provider value={searchContext}>
       <GlobalSearchHotKeys {...hotKeyProps}>
         <SearchModal modalOpen={modalOpen} toggleShow={toggleShow}>
-          {!isLibrary(category) && (
+          {!isLibrary(category) ? (
             <AlgoliaSearchWrapper
               category={category}
               query={query}
@@ -570,9 +570,7 @@ function GlobalSearch() {
                           activeItem={activeItem}
                           activeItemType={activeItemType}
                           query={query}
-                          refinements={refinements}
-                          searchResults={searchResults}
-                          showFilter={isSnippet(category)}
+                          scrollPositionRef={scrollPositionRef}
                         />
                       )}
                     </>
@@ -589,8 +587,9 @@ function GlobalSearch() {
                 {/* <Footer /> */}
               </StyledContainer>
             </AlgoliaSearchWrapper>
+          ) : (
+            <CustomLibrary />
           )}
-          {isLibrary(category) && <CustomLibrary />}
         </SearchModal>
       </GlobalSearchHotKeys>
     </SearchContext.Provider>

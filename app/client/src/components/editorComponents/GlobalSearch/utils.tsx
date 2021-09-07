@@ -60,6 +60,7 @@ export const comboHelpText = {
   [SEARCH_CATEGORY_ID.DOCUMENTATION]: <>{modText()} + L</>,
   [SEARCH_CATEGORY_ID.NAVIGATION]: <>{modText()} + K</>,
   [SEARCH_CATEGORY_ID.INIT]: <>{modText()} + P</>,
+  [SEARCH_CATEGORY_ID.LIBRARY]: <>{modText()} + I</>,
 };
 
 export type Snippet = {

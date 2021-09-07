@@ -34,7 +34,10 @@ import {
   fetchActions,
   fetchActionsForView,
 } from "actions/pluginActionActions";
-import { fetchApplication } from "actions/applicationActions";
+import {
+  fetchAppLibraries,
+  fetchApplication,
+} from "actions/applicationActions";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { getCurrentApplication } from "selectors/applicationSelectors";
 import { APP_MODE } from "entities/App";
@@ -98,10 +101,12 @@ function* initializeEditorSaga(
     );
     yield put(setAppMode(APP_MODE.EDIT));
     yield put(updateAppPersistentStore(getPersistentAppStore(applicationId)));
+
     yield put({ type: ReduxActionTypes.START_EVALUATION });
 
     const applicationAndLayoutCalls = yield failFastApiCalls(
       [
+        fetchAppLibraries(applicationId),
         fetchPageList(applicationId, APP_MODE.EDIT),
         fetchPage(pageId, true),
         fetchApplication(applicationId, APP_MODE.EDIT),
@@ -194,6 +199,7 @@ export function* initializeAppViewerSaga(
   yield put({ type: ReduxActionTypes.START_EVALUATION });
   yield all([
     // TODO (hetu) Remove spl view call for fetch actions
+    put(fetchAppLibraries(applicationId)),
     put(fetchActionsForView(applicationId)),
     put(fetchPageList(applicationId, APP_MODE.PUBLISHED)),
     put(fetchApplication(applicationId, APP_MODE.PUBLISHED)),

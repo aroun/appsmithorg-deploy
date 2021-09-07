@@ -9,11 +9,14 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppState } from "reducers";
 import styled from "styled-components";
+import { ReactComponent as ChevronLeft } from "assets/icons/ads/chevron_left.svg";
+import { setGlobalSearchFilterContext } from "actions/globalSearchActions";
+import { SEARCH_CATEGORY_ID } from "../GlobalSearch/utils";
 
 const LibraryContainer = styled.div`
   background: white;
   padding: 25px 30px;
-  height: 630px;
+  height: 600px;
   width: 750px;
   display: flex;
   flex-direction: column;
@@ -88,6 +91,12 @@ const LibraryHeader = styled.div`
   color: #090707;
   margin-bottom: 16px;
   font-weight: 500;
+  svg {
+    cursor: pointer;
+  }
+  span {
+    margin-left: 10px;
+  }
 `;
 
 const LibraryWrapper = styled.div`
@@ -163,8 +172,9 @@ function AllLibraries({ libraries }: any) {
 }
 
 function CustomLibrary() {
-  const [libraries, setLibraries] = useState([]);
-  const [query, setQuery] = useState("");
+  const [libraries, setLibraries] = useState([]),
+    [query, setQuery] = useState(""),
+    dispatch = useDispatch();
   const handleLibSearch = useCallback((e: React.ChangeEvent) => {
     const currentQuery = (e.target as HTMLInputElement).value;
     setQuery(currentQuery);
@@ -188,7 +198,18 @@ function CustomLibrary() {
 
   return (
     <LibraryContainer>
-      <LibraryHeader>JS Libraries</LibraryHeader>
+      <LibraryHeader>
+        <ChevronLeft
+          onClick={(e) =>
+            dispatch(
+              setGlobalSearchFilterContext({
+                category: { id: SEARCH_CATEGORY_ID.INIT },
+              }),
+            )
+          }
+        />
+        <span>JS Libraries</span>
+      </LibraryHeader>
       <input onChange={handleLibSearch} placeholder="Search" value={query} />
       <FlexWrapper>
         <TabComponent

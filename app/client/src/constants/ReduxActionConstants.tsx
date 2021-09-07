@@ -525,6 +525,8 @@ export const ReduxActionTypes = {
   LIB_UPDATE_SUCCESS: "LIB_UPDATE_SUCCESS",
   LIB_UNINSTALL_INIT: "LIB_UNINSTALL_INIT",
   LIB_UNINSTALL_SUCCESS: "LIB_UNINSTALL_SUCCESS",
+  FETCH_APP_LIB_INIT: "FETCH_APP_LIB_INIT",
+  FETCH_APP_LIB_SUCCESS: "FETCH_APP_LIB_SUCCESS",
 };
 
 export type ReduxActionType = typeof ReduxActionTypes[keyof typeof ReduxActionTypes];

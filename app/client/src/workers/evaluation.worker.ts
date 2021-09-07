@@ -191,7 +191,7 @@ ctx.addEventListener(
           importScripts(libs);
           return { isLoaded: true };
         } catch (e) {
-          return { error: e.message, isLoaded: true };
+          return { error: e.message, isLoaded: false };
         }
       default: {
         console.error("Action not registered on worker", method);

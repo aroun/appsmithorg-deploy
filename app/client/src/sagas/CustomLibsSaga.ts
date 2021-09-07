@@ -5,23 +5,34 @@ import {
 } from "actions/cutomLibsActions";
 import { ApiResponse } from "api/ApiResponses";
 import ApplicationApi from "api/ApplicationApi";
+import { Variant } from "components/ads/common";
+import { Toaster } from "components/ads/Toast";
 import {
   ReduxAction,
   ReduxActionErrorTypes,
   ReduxActionTypes,
 } from "constants/ReduxActionConstants";
-import { all, call, put, takeEvery, takeLatest } from "redux-saga/effects";
+import {
+  all,
+  call,
+  put,
+  select,
+  takeEvery,
+  takeLatest,
+} from "redux-saga/effects";
+import { getCurrentApplicationId } from "selectors/editorSelectors";
 import TernServer from "utils/autocomplete/TernServer";
 import ExtraLibraryClass from "utils/ExtraLibrary";
 import { validateResponse } from "./ErrorSagas";
 import { updateLibrariesSaga } from "./EvaluationsSaga";
 
-export function* fetchAppLibrariesSaga(
-  action: ReduxAction<FetchApplicationPayload>,
-) {
-  //   const { applicationId } = action.payload;
+export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
+  const applicationId = action.payload.applicationId;
   try {
-    const response: ApiResponse = yield call(ApplicationApi.fetchAppLibraries);
+    const response: ApiResponse = yield call(
+      ApplicationApi.fetchAppLibraries,
+      applicationId,
+    );
     const isValid: boolean = yield call(validateResponse, response);
     if (isValid) {
       const libs = response.data;
@@ -35,7 +46,7 @@ export function* fetchAppLibrariesSaga(
         }
       }
     }
-    yield put({ type: ReduxActionTypes.START_EVALUATION });
+    return true;
   } catch (error) {
     yield put({
       type: ReduxActionErrorTypes.FETCH_LIBRARY_ERROR,
@@ -48,35 +59,41 @@ export function* fetchAppLibrariesSaga(
 
 function* installLibrarySaga(action: ReduxAction<any>) {
   const lib = action.payload;
+  const applicationId: string = yield select(getCurrentApplicationId);
   //Save library and trigger definition generator;
   try {
-    // const status = yield call(scriptService.load.bind(scriptService), [lib]);
     const installationOnWorker: {
       isLoaded: boolean;
       error?: string;
     } = yield call(updateLibrariesSaga, lib.latest);
     if (installationOnWorker.isLoaded) {
-      const extraLibs = ExtraLibraryClass.getInstance();
-      extraLibs.addLibrary({
-        ...lib,
-        lib: window[lib.name],
+      const response: ApiResponse = yield call(
+        ApplicationApi.installLibrary,
+        applicationId,
+        lib,
+      );
+      const isValid: boolean = yield call(validateResponse, response);
+      if (isValid) {
+        TernServer.updateDef(lib.name, response.data.jsonTypeDefinition);
+        yield put(installationSuccessful(lib));
+      } else {
+        yield put(installationFailed(lib));
+      }
+    } else {
+      Toaster.show({
+        text: installationOnWorker.error || "",
+        variant: Variant.danger,
       });
+      yield put(installationFailed(lib));
     }
-    yield put(installationSuccessful(lib));
   } catch (error) {
     yield put(installationFailed(lib));
-    yield put({
-      type: ReduxActionErrorTypes.FETCH_LIBRARY_ERROR,
-      payload: {
-        error,
-      },
-    });
   }
 }
 
 export default function* customLibsSaga() {
   yield all([
-    takeLatest(ReduxActionTypes.FETCH_APPLICATION_INIT, fetchAppLibrariesSaga),
+    takeLatest(ReduxActionTypes.FETCH_APP_LIB_INIT, fetchAppLibrariesSaga),
     takeEvery(ReduxActionTypes.LIB_INSTALL_INIT, installLibrarySaga),
   ]);
 }
