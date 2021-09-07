@@ -7,6 +7,7 @@ export type ExtraLibrary = {
   version: string;
   docsURL: string;
   name: string;
+  url?: string;
   description?: string;
   accessor: string;
   lib: any;

@@ -74,7 +74,18 @@ function* installLibrarySaga(action: ReduxAction<any>) {
       );
       const isValid: boolean = yield call(validateResponse, response);
       if (isValid) {
-        TernServer.updateDef(lib.name, response.data.jsonTypeDefinition);
+        try {
+          TernServer.updateDef(lib.name, response.data.jsonTypeDefinition);
+        } catch (error) {
+          Toaster.show({
+            text: "Autocomplete might not work properly",
+            variant: Variant.info,
+          });
+        }
+        Toaster.show({
+          text: `${lib.name} installed successfully`,
+          variant: Variant.success,
+        });
         yield put(installationSuccessful(lib));
       } else {
         yield put(installationFailed(lib));

@@ -12,6 +12,7 @@ import styled from "styled-components";
 import { ReactComponent as ChevronLeft } from "assets/icons/ads/chevron_left.svg";
 import { setGlobalSearchFilterContext } from "actions/globalSearchActions";
 import { SEARCH_CATEGORY_ID } from "../GlobalSearch/utils";
+import { ExtraLibrary } from "utils/ExtraLibrary";
 
 const LibraryContainer = styled.div`
   background: white;
@@ -110,25 +111,72 @@ const FlexWrapper = styled.div`
   overflow: auto;
 `;
 
-function InstalledLibraries() {
-  const libraries = useSelector(
+enum INSTALLATION_STATUS {
+  INSTALLED,
+  NOT_INSTALLED,
+}
+
+function LibraryCardComponent(
+  lib: any,
+  idx: number,
+  installationStatus: INSTALLATION_STATUS,
+) {
+  const dispatch = useDispatch();
+  return (
+    <LibraryCard key={idx}>
+      <LibraryInfo>
+        <span className="lib-name">{lib.name}</span>
+        <span className="lib-desc">{lib.description}</span>
+        <span className="lib-desc">{lib.version}</span>
+      </LibraryInfo>
+      <LibraryActions>
+        {
+          {
+            [INSTALLATION_STATUS.INSTALLED]: (
+              <Button className="uninstall-btn" text="Uninstall" />
+            ),
+            [INSTALLATION_STATUS.NOT_INSTALLED]: (
+              <Button
+                className="install-btn"
+                onClick={() => dispatch(initializeInstallation(lib))}
+                text="Install"
+              />
+            ),
+          }[installationStatus]
+        }
+      </LibraryActions>
+    </LibraryCard>
+  );
+}
+
+function InstalledLibraries({ query }: { query: string }) {
+  const defaultLibraries = useSelector(
     (state: AppState) => state.ui.customLibs.defaultLibraries,
   );
+  const additionalLibraries = useSelector(
+    (state: AppState) => state.ui.customLibs.additionalLibraries,
+  );
+  const allLibraries = defaultLibraries.concat(additionalLibraries);
   return (
     <LibraryWrapper>
       <LibraryList>
-        {(libraries || []).map((lib: any, idx: number) => (
-          <LibraryCard key={idx}>
-            <LibraryInfo>
-              <span className="lib-name">{lib.name}</span>
-              <span className="lib-desc">{lib.description}</span>
-              <span className="lib-desc">{lib.version}</span>
-            </LibraryInfo>
-            <LibraryActions>
-              <Button className="uninstall-btn" text="Uninstall" />
-            </LibraryActions>
-          </LibraryCard>
-        ))}
+        {(allLibraries || [])
+          .filter(
+            (lib) =>
+              lib.name.includes(query) || lib.description?.includes(query),
+          )
+          .map((lib: any, idx: number) => (
+            <LibraryCard key={idx}>
+              <LibraryInfo>
+                <span className="lib-name">{lib.name}</span>
+                <span className="lib-desc">{lib.description}</span>
+                <span className="lib-desc">{lib.version}</span>
+              </LibraryInfo>
+              <LibraryActions>
+                <Button className="uninstall-btn" text="Uninstall" />
+              </LibraryActions>
+            </LibraryCard>
+          ))}
       </LibraryList>
     </LibraryWrapper>
   );
@@ -143,29 +191,42 @@ function AllLibraries({ libraries }: any) {
     dispatch(initializeInstallation(lib));
   };
 
+  const defaultLibraries = useSelector(
+    (state: AppState) => state.ui.customLibs.defaultLibraries,
+  );
+  const additionalLibraries = useSelector(
+    (state: AppState) => state.ui.customLibs.additionalLibraries,
+  );
+
+  const installedLibraries = defaultLibraries.concat(additionalLibraries);
+
   return (
     <LibraryWrapper>
       <LibraryList>
-        {(libraries || []).map((lib: any, idx: number) => (
-          <LibraryCard key={idx}>
-            <LibraryInfo>
-              <span className="lib-name">{lib.name}</span>
-              <span className="lib-desc">{lib.description}</span>
-              <span className="lib-desc">{lib.version}</span>
-            </LibraryInfo>
-            <LibraryActions>
-              {currentInstallations.indexOf(lib.name) === -1 ? (
-                <Button
-                  className="install-btn"
-                  onClick={() => installLibrary(lib)}
-                  text="Install"
-                />
-              ) : (
-                "Installing"
-              )}
-            </LibraryActions>
-          </LibraryCard>
-        ))}
+        {(libraries || [])
+          .filter(
+            (lib: any) => !installedLibraries.find((l) => l.url === lib.url),
+          )
+          .map((lib: any, idx: number) => (
+            <LibraryCard key={idx}>
+              <LibraryInfo>
+                <span className="lib-name">{lib.name}</span>
+                <span className="lib-desc">{lib.description}</span>
+                <span className="lib-desc">{lib.version}</span>
+              </LibraryInfo>
+              <LibraryActions>
+                {currentInstallations.indexOf(lib.name) === -1 ? (
+                  <Button
+                    className="install-btn"
+                    onClick={() => installLibrary(lib)}
+                    text="Install"
+                  />
+                ) : (
+                  "Installing"
+                )}
+              </LibraryActions>
+            </LibraryCard>
+          ))}
       </LibraryList>
     </LibraryWrapper>
   );
@@ -174,19 +235,25 @@ function AllLibraries({ libraries }: any) {
 function CustomLibrary() {
   const [libraries, setLibraries] = useState([]),
     [query, setQuery] = useState(""),
+    [selectedIndex, setSelectedIndex] = useState(0),
     dispatch = useDispatch();
-  const handleLibSearch = useCallback((e: React.ChangeEvent) => {
-    const currentQuery = (e.target as HTMLInputElement).value;
-    setQuery(currentQuery);
-    searchLibrary(currentQuery);
-  }, []);
+  const handleLibSearch = useCallback(
+    (e: React.ChangeEvent) => {
+      const currentQuery = (e.target as HTMLInputElement).value;
+      setQuery(currentQuery);
+      if (selectedIndex) searchLibrary(currentQuery);
+    },
+    [selectedIndex],
+  );
 
   useEffect(() => searchLibrary(query), []);
+
+  useEffect(() => setQuery(""), [selectedIndex]);
 
   const searchLibrary = useCallback(
     debounce((query) => {
       fetch(
-        `https://api.cdnjs.com/libraries?fields=filename,description,version&limit=10${
+        `https://api.cdnjs.com/libraries?fields=filename,description,version&limit=50${
           query ? `&search=${query}` : ""
         }`,
       )
@@ -213,11 +280,15 @@ function CustomLibrary() {
       <input onChange={handleLibSearch} placeholder="Search" value={query} />
       <FlexWrapper>
         <TabComponent
+          onSelect={(selectedIndex: number) => {
+            setSelectedIndex(selectedIndex);
+          }}
+          selectedIndex={selectedIndex}
           tabs={[
             {
               key: "installed",
               title: "Installed",
-              panelComponent: <InstalledLibraries />,
+              panelComponent: <InstalledLibraries query={query} />,
             },
             {
               key: "all",
