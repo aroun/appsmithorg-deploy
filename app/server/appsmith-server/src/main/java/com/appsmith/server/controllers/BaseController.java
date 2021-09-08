@@ -34,6 +34,7 @@ public abstract class BaseController<S extends CrudService<T, ID>, T extends Bas
                                        @RequestHeader(name = "Origin", required = false) String originHeader,
                                        ServerWebExchange exchange) {
         log.debug("Going to create resource {}", resource.getClass().getName());
+        log.debug("Going to create resource {}", resource);
         return service.create(resource)
                 .map(created -> new ResponseDTO<>(HttpStatus.CREATED.value(), created, null));
     }

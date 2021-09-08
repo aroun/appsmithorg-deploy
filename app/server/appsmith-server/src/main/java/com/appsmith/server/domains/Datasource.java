@@ -20,7 +20,7 @@ import java.util.Set;
 @Setter
 @ToString
 @NoArgsConstructor
-@Document
+@Document(collection = "jsLib")
 public class Datasource extends BaseDomain {
 
     @Transient

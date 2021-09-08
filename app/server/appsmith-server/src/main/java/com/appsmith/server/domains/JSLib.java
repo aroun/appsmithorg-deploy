@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Setter
 @ToString
 @NoArgsConstructor
-@Document
+@Document(collection = "jsLib")
 public class JSLib extends BaseDomain {
     /* Application ID of the application where the lib gets installed. */
     String applicationId;
@@ -25,8 +25,11 @@ public class JSLib extends BaseDomain {
     /* A short description of the library. */
     String description;
 
-    /* URL to find information about the library. */
+    /* Src url of the library. */
     String url;
+
+    /* Documentation url for the library. */
+    String docsUrl;
 
     /**
      * - Namespace string for the library. e.g. if the accessor is "#", then the library methods get accessed like
@@ -36,4 +39,10 @@ public class JSLib extends BaseDomain {
 
     /* JSON type definition to be used by the Tern server to provide auto-complete feature for the JS library. */
     String jsonTypeDefinition;
+
+    /**
+     * -To persist a collection of JS libraries that cannot be supported for various reasons.
+     * - By default, we assume all libraries are supported.
+     */
+    Boolean isSupported = true;
 }
