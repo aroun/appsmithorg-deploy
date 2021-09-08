@@ -13,6 +13,7 @@ import { ReactComponent as ChevronLeft } from "assets/icons/ads/chevron_left.svg
 import { setGlobalSearchFilterContext } from "actions/globalSearchActions";
 import { SEARCH_CATEGORY_ID } from "../GlobalSearch/utils";
 import { ExtraLibrary } from "utils/ExtraLibrary";
+import { Classes } from "@blueprintjs/core";
 
 const LibraryContainer = styled.div`
   background: white;
@@ -53,6 +54,21 @@ const LibraryCard = styled.div`
   border: 1px solid #f0f0f0;
   margin-bottom: 18px;
   cursor: pointer;
+  .bp3-skeleton.lib-desc {
+    width: 300px;
+    height: 40px;
+  }
+  .bp3-skeleton.lib-name {
+    width: 200px;
+    height: 20px;
+  }
+  .bp3-skeleton.lib-version {
+    width: 100px;
+    height: 20px;
+  }
+  button.bp3-skeleton {
+    width: 150px;
+  }
 `;
 
 const LibraryInfo = styled.div`
@@ -64,7 +80,8 @@ const LibraryInfo = styled.div`
   .lib-name {
     font-size: 14px;
   }
-  .lib-desc {
+  .lib-desc,
+  .lib-version {
     font-size: 12px;
   }
 `;
@@ -116,33 +133,43 @@ enum INSTALLATION_STATUS {
   NOT_INSTALLED,
 }
 
-function LibraryCardComponent(
-  lib: any,
-  idx: number,
-  installationStatus: INSTALLATION_STATUS,
-) {
+function LibraryCardComponent({
+  idx,
+  installationStatus,
+  lib,
+  searchInProgress,
+}: any) {
   const dispatch = useDispatch();
+  const currentInstallations = useSelector<AppState, string[]>(
+    (state: AppState) => state.ui.customLibs.currentInstallations,
+  );
+  const skeletonClass = searchInProgress ? Classes.SKELETON : "";
+  const installationInProgress = currentInstallations.indexOf(lib.name) > -1;
   return (
     <LibraryCard key={idx}>
       <LibraryInfo>
-        <span className="lib-name">{lib.name}</span>
-        <span className="lib-desc">{lib.description}</span>
-        <span className="lib-desc">{lib.version}</span>
+        <span className={`lib-name ${skeletonClass}`}>{lib.name}</span>
+        <span className={`lib-desc ${skeletonClass}`}>{lib.description}</span>
+        <span className={`lib-version ${skeletonClass}`}>{lib.version}</span>
       </LibraryInfo>
       <LibraryActions>
         {
           {
-            [INSTALLATION_STATUS.INSTALLED]: (
+            [INSTALLATION_STATUS.INSTALLED]: !installationInProgress ? (
               <Button className="uninstall-btn" text="Uninstall" />
+            ) : (
+              "...Uninstalling"
             ),
-            [INSTALLATION_STATUS.NOT_INSTALLED]: (
+            [INSTALLATION_STATUS.NOT_INSTALLED]: !installationInProgress ? (
               <Button
-                className="install-btn"
+                className={`install-btn ${skeletonClass}`}
                 onClick={() => dispatch(initializeInstallation(lib))}
                 text="Install"
               />
+            ) : (
+              "...Installing"
             ),
-          }[installationStatus]
+          }[installationStatus as INSTALLATION_STATUS]
         }
       </LibraryActions>
     </LibraryCard>
@@ -166,66 +193,39 @@ function InstalledLibraries({ query }: { query: string }) {
               lib.name.includes(query) || lib.description?.includes(query),
           )
           .map((lib: any, idx: number) => (
-            <LibraryCard key={idx}>
-              <LibraryInfo>
-                <span className="lib-name">{lib.name}</span>
-                <span className="lib-desc">{lib.description}</span>
-                <span className="lib-desc">{lib.version}</span>
-              </LibraryInfo>
-              <LibraryActions>
-                <Button className="uninstall-btn" text="Uninstall" />
-              </LibraryActions>
-            </LibraryCard>
+            <LibraryCardComponent
+              installationStatus={INSTALLATION_STATUS.INSTALLED}
+              key={idx}
+              lib={lib}
+            />
           ))}
       </LibraryList>
     </LibraryWrapper>
   );
 }
 
-function AllLibraries({ libraries }: any) {
-  const dispatch = useDispatch();
-  const currentInstallations = useSelector(
-    (state: AppState) => state.ui.customLibs.currentInstallations,
-  );
-  const installLibrary = (lib: any) => {
-    dispatch(initializeInstallation(lib));
-  };
-
+function AllLibraries({ libraries, searchInProgress }: any) {
   const defaultLibraries = useSelector(
     (state: AppState) => state.ui.customLibs.defaultLibraries,
   );
   const additionalLibraries = useSelector(
     (state: AppState) => state.ui.customLibs.additionalLibraries,
   );
-
   const installedLibraries = defaultLibraries.concat(additionalLibraries);
-
   return (
     <LibraryWrapper>
       <LibraryList>
         {(libraries || [])
           .filter(
-            (lib: any) => !installedLibraries.find((l) => l.url === lib.url),
+            (lib: any) => !installedLibraries.find((l) => l.name === lib.name),
           )
           .map((lib: any, idx: number) => (
-            <LibraryCard key={idx}>
-              <LibraryInfo>
-                <span className="lib-name">{lib.name}</span>
-                <span className="lib-desc">{lib.description}</span>
-                <span className="lib-desc">{lib.version}</span>
-              </LibraryInfo>
-              <LibraryActions>
-                {currentInstallations.indexOf(lib.name) === -1 ? (
-                  <Button
-                    className="install-btn"
-                    onClick={() => installLibrary(lib)}
-                    text="Install"
-                  />
-                ) : (
-                  "Installing"
-                )}
-              </LibraryActions>
-            </LibraryCard>
+            <LibraryCardComponent
+              installationStatus={INSTALLATION_STATUS.NOT_INSTALLED}
+              key={idx}
+              lib={lib}
+              searchInProgress={searchInProgress}
+            />
           ))}
       </LibraryList>
     </LibraryWrapper>
@@ -235,13 +235,17 @@ function AllLibraries({ libraries }: any) {
 function CustomLibrary() {
   const [libraries, setLibraries] = useState([]),
     [query, setQuery] = useState(""),
+    [searchInProgress, setSearchInProgress] = useState(false),
     [selectedIndex, setSelectedIndex] = useState(0),
     dispatch = useDispatch();
   const handleLibSearch = useCallback(
     (e: React.ChangeEvent) => {
       const currentQuery = (e.target as HTMLInputElement).value;
       setQuery(currentQuery);
-      if (selectedIndex) searchLibrary(currentQuery);
+      if (selectedIndex) {
+        setSearchInProgress(true);
+        searchLibrary(currentQuery);
+      }
     },
     [selectedIndex],
   );
@@ -258,7 +262,11 @@ function CustomLibrary() {
         }`,
       )
         .then((res) => res.json())
-        .then((res) => setLibraries(res.results));
+        .then((res) => {
+          setSearchInProgress(false);
+          setLibraries(res.results);
+        })
+        .catch(() => setSearchInProgress(false));
     }, 300),
     [],
   );
@@ -293,7 +301,12 @@ function CustomLibrary() {
             {
               key: "all",
               title: "All",
-              panelComponent: <AllLibraries libraries={libraries} />,
+              panelComponent: (
+                <AllLibraries
+                  libraries={libraries}
+                  searchInProgress={searchInProgress}
+                />
+              ),
             },
           ]}
         />

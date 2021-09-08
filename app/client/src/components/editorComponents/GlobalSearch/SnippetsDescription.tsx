@@ -39,6 +39,8 @@ import { ReactComponent as CopyIcon } from "assets/icons/menu/copy-snippet.svg";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { getTypographyByKey } from "constants/DefaultTheme";
 
+const templateRegex = /%%(.*?)%%/g;
+
 SyntaxHighlighter.registerLanguage("sql", sql);
 
 const SnippetContainer = styled.div`
@@ -150,15 +152,13 @@ const SnippetContainer = styled.div`
 `;
 
 const removeDynamicBinding = (value: string) => {
-  const regex = /{{(.*?)}}/g;
-  return value.replace(regex, function(match, capture) {
+  return value.replace(templateRegex, function(match, capture) {
     return capture;
   });
 };
 
 export const getSnippet = (snippet: string, args: any) => {
-  const regex = /{{(.*?)}}/g;
-  return snippet.replace(regex, function(match, capture) {
+  return snippet.replace(templateRegex, function(match, capture) {
     const substitution = (args[capture] || "")
       .replaceAll("{{", "")
       .replaceAll("}}", "");
