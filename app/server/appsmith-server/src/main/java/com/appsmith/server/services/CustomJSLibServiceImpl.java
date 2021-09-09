@@ -1,7 +1,11 @@
 package com.appsmith.server.services;
 
 import com.appsmith.external.models.Policy;
+import com.appsmith.server.constants.FieldName;
 import com.appsmith.server.domains.JSLib;
+import com.appsmith.server.domains.NewAction;
+import com.appsmith.server.exceptions.AppsmithError;
+import com.appsmith.server.exceptions.AppsmithException;
 import com.appsmith.server.repositories.JSLibRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
@@ -27,9 +31,24 @@ public class CustomJSLibServiceImpl extends BaseService<JSLibRepository, JSLib, 
     }
 
     @Override
+    public Mono<JSLib> create(JSLib jsLib) {
+            
+        return super.create(jsLib);
+    }
+
+    @Override
     public Mono<List<JSLib>> getJSLibsByApplicationId(String applicationId) {
         // TODO: fix ACL permission
         return repository.findByApplicationId(applicationId, null)
                 .collectList();
+    }
+
+    @Override
+    public Mono<JSLib> delete(String id) {
+        Mono<JSLib> actionMono = repository.findById(id)
+                .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.ACTION, id)));
+        return actionMono
+                .flatMap(toDelete -> repository.delete(toDelete).thenReturn(toDelete))
+                .flatMap(analyticsService::sendDeleteEvent);
     }
 }
