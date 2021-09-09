@@ -122,4 +122,14 @@ public class AssetServiceImpl implements AssetService {
         response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/png");
         return response.writeWith(Mono.just(new DefaultDataBufferFactory().wrap(bytes)));
     }
+
+    @Override
+    public Mono<Asset> createAvatarImage() {
+        System.currentTimeMillis();
+        Avatar avatar = IdenticonAvatar.newAvatarBuilder().build();
+        byte[] bytes = avatar.createAsPngBytes(System.currentTimeMillis());
+
+        Asset asset = new Asset("image/png", bytes);
+        return repository.save(asset);
+    }
 }

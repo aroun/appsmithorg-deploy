@@ -16,4 +16,6 @@ public interface AssetService {
     Mono<Void> makeImageResponse(ServerWebExchange exchange, String assetId);
 
     Mono<Void> makeAvatarImageResponse(ServerWebExchange exchange, String userId);
+
+    Mono<Asset> createAvatarImage();
 }
