@@ -218,6 +218,9 @@ public class UserDataServiceImpl extends BaseService<UserDataRepository, UserDat
     }
 
     private Mono<Void> makeProfilePhotoResponse(ServerWebExchange exchange, UserData userData) {
+        if(StringUtils.isEmpty(userData.getProfilePhotoAssetId())) {
+            return assetService.makeAvatarImageResponse(exchange, userData.getUserId());
+        }
         return Mono.justOrEmpty(userData.getProfilePhotoAssetId())
                 .flatMap(assetId -> assetService.makeImageResponse(exchange, assetId));
     }

@@ -147,6 +147,13 @@
             <version>0.7.0</version>
         </dependency>
 
+        <!-- plugin to generate a profile avatar like github -->
+        <dependency>
+            <groupId>com.talanlabs</groupId>
+            <artifactId>avatar-generator</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
         <dependency>
             <groupId>com.appsmith</groupId>
             <artifactId>appsmith-git</artifactId>
