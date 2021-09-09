@@ -87,12 +87,10 @@ public class UserServiceImpl extends BaseService<UserRepository, User, String> i
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationService userOrganizationService;
     private final RoleGraph roleGraph;
-    private final ConfigService configService;
     private final CommonConfig commonConfig;
     private final EmailConfig emailConfig;
     private final UserChangedHandler userChangedHandler;
     private final EncryptionService encryptionService;
-    private final ApplicationPageService applicationPageService;
 
     private static final String WELCOME_USER_EMAIL_TEMPLATE = "email/welcomeUserTemplate.html";
     private static final String FORGOT_PASSWORD_EMAIL_TEMPLATE = "email/forgotPasswordTemplate.html";
@@ -122,8 +120,7 @@ public class UserServiceImpl extends BaseService<UserRepository, User, String> i
                            CommonConfig commonConfig,
                            EmailConfig emailConfig,
                            UserChangedHandler userChangedHandler,
-                           EncryptionService encryptionService,
-                           ApplicationPageService applicationPageService
+                           EncryptionService encryptionService
     ) {
         super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
         this.organizationService = organizationService;
@@ -136,12 +133,10 @@ public class UserServiceImpl extends BaseService<UserRepository, User, String> i
         this.organizationRepository = organizationRepository;
         this.userOrganizationService = userOrganizationService;
         this.roleGraph = roleGraph;
-        this.configService = configService;
         this.commonConfig = commonConfig;
         this.emailConfig = emailConfig;
         this.userChangedHandler = userChangedHandler;
         this.encryptionService = encryptionService;
-        this.applicationPageService = applicationPageService;
     }
 
     @Override
