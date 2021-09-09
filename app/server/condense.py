@@ -7,7 +7,7 @@ import random
 
 name = sys.argv[1]
 version = sys.argv[2]
-dirName = "./" + name + "_" + version + "_" + str(random.randint(0, 1000000))
+dirName = name + "_" + version + "_" + str(random.randint(0, 1000000))
 
 os.makedirs(dirName)
 
@@ -21,6 +21,6 @@ try:
     condense = "/Users/sumitsum/Documents/appsmith/as13/app/tern/bin/condense"
     subprocess.call(condense + " package/*.js", shell=True)
 
-except:
-    os.chdir("/Users/sumitsum/Documents/appsmith/as13/app")
+finally:
+    os.chdir("/Users/sumitsum/Documents/appsmith/as13/app/server")
     shutil.rmtree(dirName)

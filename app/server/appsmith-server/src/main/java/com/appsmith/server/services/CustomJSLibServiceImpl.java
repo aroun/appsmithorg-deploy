@@ -7,6 +7,7 @@ import com.appsmith.server.domains.NewAction;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.exceptions.AppsmithException;
 import com.appsmith.server.repositories.JSLibRepository;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -17,6 +18,8 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Set;
 
@@ -30,9 +33,27 @@ public class CustomJSLibServiceImpl extends BaseService<JSLibRepository, JSLib, 
         super(scheduler, validator, mongoConverter, reactiveMongoTemplate, repository, analyticsService);
     }
 
+    @SneakyThrows
     @Override
     public Mono<JSLib> create(JSLib jsLib) {
-            
+        Runtime rt = Runtime.getRuntime();
+        // TODO: move this to cloud.
+        Process proc = rt.exec("/Users/sumitsum/Documents/appsmith/as13/app/server/condense.py " + jsLib.getName() +
+                " " + jsLib.getVersion());
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+        /*BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));*/
+
+        // Read the output from the command
+        //System.out.println("Here is the standard output of the command:\n");
+        String s = null;
+        String out = "";
+        while ((s = stdInput.readLine()) != null) {
+            System.out.println(s);
+            out += s;
+        }
+
+        jsLib.setAccessor(jsLib.getName());
+        jsLib.setJsonTypeDefinition(out);
         return super.create(jsLib);
     }
 
