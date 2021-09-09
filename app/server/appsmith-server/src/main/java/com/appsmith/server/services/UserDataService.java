@@ -29,6 +29,8 @@ public interface UserDataService {
 
     Mono<UserData> saveProfilePhoto(Part filePart);
 
+    Mono<UserData> generateProfilePhoto();
+
     Mono<Void> deleteProfilePhoto();
 
     Mono<Void> makeProfilePhotoResponse(ServerWebExchange exchange, String email);

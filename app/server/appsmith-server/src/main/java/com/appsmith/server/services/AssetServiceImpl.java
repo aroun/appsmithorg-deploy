@@ -8,7 +8,6 @@ import com.talanlabs.avatargenerator.Avatar;
 import com.talanlabs.avatargenerator.IdenticonAvatar;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
@@ -109,18 +108,6 @@ public class AssetServiceImpl implements AssetService {
 
                     return response.writeWith(Mono.just(new DefaultDataBufferFactory().wrap(asset.getData())));
                 });
-    }
-
-    @Override
-    public Mono<Void> makeAvatarImageResponse(ServerWebExchange exchange, String userId) {
-        ObjectId userObjectId = new ObjectId(userId);
-        Avatar avatar = IdenticonAvatar.newAvatarBuilder().build();
-        byte[] bytes = avatar.createAsPngBytes(userObjectId.getTimestamp()); // use timestamp from user id
-
-        final ServerHttpResponse response = exchange.getResponse();
-        response.setStatusCode(HttpStatus.OK);
-        response.getHeaders().set(HttpHeaders.CONTENT_TYPE, "image/png");
-        return response.writeWith(Mono.just(new DefaultDataBufferFactory().wrap(bytes)));
     }
 
     @Override

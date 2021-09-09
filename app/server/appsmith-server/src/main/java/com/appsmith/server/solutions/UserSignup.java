@@ -115,18 +115,20 @@ public class UserSignup {
                     MultiValueMap<String, String> queryParams = exchange.getRequest().getQueryParams();
                     String redirectQueryParamValue = queryParams.getFirst(REDIRECT_URL_QUERY_PARAM);
 
-                    if(StringUtils.isEmpty(redirectQueryParamValue) && !StringUtils.isEmpty(organizationId)) {
+                    if (StringUtils.isEmpty(redirectQueryParamValue) && !StringUtils.isEmpty(organizationId)) {
                         // need to create default application
                         Application application = new Application();
                         application.setOrganizationId(organizationId);
                         application.setName("My first application");
                         return applicationPageService.createApplication(application).flatMap(createdApplication ->
                                 authenticationSuccessHandler
-                                .onAuthenticationSuccess(webFilterExchange, authentication, createdApplication, true)
-                                .thenReturn(savedUser));
+                                        .onAuthenticationSuccess(webFilterExchange, authentication, createdApplication, true)
+                                        .then(userDataService.generateProfilePhoto())
+                                        .thenReturn(savedUser));
                     }
                     return authenticationSuccessHandler
                             .onAuthenticationSuccess(webFilterExchange, authentication, null, true)
+                            .then(userDataService.generateProfilePhoto())
                             .thenReturn(savedUser);
                 });
     }
