@@ -1,10 +1,8 @@
-import { FetchApplicationPayload } from "actions/applicationActions";
 import {
   installationFailed,
   installationSuccessful,
 } from "actions/cutomLibsActions";
 import { ApiResponse } from "api/ApiResponses";
-import ApplicationApi from "api/ApplicationApi";
 import CustomLibsApi from "api/CustomLibsApi";
 import { Variant } from "components/ads/common";
 import { Toaster } from "components/ads/Toast";
@@ -45,7 +43,10 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
           yield put(installationSuccessful(libs[i]));
           if (libs[i].jsonTypeDefinition) {
             try {
-              TernServer.updateDef(libs[i].name, libs[i].jsonTypeDefinition);
+              TernServer.updateDef(
+                libs[i].name,
+                JSON.parse(libs[i].jsonTypeDefinition),
+              );
             } catch (e) {
               Toaster.show({
                 text: `Autocomplete might not work properly for ${libs[i].name}`,
@@ -85,7 +86,10 @@ function* installLibrarySaga(action: ReduxAction<any>) {
       const isValid: boolean = yield call(validateResponse, response);
       if (isValid) {
         try {
-          TernServer.updateDef(lib.name, response.data.jsonTypeDefinition);
+          TernServer.updateDef(
+            lib.name,
+            JSON.parse(response.data.jsonTypeDefinition),
+          );
         } catch (error) {
           Toaster.show({
             text: "Autocomplete might not work properly",
