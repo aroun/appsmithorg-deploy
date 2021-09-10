@@ -80,7 +80,7 @@ function* installLibrarySaga(action: ReduxAction<any>) {
       const response: ApiResponse = yield call(
         CustomLibsApi.installLibrary,
         applicationId,
-        lib,
+        { ...lib, url: lib.latest },
       );
       const isValid: boolean = yield call(validateResponse, response);
       if (isValid) {
