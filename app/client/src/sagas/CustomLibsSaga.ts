@@ -5,6 +5,7 @@ import {
 } from "actions/cutomLibsActions";
 import { ApiResponse } from "api/ApiResponses";
 import ApplicationApi from "api/ApplicationApi";
+import CustomLibsApi from "api/CustomLibsApi";
 import { Variant } from "components/ads/common";
 import { Toaster } from "components/ads/Toast";
 import {
@@ -22,7 +23,6 @@ import {
 } from "redux-saga/effects";
 import { getCurrentApplicationId } from "selectors/editorSelectors";
 import TernServer from "utils/autocomplete/TernServer";
-import ExtraLibraryClass from "utils/ExtraLibrary";
 import { validateResponse } from "./ErrorSagas";
 import { updateLibrariesSaga } from "./EvaluationsSaga";
 
@@ -30,7 +30,7 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
   const applicationId = action.payload.applicationId;
   try {
     const response: ApiResponse = yield call(
-      ApplicationApi.fetchAppLibraries,
+      CustomLibsApi.fetchAppLibraries,
       applicationId,
     );
     const isValid: boolean = yield call(validateResponse, response);
@@ -40,9 +40,19 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
         const installationOnWorker: {
           isLoaded: boolean;
           error?: string;
-        } = yield call(updateLibrariesSaga, libs[i].latest);
-        if (installationOnWorker.isLoaded && libs[i].jsonTypeDefinition) {
-          TernServer.updateDef("dayjs", libs[i].jsonTypeDefinition);
+        } = yield call(updateLibrariesSaga, libs[i].url);
+        if (installationOnWorker.isLoaded) {
+          yield put(installationSuccessful(libs[i]));
+          if (libs[i].jsonTypeDefinition) {
+            try {
+              TernServer.updateDef(libs[i].name, libs[i].jsonTypeDefinition);
+            } catch (e) {
+              Toaster.show({
+                text: `Autocomplete might not work properly for ${libs[i].name}`,
+                variant: Variant.info,
+              });
+            }
+          }
         }
       }
     }
@@ -68,7 +78,7 @@ function* installLibrarySaga(action: ReduxAction<any>) {
     } = yield call(updateLibrariesSaga, lib.latest);
     if (installationOnWorker.isLoaded) {
       const response: ApiResponse = yield call(
-        ApplicationApi.installLibrary,
+        CustomLibsApi.installLibrary,
         applicationId,
         lib,
       );

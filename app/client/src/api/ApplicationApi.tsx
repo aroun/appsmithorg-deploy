@@ -4,8 +4,6 @@ import { AxiosPromise } from "axios";
 import { AppColorCode } from "constants/DefaultTheme";
 import { AppIconName } from "components/ads/AppIcon";
 import { AppLayoutConfig } from "reducers/entityReducers/pageListReducer";
-import dayjs from "./dayjs.json";
-import d3 from "./d3.json";
 
 export interface PublishApplicationRequest {
   applicationId: string;
@@ -159,50 +157,6 @@ class ApplicationApi extends Api {
     applicationId: string,
   ): AxiosPromise<FetchApplicationResponse> {
     return Api.get(ApplicationApi.baseURL + applicationId);
-  }
-
-  static installLibrary(application: string, lib: any): Promise<ApiResponse> {
-    return Promise.resolve({
-      responseMeta: {
-        status: 200,
-        success: true,
-      },
-      data: {
-        name: "underscore",
-        jsonTypeDefinition: "",
-      },
-    });
-  }
-
-  static fetchAppLibraries(applicationId: string): Promise<ApiResponse> {
-    const libs = [
-      {
-        name: "dayjs",
-        latest:
-          "https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.6/dayjs.min.js",
-        filename: "dayjs.min.js",
-        description: "A JavaScript visualization library for HTML and SVG.",
-        version: "7.0.1",
-        jsonTypeDefinition: dayjs,
-      },
-      {
-        name: "react-dom",
-        latest:
-          "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.0.0-alpha-1314299c7-20210901/umd/react-dom.production.min.js",
-        filename: "react-dom.production.min.js",
-        description: "Promise based HTTP client for the browser and node.js",
-        version: "0.21.1",
-        jsonTypeDefinition: d3,
-      },
-    ];
-    return Promise.resolve({
-      responseMeta: {
-        status: 200,
-        success: true,
-      },
-      data: libs,
-    });
-    // return Api.get(ApplicationApi.baseURL + applicationId + "/libraries");
   }
 
   static fetchApplicationForViewMode(

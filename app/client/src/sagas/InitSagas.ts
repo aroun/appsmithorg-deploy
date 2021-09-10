@@ -126,13 +126,13 @@ function* initializeEditorSaga(
       ],
     );
     if (!applicationAndLayoutCalls) return;
-    const jsActionsCall = yield failFastApiCalls(
-      [fetchJSCollections(applicationId)],
-      [ReduxActionTypes.FETCH_JS_ACTIONS_SUCCESS],
-      [ReduxActionErrorTypes.FETCH_JS_ACTIONS_ERROR],
-    );
+    // const jsActionsCall = yield failFastApiCalls(
+    //   [fetchJSCollections(applicationId)],
+    //   [ReduxActionTypes.FETCH_JS_ACTIONS_SUCCESS],
+    //   [ReduxActionErrorTypes.FETCH_JS_ACTIONS_ERROR],
+    // );
 
-    if (!jsActionsCall) return;
+    // if (!jsActionsCall) return;
     const pluginsAndDatasourcesCalls = yield failFastApiCalls(
       [fetchPlugins(), fetchDatasources(), fetchMockDatasources()],
       [
