@@ -38,8 +38,9 @@ public class CustomJSLibServiceImpl extends BaseService<JSLibRepository, JSLib, 
     public Mono<JSLib> create(JSLib jsLib) {
         Runtime rt = Runtime.getRuntime();
         // TODO: move this to cloud.
-        Process proc = rt.exec("/Users/sumitsum/Documents/appsmith/as13/app/server/condense.py " + jsLib.getName() +
+        Process proc = rt.exec("/test/condense.py " + jsLib.getName() +
                 " " + jsLib.getVersion());
+        //Process proc = rt.exec("ls /test/");
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
         /*BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));*/
 
