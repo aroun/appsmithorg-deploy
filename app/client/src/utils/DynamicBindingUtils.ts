@@ -10,7 +10,6 @@ import {
   getEntityNameAndPropertyPath,
   isJSAction,
 } from "workers/evaluationUtils";
-import forge from "node-forge";
 import { DataTreeEntity } from "entities/DataTree/dataTreeFactory";
 
 export type DependencyMap = Record<string, Array<string>>;
@@ -143,6 +142,7 @@ export enum EVAL_WORKER_ACTIONS {
   EVAL_EXPRESSION = "EVAL_EXPRESSION",
   IMPORT_SCRIPT = "IMPORT_SCRIPT",
   UPDATE_LIBRARIES = "UPDATE_LIBRARIES",
+  REMOVE_LIBRARY = "REMOVE_LIBRARY",
 }
 export interface DynamicPath {
   key: string;

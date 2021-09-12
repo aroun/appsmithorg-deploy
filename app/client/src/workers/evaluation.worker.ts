@@ -20,6 +20,7 @@ import {
 } from "./evaluationUtils";
 import DataTreeEvaluator from "workers/DataTreeEvaluator";
 import evaluate from "workers/evaluate";
+import difference from "lodash/difference";
 
 const ctx: Worker = self as any;
 
@@ -269,11 +270,20 @@ ctx.addEventListener(
       case EVAL_WORKER_ACTIONS.UPDATE_LIBRARIES:
         const { libs } = requestData;
         try {
+          const currentSelf = Object.keys(self);
           importScripts(libs);
-          return { isLoaded: true };
+          const namespace = difference(Object.keys(self), currentSelf)[0];
+          return { isLoaded: true, namespace };
         } catch (e) {
           return { error: e.message, isLoaded: false };
         }
+      case EVAL_WORKER_ACTIONS.REMOVE_LIBRARY: {
+        const { libs } = requestData;
+        libs.forEach((lib: any) => {
+          delete self[lib.accessor];
+        });
+        break;
+      }
       default: {
         console.error("Action not registered on worker", method);
       }

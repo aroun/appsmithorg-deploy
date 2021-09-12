@@ -4,11 +4,12 @@ import { Collapse, Icon, IconName, Tooltip } from "@blueprintjs/core";
 import { IconNames } from "@blueprintjs/icons";
 import { Colors } from "constants/Colors";
 import { BindingText } from "pages/Editor/APIEditor/Form";
-import customLibraries from "utils/ExtraLibrary";
 import { ControlIcons } from "icons/ControlIcons";
 import { useDispatch } from "react-redux";
 import { toggleShowGlobalSearchModal } from "actions/globalSearchActions";
 import { filterCategories } from "components/editorComponents/GlobalSearch/utils";
+import { useSelector } from "store";
+import { AppState } from "reducers";
 const PlusIcon = ControlIcons.INCREASE_CONTROL;
 
 const Wrapper = styled.div`
@@ -77,9 +78,14 @@ const IconWrapper = styled.div`
 export function JSDependencies() {
   const [isOpen, setIsOpen] = useState(false);
   const openDocs = (name: string, url: string) => () => window.open(url, name);
-  const dependencyList = customLibraries
-    .getInstance()
-    .getLibraries()
+  const defaultLibraries = useSelector(
+    (state: AppState) => state.ui.customLibs.defaultLibraries,
+  );
+  const additionalLibraries = useSelector(
+    (state: AppState) => state.ui.customLibs.additionalLibraries,
+  );
+  const dependencyList = defaultLibraries
+    .concat(additionalLibraries)
     .map((lib) => {
       return (
         <ListItem key={lib.name} onClick={openDocs(lib.name, lib.docsURL)}>

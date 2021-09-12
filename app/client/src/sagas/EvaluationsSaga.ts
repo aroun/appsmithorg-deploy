@@ -397,11 +397,17 @@ export function* evaluateArgumentSaga(action: any) {
   }
 }
 
-export function* updateLibrariesSaga(libs: any) {
+export function* addRemoveLibrariesSaga(libs: any, remove = false) {
   try {
-    const workerResponse: { isLoaded: boolean; error?: string } = yield call(
+    const workerResponse: {
+      isLoaded: boolean;
+      error?: string;
+      namespace?: string;
+    } = yield call(
       worker.request,
-      EVAL_WORKER_ACTIONS.UPDATE_LIBRARIES,
+      remove
+        ? EVAL_WORKER_ACTIONS.REMOVE_LIBRARY
+        : EVAL_WORKER_ACTIONS.UPDATE_LIBRARIES,
       {
         libs,
       },

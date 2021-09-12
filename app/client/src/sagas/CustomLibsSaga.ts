@@ -1,6 +1,8 @@
 import {
   installationFailed,
   installationSuccessful,
+  unInstallationFailed,
+  unInstallationSuccessful,
 } from "actions/cutomLibsActions";
 import { ApiResponse } from "api/ApiResponses";
 import CustomLibsApi from "api/CustomLibsApi";
@@ -22,7 +24,7 @@ import {
 import { getCurrentApplicationId } from "selectors/editorSelectors";
 import TernServer from "utils/autocomplete/TernServer";
 import { validateResponse } from "./ErrorSagas";
-import { updateLibrariesSaga } from "./EvaluationsSaga";
+import { addRemoveLibrariesSaga } from "./EvaluationsSaga";
 
 export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
   const applicationId = action.payload.applicationId;
@@ -38,8 +40,10 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
         const installationOnWorker: {
           isLoaded: boolean;
           error?: string;
-        } = yield call(updateLibrariesSaga, libs[i].url);
+          namespace?: string;
+        } = yield call(addRemoveLibrariesSaga, libs[i].url);
         if (installationOnWorker.isLoaded) {
+          libs[i].accessor = installationOnWorker.namespace;
           yield put(installationSuccessful(libs[i]));
           if (libs[i].jsonTypeDefinition) {
             try {
@@ -50,14 +54,13 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
             } catch (e) {
               Toaster.show({
                 text: `Autocomplete might not work properly for ${libs[i].name}`,
-                variant: Variant.info,
+                variant: Variant.warning,
               });
             }
           }
         }
       }
     }
-    return true;
   } catch (error) {
     yield put({
       type: ReduxActionErrorTypes.FETCH_LIBRARY_ERROR,
@@ -70,37 +73,41 @@ export function* fetchAppLibrariesSaga(action: ReduxAction<any>) {
 
 function* installLibrarySaga(action: ReduxAction<any>) {
   const lib = action.payload;
+  lib.url = lib.latest;
   const applicationId: string = yield select(getCurrentApplicationId);
   //Save library and trigger definition generator;
   try {
     const installationOnWorker: {
       isLoaded: boolean;
       error?: string;
-    } = yield call(updateLibrariesSaga, lib.latest);
+      namespace?: string;
+    } = yield call(addRemoveLibrariesSaga, lib.latest);
     if (installationOnWorker.isLoaded) {
       const response: ApiResponse = yield call(
         CustomLibsApi.installLibrary,
         applicationId,
-        { ...lib, url: lib.latest },
+        lib,
       );
       const isValid: boolean = yield call(validateResponse, response);
       if (isValid) {
+        const responseLib = response.data;
+        responseLib.accessor = installationOnWorker.namespace;
         try {
           TernServer.updateDef(
             lib.name,
-            JSON.parse(response.data.jsonTypeDefinition),
+            JSON.parse(responseLib.jsonTypeDefinition),
           );
         } catch (error) {
           Toaster.show({
             text: "Autocomplete might not work properly",
-            variant: Variant.info,
+            variant: Variant.warning,
           });
         }
         Toaster.show({
           text: `${lib.name} installed successfully`,
           variant: Variant.success,
         });
-        yield put(installationSuccessful(lib));
+        yield put(installationSuccessful(responseLib));
       } else {
         yield put(installationFailed(lib));
       }
@@ -116,9 +123,37 @@ function* installLibrarySaga(action: ReduxAction<any>) {
   }
 }
 
+function* uninstallLibrary(action: ReduxAction<any>) {
+  const lib = action.payload;
+  try {
+    const response: ApiResponse = yield call(
+      CustomLibsApi.uninstallLibrary,
+      lib,
+    );
+    const isValid: boolean = yield call(validateResponse, response);
+    if (isValid) {
+      const workerTask: {
+        isLoaded: boolean;
+        error?: string;
+        namespace?: string;
+      } = yield call(addRemoveLibrariesSaga, [lib], true);
+      yield put(unInstallationSuccessful(lib.id));
+      Toaster.show({
+        text: `${lib.name} uninstalled successfully`,
+        variant: Variant.success,
+      });
+    } else {
+      yield put(unInstallationFailed(lib));
+    }
+  } catch (e) {
+    yield put(unInstallationFailed(lib));
+  }
+}
+
 export default function* customLibsSaga() {
   yield all([
     takeLatest(ReduxActionTypes.FETCH_APP_LIB_INIT, fetchAppLibrariesSaga),
     takeEvery(ReduxActionTypes.LIB_INSTALL_INIT, installLibrarySaga),
+    takeEvery(ReduxActionTypes.LIB_UNINSTALL_INIT, uninstallLibrary),
   ]);
 }

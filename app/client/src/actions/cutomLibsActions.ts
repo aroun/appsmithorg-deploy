@@ -28,6 +28,16 @@ export const initializeUnInstallation = (payload: any) => ({
   payload,
 });
 
+export const unInstallationSuccessful = (payload: any) => ({
+  type: ReduxActionTypes.LIB_UNINSTALL_SUCCESS,
+  payload,
+});
+
+export const unInstallationFailed = (payload: any) => ({
+  type: ReduxActionErrorTypes.LIB_UNINSTALL_ERROR,
+  payload,
+});
+
 export const initializeUpdate = (payload: any) => ({
   type: ReduxActionTypes.LIB_UPDATE_INIT,
   payload,

@@ -4,7 +4,10 @@ import {
   PropertyEvaluationErrorType,
   unsafeFunctionForEval,
 } from "utils/DynamicBindingUtils";
-import customLibraries, { ExtraLibrary } from "utils/ExtraLibrary";
+import customLibraries, {
+  defaultLibraries,
+  ExtraLibrary,
+} from "utils/ExtraLibrary";
 import unescapeJS from "unescape-js";
 import { JSHINT as jshint } from "jshint";
 import { Severity } from "entities/AppsmithConsole";
@@ -150,7 +153,7 @@ export default function evaluate(
       });
     }
 
-    ((self as any).customLibs || []).forEach((lib: ExtraLibrary) => {
+    defaultLibraries.forEach((lib: ExtraLibrary) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: No types available
       self[lib.accessor] = lib.lib;

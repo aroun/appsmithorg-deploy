@@ -1,4 +1,7 @@
-import { initializeInstallation } from "actions/cutomLibsActions";
+import {
+  initializeInstallation,
+  initializeUnInstallation,
+} from "actions/cutomLibsActions";
 import Button from "components/ads/Button";
 import { TabComponent } from "components/ads/Tabs";
 import { debounce } from "lodash";
@@ -12,8 +15,10 @@ import styled from "styled-components";
 import { ReactComponent as ChevronLeft } from "assets/icons/ads/chevron_left.svg";
 import { setGlobalSearchFilterContext } from "actions/globalSearchActions";
 import { SEARCH_CATEGORY_ID } from "../GlobalSearch/utils";
-import { ExtraLibrary } from "utils/ExtraLibrary";
 import { Classes } from "@blueprintjs/core";
+import { ExtraLibrary } from "utils/ExtraLibrary";
+import { CDNJSLibrary } from "api/CustomLibsApi";
+import { getTypographyByKey } from "constants/DefaultTheme";
 
 const LibraryContainer = styled.div`
   background: white;
@@ -76,13 +81,27 @@ const LibraryInfo = styled.div`
   flex-direction: column;
   > * {
     margin: 3px 0;
+    ${(props) => getTypographyByKey(props, "p3")}
   }
   .lib-name {
     font-size: 14px;
   }
-  .lib-desc,
+  .lib-desc {
+    color: #4b4848;
+  }
   .lib-version {
-    font-size: 12px;
+    color: #090707;
+  }
+  .lib-homepage {
+    color: #716e6e;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+  .in-progress {
+    ${(props) => getTypographyByKey(props, "p3")}
+    font-weight: 600;
+    color: #716e6e;
   }
 `;
 
@@ -91,6 +110,7 @@ const LibraryActions = styled.div`
   flex-shrink: 0;
   > * {
     margin: 0 5px;
+    height: 30px;
   }
   .uninstall-btn {
     background: #f22b2b;
@@ -120,25 +140,28 @@ const LibraryHeader = styled.div`
 const LibraryWrapper = styled.div`
   padding: 10px 15px 10px 0;
   margin-top: 2px;
-  border-top: 1px solid #ebebeb;
 `;
 
 const FlexWrapper = styled.div`
   flex-grow: 1;
   overflow: auto;
+  .react-tabs__tab-list {
+    border-bottom: 1px solid #f0f0f0;
+  }
 `;
 
-enum INSTALLATION_STATUS {
-  INSTALLED,
-  NOT_INSTALLED,
+type libraryCardProps = {
+  lib: ExtraLibrary | CDNJSLibrary;
+  searchInProgress?: boolean;
+};
+
+function isCDNLibrary(
+  value: ExtraLibrary | CDNJSLibrary,
+): value is CDNJSLibrary {
+  return value.hasOwnProperty("latest");
 }
 
-function LibraryCardComponent({
-  idx,
-  installationStatus,
-  lib,
-  searchInProgress,
-}: any) {
+function LibraryCardComponent({ lib, searchInProgress }: libraryCardProps) {
   const dispatch = useDispatch();
   const currentInstallations = useSelector<AppState, string[]>(
     (state: AppState) => state.ui.customLibs.currentInstallations,
@@ -146,44 +169,62 @@ function LibraryCardComponent({
   const skeletonClass = searchInProgress ? Classes.SKELETON : "";
   const installationInProgress = currentInstallations.indexOf(lib.name) > -1;
   return (
-    <LibraryCard key={idx}>
+    <LibraryCard>
       <LibraryInfo>
         <span className={`lib-name ${skeletonClass}`}>{lib.name}</span>
+        <span
+          className={`lib-homepage ${skeletonClass}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            window.open(
+              isCDNLibrary(lib) ? lib.homepage : lib.docsURL,
+              "_blank",
+            );
+          }}
+        >
+          {lib.name}
+        </span>
         <span className={`lib-desc ${skeletonClass}`}>{lib.description}</span>
         <span className={`lib-version ${skeletonClass}`}>{lib.version}</span>
       </LibraryInfo>
       <LibraryActions>
-        {
-          {
-            [INSTALLATION_STATUS.INSTALLED]: !installationInProgress ? (
-              <Button className="uninstall-btn" text="Uninstall" />
-            ) : (
-              "...Uninstalling"
-            ),
-            [INSTALLATION_STATUS.NOT_INSTALLED]: !installationInProgress ? (
-              <Button
-                className={`install-btn ${skeletonClass}`}
-                onClick={() => dispatch(initializeInstallation(lib))}
-                text="Install"
-              />
-            ) : (
-              "...Installing"
-            ),
-          }[installationStatus as INSTALLATION_STATUS]
-        }
+        {isCDNLibrary(lib) &&
+          (installationInProgress ? (
+            <span className="in-progress">...INSTALLING</span>
+          ) : (
+            <Button
+              className={`install-btn ${skeletonClass}`}
+              onClick={() => dispatch(initializeInstallation(lib))}
+              text="Install"
+            />
+          ))}
+        {!isCDNLibrary(lib) &&
+          (!lib.id ? (
+            ""
+          ) : installationInProgress ? (
+            "...Uninstalling"
+          ) : (
+            <Button
+              className="uninstall-btn"
+              onClick={() => dispatch(initializeUnInstallation(lib))}
+              text="Uninstall"
+            />
+          ))}
       </LibraryActions>
     </LibraryCard>
   );
 }
 
 function InstalledLibraries({ query }: { query: string }) {
-  const defaultLibraries = useSelector(
+  const defaultLibraries: ExtraLibrary[] = useSelector(
     (state: AppState) => state.ui.customLibs.defaultLibraries,
   );
-  const additionalLibraries = useSelector(
+  const additionalLibraries: ExtraLibrary[] = useSelector(
     (state: AppState) => state.ui.customLibs.additionalLibraries,
   );
-  const allLibraries = defaultLibraries.concat(additionalLibraries);
+  const allLibraries: ExtraLibrary[] = defaultLibraries.concat(
+    additionalLibraries,
+  );
   return (
     <LibraryWrapper>
       <LibraryList>
@@ -193,22 +234,24 @@ function InstalledLibraries({ query }: { query: string }) {
               lib.name.includes(query) || lib.description?.includes(query),
           )
           .map((lib: any, idx: number) => (
-            <LibraryCardComponent
-              installationStatus={INSTALLATION_STATUS.INSTALLED}
-              key={idx}
-              lib={lib}
-            />
+            <LibraryCardComponent key={idx} lib={lib} />
           ))}
       </LibraryList>
     </LibraryWrapper>
   );
 }
 
-function AllLibraries({ libraries, searchInProgress }: any) {
-  const defaultLibraries = useSelector(
+function AllLibraries({
+  libraries,
+  searchInProgress,
+}: {
+  libraries: CDNJSLibrary[];
+  searchInProgress: boolean;
+}) {
+  const defaultLibraries: ExtraLibrary[] = useSelector(
     (state: AppState) => state.ui.customLibs.defaultLibraries,
   );
-  const additionalLibraries = useSelector(
+  const additionalLibraries: ExtraLibrary[] = useSelector(
     (state: AppState) => state.ui.customLibs.additionalLibraries,
   );
   const installedLibraries = defaultLibraries.concat(additionalLibraries);
@@ -221,7 +264,6 @@ function AllLibraries({ libraries, searchInProgress }: any) {
           )
           .map((lib: any, idx: number) => (
             <LibraryCardComponent
-              installationStatus={INSTALLATION_STATUS.NOT_INSTALLED}
               key={idx}
               lib={lib}
               searchInProgress={searchInProgress}
@@ -257,8 +299,8 @@ function CustomLibrary() {
   const searchLibrary = useCallback(
     debounce((query) => {
       fetch(
-        `https://api.cdnjs.com/libraries?fields=filename,description,version&limit=50${
-          query ? `&search=${query}` : ""
+        `https://api.cdnjs.com/libraries?fields=description,version,homepage&search_fields=name,description&limit=25&search=${
+          query ? query : "date library"
         }`,
       )
         .then((res) => res.json())
@@ -275,7 +317,7 @@ function CustomLibrary() {
     <LibraryContainer>
       <LibraryHeader>
         <ChevronLeft
-          onClick={(e) =>
+          onClick={() =>
             dispatch(
               setGlobalSearchFilterContext({
                 category: { id: SEARCH_CATEGORY_ID.INIT },

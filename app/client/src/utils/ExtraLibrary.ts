@@ -11,8 +11,10 @@ export type ExtraLibrary = {
   description?: string;
   accessor: string;
   lib: any;
+  id?: string;
 };
 
+//To-do: Remove this code
 class ExtraLibraryClass {
   private static instance: ExtraLibraryClass;
   private libraries: ExtraLibrary[];
