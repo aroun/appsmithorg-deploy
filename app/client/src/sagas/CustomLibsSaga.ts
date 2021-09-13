@@ -132,11 +132,7 @@ function* uninstallLibrary(action: ReduxAction<any>) {
     );
     const isValid: boolean = yield call(validateResponse, response);
     if (isValid) {
-      const workerTask: {
-        isLoaded: boolean;
-        error?: string;
-        namespace?: string;
-      } = yield call(addRemoveLibrariesSaga, [lib], true);
+      yield call(addRemoveLibrariesSaga, [lib], true);
       yield put(unInstallationSuccessful(lib.id));
       Toaster.show({
         text: `${lib.name} uninstalled successfully`,
