@@ -29,12 +29,16 @@ import {
   fetchMockDatasources,
 } from "actions/datasourceActions";
 import { fetchPluginFormConfigs, fetchPlugins } from "actions/pluginActions";
+import { fetchJSCollections } from "actions/jsActionActions";
 import {
   executePageLoadActions,
   fetchActions,
   fetchActionsForView,
 } from "actions/pluginActionActions";
-import { fetchApplication } from "actions/applicationActions";
+import {
+  fetchAppLibraries,
+  fetchApplication,
+} from "actions/applicationActions";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { getCurrentApplication } from "selectors/applicationSelectors";
 import { APP_MODE } from "entities/App";
@@ -53,6 +57,8 @@ import PerformanceTracker, {
 } from "utils/PerformanceTracker";
 import { getIsEditorInitialized } from "selectors/editorSelectors";
 import { getIsInitialized as getIsViewerInitialized } from "selectors/appViewSelectors";
+import { fetchCommentThreadsInit } from "actions/commentActions";
+import { fetchJSCollectionsForView } from "actions/jsActionActions";
 
 function* failFastApiCalls(
   triggerActions: Array<ReduxAction<unknown> | ReduxActionWithoutPayload>,
@@ -98,10 +104,12 @@ function* initializeEditorSaga(
     );
     yield put(setAppMode(APP_MODE.EDIT));
     yield put(updateAppPersistentStore(getPersistentAppStore(applicationId)));
+
     yield put({ type: ReduxActionTypes.START_EVALUATION });
 
     const applicationAndLayoutCalls = yield failFastApiCalls(
       [
+        fetchAppLibraries(applicationId),
         fetchPageList(applicationId, APP_MODE.EDIT),
         fetchPage(pageId, true),
         fetchApplication(applicationId, APP_MODE.EDIT),
@@ -118,7 +126,13 @@ function* initializeEditorSaga(
       ],
     );
     if (!applicationAndLayoutCalls) return;
+    const jsActionsCall = yield failFastApiCalls(
+      [fetchJSCollections(applicationId)],
+      [ReduxActionTypes.FETCH_JS_ACTIONS_SUCCESS],
+      [ReduxActionErrorTypes.FETCH_JS_ACTIONS_ERROR],
+    );
 
+    if (!jsActionsCall) return;
     const pluginsAndDatasourcesCalls = yield failFastApiCalls(
       [fetchPlugins(), fetchDatasources(), fetchMockDatasources()],
       [
@@ -155,6 +169,8 @@ function* initializeEditorSaga(
     const appId = currentApplication ? currentApplication.id : "";
 
     yield put(restoreRecentEntitiesRequest(applicationId));
+
+    yield put(fetchCommentThreadsInit());
 
     AnalyticsUtil.logEvent("EDITOR_OPEN", {
       appId: appId,
@@ -194,6 +210,7 @@ export function* initializeAppViewerSaga(
   yield put({ type: ReduxActionTypes.START_EVALUATION });
   yield all([
     // TODO (hetu) Remove spl view call for fetch actions
+    put(fetchAppLibraries(applicationId)),
     put(fetchActionsForView(applicationId)),
     put(fetchPageList(applicationId, APP_MODE.PUBLISHED)),
     put(fetchApplication(applicationId, APP_MODE.PUBLISHED)),
@@ -251,7 +268,17 @@ export function* initializeAppViewerSaga(
       return;
     }
 
+    const jsActionsCall = yield failFastApiCalls(
+      [fetchJSCollectionsForView(applicationId)],
+      [ReduxActionTypes.FETCH_JS_ACTIONS_VIEW_MODE_SUCCESS],
+      [ReduxActionErrorTypes.FETCH_JS_ACTIONS_VIEW_MODE_ERROR],
+    );
+
+    if (!jsActionsCall) return;
+
     yield put(setAppMode(APP_MODE.PUBLISHED));
+
+    yield put(fetchCommentThreadsInit());
 
     yield put({
       type: ReduxActionTypes.INITIALIZE_PAGE_VIEWER_SUCCESS,

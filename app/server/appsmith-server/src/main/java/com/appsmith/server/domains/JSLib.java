@@ -41,7 +41,7 @@ public class JSLib extends BaseDomain {
     String jsonTypeDefinition;
 
     /**
-     * -To persist a collection of JS libraries that cannot be supported for various reasons.
+     * - In case a library cannot be supported for any reason.
      * - By default, we assume all libraries are supported.
      */
     Boolean isSupported = true;

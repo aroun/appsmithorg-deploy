@@ -4,10 +4,7 @@ import {
   ReduxActionErrorTypes,
   ReduxActionTypes,
 } from "constants/ReduxActionConstants";
-import ExtraLibraryClass, {
-  defaultLibraries,
-  ExtraLibrary,
-} from "utils/ExtraLibrary";
+import { defaultLibraries, ExtraLibrary } from "utils/ExtraLibrary";
 
 export type CustomLibsReduxState = {
   defaultLibraries: ExtraLibrary[];
@@ -45,7 +42,7 @@ const customLibsReducer = createReducer(initialState, {
   ) => ({
     ...state,
     additionalLibraries: state.additionalLibraries.filter(
-      (lib: ExtraLibrary) => lib.accessor !== action.payload,
+      (lib: ExtraLibrary) => lib.id !== action.payload,
     ),
   }),
   [ReduxActionErrorTypes.LIB_INSTALL_ERROR]: (

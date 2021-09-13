@@ -1,18 +1,15 @@
 package com.appsmith.server.controllers;
 
-import com.appsmith.external.models.DatasourceStructure;
 import com.appsmith.server.constants.Url;
 import com.appsmith.server.domains.JSLib;
 import com.appsmith.server.dtos.ResponseDTO;
 import com.appsmith.server.services.CustomJSLibService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 

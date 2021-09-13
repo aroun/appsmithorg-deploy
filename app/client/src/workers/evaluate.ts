@@ -4,12 +4,16 @@ import {
   PropertyEvaluationErrorType,
   unsafeFunctionForEval,
 } from "utils/DynamicBindingUtils";
-import customLibraries, { ExtraLibrary } from "utils/ExtraLibrary";
+import customLibraries, {
+  defaultLibraries,
+  ExtraLibrary,
+} from "utils/ExtraLibrary";
 import unescapeJS from "unescape-js";
 import { JSHINT as jshint } from "jshint";
 import { Severity } from "entities/AppsmithConsole";
 import { AppsmithPromise, enhanceDataTreeWithFunctions } from "./Actions";
 import { ActionDescription } from "entities/DataTree/actionTriggers";
+import { isEmpty } from "lodash";
 
 export type EvalResult = {
   result: any;
@@ -45,6 +49,7 @@ const evaluationScripts: Record<
   [EvaluationScriptType.TRIGGERS]: (script) => `
   function closedFunction () {
     const result = ${script};
+    return result;
   }
   closedFunction();
   `,
@@ -115,6 +120,7 @@ const beginsWithLineBreakRegex = /^\s+|\s+$/;
 export default function evaluate(
   js: string,
   data: DataTree,
+  resolvedFunctions: Record<string, any>,
   evalArguments?: Array<any>,
   isTriggerBased = false,
   extraLibraries = customLibraries.getInstance().getLibraries(),
@@ -147,7 +153,7 @@ export default function evaluate(
       });
     }
 
-    ((self as any).customLibs || []).forEach((lib: ExtraLibrary) => {
+    defaultLibraries.forEach((lib: ExtraLibrary) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: No types available
       self[lib.accessor] = lib.lib;
@@ -156,12 +162,28 @@ export default function evaluate(
     // Set it to self so that the eval function can have access to it
     // as global data. This is what enables access all appsmith
     // entity properties from the global context
+
     Object.keys(GLOBAL_DATA).forEach((key) => {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore: No types available
       self[key] = GLOBAL_DATA[key];
     });
-    errors = getLintingErrors(script, GLOBAL_DATA, unescapedJS);
+
+    if (!isEmpty(resolvedFunctions)) {
+      Object.keys(resolvedFunctions).forEach((datum: any) => {
+        const resolvedObject = resolvedFunctions[datum];
+        Object.keys(resolvedObject).forEach((key: any) => {
+          self[datum][key] = resolvedObject[key];
+        });
+      });
+    }
+
+    errors = getLintingErrors(
+      script,
+      (self as unknown) as Record<string, unknown>,
+      unescapedJS,
+    );
+    // errors = getLintingErrors(script, GLOBAL_DATA, unescapedJS);
 
     ///// Adding extra libraries separately
     extraLibraries.forEach((library) => {

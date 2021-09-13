@@ -7,11 +7,14 @@ export type ExtraLibrary = {
   version: string;
   docsURL: string;
   name: string;
+  url?: string;
   description?: string;
   accessor: string;
   lib: any;
+  id?: string;
 };
 
+//To-do: Remove this code
 class ExtraLibraryClass {
   private static instance: ExtraLibraryClass;
   private libraries: ExtraLibrary[];

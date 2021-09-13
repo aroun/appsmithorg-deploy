@@ -1,9 +1,7 @@
 package com.appsmith.server.services;
 
-import com.appsmith.external.models.Policy;
 import com.appsmith.server.constants.FieldName;
 import com.appsmith.server.domains.JSLib;
-import com.appsmith.server.domains.NewAction;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.exceptions.AppsmithException;
 import com.appsmith.server.repositories.JSLibRepository;
@@ -12,16 +10,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.stereotype.Service;
-import org.springframework.util.MultiValueMap;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
 import javax.validation.Validator;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Service
@@ -44,7 +37,7 @@ public class CustomJSLibServiceImpl extends BaseService<JSLibRepository, JSLib, 
 
     @Override
     public Mono<List<JSLib>> getJSLibsByApplicationId(String applicationId) {
-        // TODO: fix ACL permission
+        // TODO: fix ACL policy
         return repository.findByApplicationId(applicationId, null)
                 .collectList();
     }

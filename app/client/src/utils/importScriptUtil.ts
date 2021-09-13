@@ -32,7 +32,7 @@ export class ScriptService {
   }
 
   private loadScript(name: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       //resolve if already loaded
       if (this.scripts[name].loaded) {
         resolve({ script: name, loaded: true, status: "Already Loaded" });
@@ -47,7 +47,7 @@ export class ScriptService {
           resolve({ script: name, loaded: true, status: "Loaded" });
         };
         script.onerror = (error: any) =>
-          resolve({ script: name, loaded: false, status: "Loaded" });
+          resolve({ script: name, loaded: false, status: error });
         document.body.appendChild(script);
       }
     });
