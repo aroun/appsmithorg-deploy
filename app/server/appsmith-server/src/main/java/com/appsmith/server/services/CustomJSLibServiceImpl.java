@@ -36,25 +36,9 @@ public class CustomJSLibServiceImpl extends BaseService<JSLibRepository, JSLib, 
     @SneakyThrows
     @Override
     public Mono<JSLib> create(JSLib jsLib) {
-        Runtime rt = Runtime.getRuntime();
-        // TODO: move this to cloud.
-        Process proc = rt.exec("/test/condense.py " + jsLib.getName() +
-                " " + jsLib.getVersion());
-        //Process proc = rt.exec("ls /test/");
-        BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-        /*BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));*/
-
-        // Read the output from the command
-        //System.out.println("Here is the standard output of the command:\n");
-        String s = null;
-        String out = "";
-        while ((s = stdInput.readLine()) != null) {
-            System.out.println(s);
-            out += s;
-        }
-
-        jsLib.setAccessor(jsLib.getName());
-        jsLib.setJsonTypeDefinition(out);
+        // TODO: get type definition from cloud server and set in jsLib object.
+        // TODO: create separate copies for published and unpublished.
+        // TODO: check if need to add to analytics service. 
         return super.create(jsLib);
     }
 

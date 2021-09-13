@@ -232,6 +232,7 @@ public class SnowflakePlugin extends BasePlugin {
                                 Statement statement = connection.createStatement();
                                 final String columnsQuery = SqlUtils.COLUMNS_QUERY + "'"
                                         + datasourceConfiguration.getProperties().get(2).getValue() + "'";
+
                                 ResultSet resultSet = statement.executeQuery(columnsQuery);
 
                                 while (resultSet.next()) {
