@@ -244,7 +244,7 @@ export const StyledEditIcon = styled(
     height: 16px;
     position: relative;
     path {
-      fill: ${(props) => props.theme.colors.propertyPane.iconColor};
+      fill: ${Colors.GREY_7};
     }
   }
 `;
@@ -285,7 +285,7 @@ export const StyledDeleteIcon = styled(
     height: 16px;
     position: relative;
     path {
-      fill: ${(props) => props.theme.colors.propertyPane.iconColor};
+      fill: ${Colors.GREY_7};
     }
   }
 `;
@@ -309,7 +309,7 @@ export const StyledVisibleIcon = styled(
     height: 16px;
     position: relative;
     path {
-      fill: ${(props) => props.theme.colors.propertyPane.iconColor};
+      fill: ${Colors.GREY_7};
     }
   }
 `;
@@ -329,7 +329,7 @@ export const StyledHiddenIcon = styled(
     height: 16px;
     position: relative;
     path {
-      fill: ${(props) => props.theme.colors.propertyPane.iconColor};
+      fill: ${Colors.GREY_7};
     }
   }
 `;

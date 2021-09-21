@@ -307,7 +307,7 @@ const StyledSubText = styled(Text)<{
   &.sub-text {
     color: ${(props) => props.theme.colors.dropdown.selected.subtext};
     position: absolute;
-    right: ${(props) => (props.showDropIcon ? "39px" : "12px")};
+    right: ${(props) => (props.showDropIcon ? "28px" : "12px")};
   }
 `;
 
@@ -369,7 +369,8 @@ const SelectedIcon = styled(Icon)`
 `;
 
 const DropdownIcon = styled(Icon)`
-  margin-right: 7px;
+  margin-right: 6px;
+  margin-top: 2px;
   svg {
     path {
       fill: ${(props) =>
