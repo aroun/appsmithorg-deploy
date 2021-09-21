@@ -230,6 +230,7 @@ function GitConnection({ isImport, onSuccess, organizationId }: Props) {
       <UrlContainer>
         <UrlInputContainer>
           <TextInput
+            className="t--git-repo-input"
             disabled={remoteUrl === remoteUrlInStore && !!remoteUrl}
             fill
             onChange={remoteUrlChangeHandler}
@@ -256,6 +257,7 @@ function GitConnection({ isImport, onSuccess, organizationId }: Props) {
         <ButtonContainer topMargin={10}>
           <Button
             category={Category.secondary}
+            className="t--add-repo-submit-btn"
             disabled={!remoteUrl}
             isLoading={generatingSSHKey}
             onClick={() => generateSSHKey(currentApplicationId)}
