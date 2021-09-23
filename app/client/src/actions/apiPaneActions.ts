@@ -55,6 +55,7 @@ export const createNewApiAction = (
   payload: { pageId, from },
 });
 
+// comment that i would remove
 export const createNewQueryAction = (
   pageId: string,
   from: EventLocation,
