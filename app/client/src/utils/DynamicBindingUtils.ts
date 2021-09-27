@@ -121,6 +121,7 @@ export enum EvalErrorTypes {
   BAD_UNEVAL_TREE_ERROR = "BAD_UNEVAL_TREE_ERROR",
   EVAL_TRIGGER_ERROR = "EVAL_TRIGGER_ERROR",
   PARSE_JS_ERROR = "PARSE_JS_ERROR",
+  CLONE_ERROR = "CLONE_ERROR",
 }
 
 export type EvalError = {
@@ -137,6 +138,8 @@ export enum EVAL_WORKER_ACTIONS {
   CLEAR_PROPERTY_CACHE_OF_WIDGET = "CLEAR_PROPERTY_CACHE_OF_WIDGET",
   CLEAR_CACHE = "CLEAR_CACHE",
   VALIDATE_PROPERTY = "VALIDATE_PROPERTY",
+  UNDO = "undo",
+  REDO = "redo",
   PARSE_JS_FUNCTION_BODY = "PARSE_JS_FUNCTION_BODY",
   EVAL_JS_FUNCTION = "EVAL_JS_FUNCTION",
   EVAL_EXPRESSION = "EVAL_EXPRESSION",
@@ -310,8 +313,10 @@ export type EvaluationError = {
   severity: Severity.WARNING | Severity.ERROR;
   errorSegment?: string;
   originalBinding?: string;
-  variables?: (string | undefined | null | number)[];
+  variables?: (string | undefined | null)[];
   code?: string;
+  line?: number;
+  ch?: number;
 };
 
 export interface DataTreeEvaluationProps {

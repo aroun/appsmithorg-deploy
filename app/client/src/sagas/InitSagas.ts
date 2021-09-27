@@ -112,7 +112,7 @@ function* initializeEditorSaga(
         fetchAppLibraries(applicationId),
         fetchPageList(applicationId, APP_MODE.EDIT),
         fetchPage(pageId, true),
-        fetchApplication(applicationId, APP_MODE.EDIT),
+        fetchApplication({ payload: { applicationId, mode: APP_MODE.EDIT } }),
       ],
       [
         ReduxActionTypes.FETCH_PAGE_LIST_SUCCESS,
@@ -211,18 +211,25 @@ export function* initializeAppViewerSaga(
   yield all([
     // TODO (hetu) Remove spl view call for fetch actions
     put(fetchAppLibraries(applicationId)),
+    put(fetchJSCollectionsForView(applicationId)),
     put(fetchActionsForView(applicationId)),
     put(fetchPageList(applicationId, APP_MODE.PUBLISHED)),
-    put(fetchApplication(applicationId, APP_MODE.PUBLISHED)),
+    put(
+      fetchApplication({
+        payload: { applicationId, mode: APP_MODE.PUBLISHED },
+      }),
+    ),
   ]);
 
   const resultOfPrimaryCalls = yield race({
     success: all([
+      take(ReduxActionTypes.FETCH_JS_ACTIONS_VIEW_MODE_SUCCESS),
       take(ReduxActionTypes.FETCH_ACTIONS_VIEW_MODE_SUCCESS),
       take(ReduxActionTypes.FETCH_PAGE_LIST_SUCCESS),
       take(ReduxActionTypes.FETCH_APPLICATION_SUCCESS),
     ]),
     failure: take([
+      ReduxActionErrorTypes.FETCH_JS_ACTIONS_VIEW_MODE_ERROR,
       ReduxActionErrorTypes.FETCH_ACTIONS_VIEW_MODE_ERROR,
       ReduxActionErrorTypes.FETCH_PAGE_LIST_ERROR,
       ReduxActionErrorTypes.FETCH_APPLICATION_ERROR,
@@ -267,14 +274,6 @@ export function* initializeAppViewerSaga(
       });
       return;
     }
-
-    const jsActionsCall = yield failFastApiCalls(
-      [fetchJSCollectionsForView(applicationId)],
-      [ReduxActionTypes.FETCH_JS_ACTIONS_VIEW_MODE_SUCCESS],
-      [ReduxActionErrorTypes.FETCH_JS_ACTIONS_VIEW_MODE_ERROR],
-    );
-
-    if (!jsActionsCall) return;
 
     yield put(setAppMode(APP_MODE.PUBLISHED));
 

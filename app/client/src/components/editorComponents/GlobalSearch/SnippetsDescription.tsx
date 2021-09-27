@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
-import SyntaxHighlighter from "react-syntax-highlighter/dist/esm/prism-light";
+import SyntaxHighlighter from "react-syntax-highlighter/dist/cjs/prism-light";
 import sql from "react-syntax-highlighter/dist/cjs/languages/prism/sql";
 import { prism } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import { TabbedViewContainer } from "pages/Editor/APIEditor/Form";
@@ -30,13 +30,20 @@ import { useEffect } from "react";
 import { ValidationTypes } from "constants/WidgetValidation";
 import { debounce } from "lodash";
 import { Snippet, SnippetArgument } from "./utils";
-import { createMessage, SEARCH_ITEM_SELECT } from "constants/messages";
+import {
+  createMessage,
+  SNIPPET_COPY,
+  SNIPPET_EXECUTE,
+  SNIPPET_INSERT,
+} from "constants/messages";
 import { getExpectedValue } from "utils/validation/common";
 import { Toaster } from "components/ads/Toast";
 import { Variant } from "components/ads/common";
 import { ReactComponent as CopyIcon } from "assets/icons/menu/copy-snippet.svg";
 import AnalyticsUtil from "utils/AnalyticsUtil";
 import { getTypographyByKey } from "constants/DefaultTheme";
+import { SnippetAction } from "reducers/uiReducers/globalSearchReducer";
+import { Layers } from "constants/Layers";
 
 const templateRegex = /%%(.*?)%%/g;
 
@@ -151,7 +158,8 @@ const SnippetContainer = styled.div`
 `;
 
 const removeDynamicBinding = (value: string) => {
-  return value.replace(templateRegex, function(match, capture) {
+  const regex = /{{([\s\S]*?)}}/g;
+  return value.replace(regex, function(match, capture) {
     return capture;
   });
 };
@@ -190,8 +198,8 @@ export default function SnippetDescription({ item }: { item: Snippet }) {
       (state: AppState) =>
         state.ui.globalSearch.filterContext.evaluatedArguments,
     ),
-    shouldInsertSnippet = useSelector(
-      (state: AppState) => state.ui.globalSearch.filterContext.insertSnippet,
+    onEnter = useSelector(
+      (state: AppState) => state.ui.globalSearch.filterContext.onEnter,
     );
 
   const handleArgsValidation = useCallback(
@@ -219,14 +227,17 @@ export default function SnippetDescription({ item }: { item: Snippet }) {
     dispatch(unsetEvaluatedArgument());
   }, [title]);
 
-  const handleCopy = useCallback((value) => {
-    copy(value);
-    Toaster.show({
-      text: "Snippet copied to clipboard",
-      variant: Variant.success,
-    });
-    AnalyticsUtil.logEvent("SNIPPET_COPIED", { snippet: value, title });
-  }, []);
+  const handleCopy = useCallback(
+    (value) => {
+      copy(value);
+      Toaster.show({
+        text: "Snippet copied to clipboard",
+        variant: Variant.success,
+      });
+      AnalyticsUtil.logEvent("SNIPPET_COPIED", { snippet: value, title });
+    },
+    [title],
+  );
 
   const handleRun = useCallback(() => {
     if (executionInProgress) return;
@@ -237,7 +248,7 @@ export default function SnippetDescription({ item }: { item: Snippet }) {
     );
     dispatch(
       evaluateSnippet({
-        expression: getSnippet(template, selectedArgs),
+        expression: removeDynamicBinding(getSnippet(template, selectedArgs)),
         dataType: dataType,
         isTrigger,
       }),
@@ -293,51 +304,54 @@ export default function SnippetDescription({ item }: { item: Snippet }) {
       ),
     },
   ];
-  if (template) {
+  if (template && args && args.length > 0) {
     tabs.push({
       key: "Customize",
       title: "Customize",
-      panelComponent:
-        args && args.length > 0 ? (
-          <>
-            <div className="snippet-container">
-              <SyntaxHighlighter language={language} style={prism}>
-                {getSnippet(template, selectedArgs)}
-              </SyntaxHighlighter>
-              <div className="action-icons">
-                <CopyIcon onClick={() => handleCopy(getSnippet(snippet, {}))} />
-              </div>
+      panelComponent: (
+        <>
+          <div className="snippet-container">
+            <SyntaxHighlighter language={language} style={prism}>
+              {getSnippet(template, selectedArgs)}
+            </SyntaxHighlighter>
+            <div className="action-icons">
+              <CopyIcon
+                onClick={() => handleCopy(getSnippet(template, selectedArgs))}
+              />
             </div>
-            <div className="snippet-group">
-              {args.map((arg: SnippetArgument) => (
-                <div
-                  className="argument"
-                  key={arg.name}
-                  onKeyDown={(e) => e.stopPropagation()}
-                >
-                  <span>{arg.name}</span>
-                  <CodeEditor
-                    errors={evaluatedArguments[arg.name]?.errors}
-                    evaluatedValue={evaluatedArguments[arg.name]?.value}
-                    expected={getExpectedValue({ type: arg.type })}
-                    input={{
-                      value: selectedArgs[arg.name],
-                      onChange: (value: any) => handleArgChange(value, arg),
-                    }}
-                    isInvalid={evaluatedArguments[arg.name]?.isInvalid}
-                    mode={EditorModes.TEXT_WITH_BINDING}
-                    popperPlacement="right-start"
-                    showLightningMenu={false}
-                    size={EditorSize.EXTENDED}
-                    tabBehaviour={TabBehaviour.INDENT}
-                    theme={EditorTheme.LIGHT}
-                    useValidationMessage
-                  />
-                </div>
-              ))}
-              <div className="actions-container">
+          </div>
+          <div className="snippet-group">
+            {args.map((arg: SnippetArgument) => (
+              <div
+                className="argument"
+                key={arg.name}
+                onKeyDown={(e) => e.stopPropagation()}
+              >
+                <span>{arg.name}</span>
+                <CodeEditor
+                  errors={evaluatedArguments[arg.name]?.errors}
+                  evaluatedValue={evaluatedArguments[arg.name]?.value}
+                  expected={getExpectedValue({ type: arg.type })}
+                  input={{
+                    value: selectedArgs[arg.name],
+                    onChange: (value: any) => handleArgChange(value, arg),
+                  }}
+                  isInvalid={evaluatedArguments[arg.name]?.isInvalid}
+                  mode={EditorModes.TEXT_WITH_BINDING}
+                  popperPlacement="right-start"
+                  popperZIndex={Layers.portals}
+                  showLightningMenu={false}
+                  size={EditorSize.EXTENDED}
+                  tabBehaviour={TabBehaviour.INDENT}
+                  theme={EditorTheme.LIGHT}
+                  useValidationMessage
+                />
+              </div>
+            ))}
+            <div className="actions-container">
+              {language === "javascript" && (
                 <Button
-                  className="t--apiFormRunBtn"
+                  className="t--apiFormRunBtn snippet-execute"
                   disabled={executionInProgress}
                   onClick={handleRun}
                   size={Size.medium}
@@ -345,38 +359,41 @@ export default function SnippetDescription({ item }: { item: Snippet }) {
                   text="Run"
                   type="button"
                 />
-              </div>
-              <div id="snippet-evaluator">
-                {evaluatedSnippet && (
-                  <div className="snippet-group">
-                    <div className="header">Evaluated Snippet</div>
-                    <div className="content">
-                      <ReadOnlyEditor
-                        folding
-                        height="300px"
-                        input={{ value: evaluatedSnippet }}
-                        showLineNumbers={false}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
-          </>
-        ) : (
-          <div />
-        ),
+            <div id="snippet-evaluator">
+              {evaluatedSnippet && (
+                <div className="snippet-group">
+                  <div className="header">Evaluated Snippet</div>
+                  <div className="content">
+                    <ReadOnlyEditor
+                      folding
+                      height="300px"
+                      input={{ value: evaluatedSnippet }}
+                      showLineNumbers={false}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
+      ),
     });
   }
   return (
     <SnippetContainer>
       <div className="snippet-title">
         <span>{title}</span>
-        {shouldInsertSnippet && (
-          <span className="action-msg">
-            {createMessage(SEARCH_ITEM_SELECT)}
-          </span>
-        )}
+        <span className="action-msg">
+          {createMessage(
+            selectedIndex === 0
+              ? onEnter === SnippetAction.INSERT
+                ? SNIPPET_INSERT
+                : SNIPPET_COPY
+              : SNIPPET_EXECUTE,
+          )}
+        </span>
       </div>
       <div className="snippet-desc">{summary}</div>
       <TabbedViewContainer className="tab-container">
