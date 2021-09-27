@@ -1,4 +1,4 @@
-import { ReduxActionTypes } from "constants/ReduxActionConstants";
+import { ReduxAction, ReduxActionTypes } from "constants/ReduxActionConstants";
 import { APP_MODE } from "entities/App";
 import {
   ReduxActionErrorTypes,
