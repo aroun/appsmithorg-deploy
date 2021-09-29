@@ -1,0 +1,3 @@
+# Checkout this link to know more about github CODEOWNERS https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners#example-of-a-codeowners-file
+
+app/client/src/pages/Editor/GeneratePage/ @Rishabh-Rathod
