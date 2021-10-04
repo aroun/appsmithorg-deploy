@@ -11,6 +11,8 @@ import {
   collabResetAppEditors,
 } from "actions/appCollabActions";
 import { getIsAppLevelSocketConnected } from "selectors/websocketSelectors";
+import { ANONYMOUS_USERNAME } from "../../constants/userConstants";
+import { getCurrentUser } from "../../selectors/usersSelectors";
 
 const UserImageContainer = styled.div`
   display: flex;
@@ -28,27 +30,36 @@ const UserImageContainer = styled.div`
   }
 `;
 
+export enum APP_MODE {
+  VIEW = "VIEW",
+  EDIT = "EDIT",
+}
+
 type RealtimeAppEditorsProps = {
   applicationId?: string;
 };
 
 export function useEditAppCollabEvents(applicationId?: string) {
   const dispatch = useDispatch();
-
+  const currentUser = useSelector(getCurrentUser);
   const isWebsocketConnected = useSelector(getIsAppLevelSocketConnected);
 
   useEffect(() => {
     // websocket has to be connected as we only fire this event once.
-    isWebsocketConnected &&
+    !!currentUser &&
+      currentUser.username !== ANONYMOUS_USERNAME &&
+      isWebsocketConnected &&
       applicationId &&
       dispatch(collabStartEditingAppEvent(applicationId));
     return () => {
       dispatch(collabResetAppEditors());
-      isWebsocketConnected &&
+      !!currentUser &&
+        currentUser.username !== ANONYMOUS_USERNAME &&
+        isWebsocketConnected &&
         applicationId &&
         dispatch(collabStopEditingAppEvent(applicationId));
     };
-  }, [applicationId, isWebsocketConnected]);
+  }, [applicationId, isWebsocketConnected, currentUser]);
 }
 
 function RealtimeAppEditors(props: RealtimeAppEditorsProps) {
@@ -61,12 +72,9 @@ function RealtimeAppEditors(props: RealtimeAppEditorsProps) {
       {realtimeAppEditors.slice(0, 5).map((el) => (
         <TooltipComponent
           content={
-            <>
-              <span style={{ margin: "0 0 8px 0", display: "block" }}>
-                {el.name || el.email}
-              </span>
-              <b>Editing</b>
-            </>
+            <span style={{ margin: "0 0 8px 0", display: "block" }}>
+              {el.name || el.email}
+            </span>
           }
           hoverOpenDelay={100}
           key={el.email}

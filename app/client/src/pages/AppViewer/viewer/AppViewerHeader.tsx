@@ -35,6 +35,7 @@ import { getThemeDetails, ThemeMode } from "selectors/themeSelectors";
 import ToggleCommentModeButton from "pages/Editor/ToggleModeButton";
 import GetAppViewerHeaderCTA from "./GetAppViewerHeaderCTA";
 import { showAppInviteUsersDialogSelector } from "selectors/applicationSelectors";
+import RealtimeAppEditors from "../../Editor/RealtimeAppEditors";
 
 const HeaderWrapper = styled(StyledHeader)<{ hasPages: boolean }>`
   box-shadow: unset;
@@ -186,6 +187,7 @@ export function AppViewerHeader(props: AppViewerHeaderProps) {
             )}
           </HeaderSection>
           <HeaderSection justify={"flex-end"}>
+            <RealtimeAppEditors applicationId={currentApplicationDetails?.id} />
             {currentApplicationDetails && (
               <>
                 <FormDialogComponent
