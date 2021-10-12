@@ -12,6 +12,8 @@ import {
   omit,
   floor,
   isEmpty,
+  map,
+  sortBy,
 } from "lodash";
 import memoizeOne from "memoize-one";
 import shallowEqual from "shallowequal";
@@ -56,6 +58,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       selectedItem: `{{(()=>{${derivedProperties.getSelectedItem}})()}}`,
       items: `{{(() => {${derivedProperties.getItems}})()}}`,
       childAutoComplete: `{{(() => {${derivedProperties.getChildAutoComplete}})()}}`,
+      dsl: `{{(() => {${derivedProperties.getDSL}})()}}`,
     };
   }
 
@@ -640,7 +643,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
   /**
    * renders children
    */
-  renderChildren = () => {
+  renderChildren_ = () => {
     if (
       this.props.children &&
       this.props.children.length > 0 &&
@@ -667,8 +670,51 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       } catch (e) {
         log.error(e);
       }
-      return this.renderChild(childCanvas);
+      // return this.renderChild(childCanvas);
+      // return <Canvas dsl={this.generateDSL() as DSLWidget} pageId="99" />;
+      // const myDSL = this.generateDSL() as DSLWidget;
+      // debugger;
+      // return <Canvas dsl={JSON.parse(this.props.dsl)} pageId="99" />;
+      return WidgetFactory.createWidget(this.props.dsl, RenderModes.CANVAS);
     }
+  };
+
+  // Copied from container widget, treating list widget effectively as container widget #LWV2
+  renderChildWidget = (childWidgetData: WidgetProps): React.ReactNode => {
+    // For now, isVisible prop defines whether to render a detached widget
+    if (childWidgetData.detachFromLayout && !childWidgetData.isVisible) {
+      return null;
+    }
+
+    const { componentHeight, componentWidth } = this.getComponentDimensions();
+    try {
+      childWidgetData.rightColumn = componentWidth;
+      childWidgetData.bottomRow = this.props.shouldScrollContents
+        ? childWidgetData.bottomRow
+        : componentHeight;
+      childWidgetData.minHeight = componentHeight;
+      childWidgetData.isVisible = this.props.isVisible;
+      childWidgetData.shouldScrollContents = false;
+      childWidgetData.canExtend = this.props.shouldScrollContents;
+
+      childWidgetData.parentId = this.props.widgetId;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log("key...", childWidgetData, e);
+    }
+
+    return WidgetFactory.createWidget(childWidgetData, this.props.renderMode);
+  };
+
+  // Copied from container widget, treating list widget effectively as container widget #LWV2
+  renderChildren = () => {
+    return map(
+      // sort by row so stacking context is correct
+      // TODO(abhinav): This is hacky. The stacking context should increase for widgets rendered top to bottom, always.
+      // Figure out a way in which the stacking context is consistent.
+      this.props.children,
+      this.renderChildWidget,
+    );
   };
 
   getCanvasChildren = memoizeOne(
@@ -713,6 +759,38 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     },
   );
 
+  // Container came, but canvas is missing.-
+  generateDSL = () => {
+    const { children = [], listData = [], template2, widgetName } = this.props;
+    const childCanvas = children[0];
+    const container = childCanvas.children[0]; //container
+    const canvasChildren = [];
+    for (let i = 0; i < listData.length; i++) {
+      const newContainer = JSON.parse(JSON.stringify(container));
+      //@todo add height, + new names
+      // todo change widget ID's
+      newContainer.children[0].children = [];
+      newContainer.bottomRow = container.bottomRow * (i + 1);
+      Object.keys(template2).forEach((key) => {
+        const newWidget = JSON.parse(
+          JSON.stringify(template2[key]).replace(
+            "currentItem",
+            `${widgetName}.listData.${i}.${key}`,
+          ),
+        );
+        //@todo update parentID and widgetID
+
+        newWidget.widgetName = `${widgetName}.${key}.${i}`;
+        newContainer.children[0].children.push(newWidget);
+      });
+      canvasChildren.push(newContainer);
+    }
+    childCanvas.children = canvasChildren;
+
+    // debugger;
+    return childCanvas;
+  };
+
   /**
    * 400
    * 200
@@ -731,8 +809,9 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
     }
     const { componentHeight } = this.getComponentDimensions();
     const templateBottomRow = get(children, "0.children.0.bottomRow");
-    const templateHeight =
-      templateBottomRow * GridDefaults.DEFAULT_GRID_ROW_HEIGHT;
+    // const templateHeight =
+    // templateBottomRow * GridDefaults.DEFAULT_GRID_ROW_HEIGHT;
+    const templateHeight = templateBottomRow;
 
     try {
       gridGap = parseInt(gridGap);
@@ -771,8 +850,7 @@ class ListWidget extends BaseWidget<ListWidgetProps<WidgetProps>, WidgetState> {
       this.props.children,
       "0.children.0.bottomRow",
     );
-    const templateHeight =
-      templateBottomRow * GridDefaults.DEFAULT_GRID_ROW_HEIGHT;
+    const templateHeight = templateBottomRow;
 
     if (this.props.isLoading) {
       return (

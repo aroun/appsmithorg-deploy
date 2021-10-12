@@ -77,16 +77,80 @@ import { diff } from "deep-diff";
 import AnalyticsUtil from "../utils/AnalyticsUtil";
 import { commentModeSelector } from "selectors/commentsSelectors";
 import { snipingModeSelector } from "selectors/editorSelectors";
+import _ from "lodash";
+import CanvasWidgetsNormalizer from "normalizers/CanvasWidgetsNormalizer";
+import { generateDataTreeWidget } from "entities/DataTree/dataTreeWidget";
+import { GridDefaults } from "constants/WidgetConstants";
 
 let widgetTypeConfigMap: WidgetTypeConfigMap;
 
 const worker = new GracefulWorkerService(Worker);
 
+const getDSL = (props: any, self: any) => {
+  const { children, template2, widgetName } = props;
+  const childCanvas = JSON.parse(
+    JSON.stringify(_.find(self, { widgetId: children[0] })),
+  );
+  const container = _.find(self, { widgetId: childCanvas.children[0] });
+  container.children = [_.find(self, { widgetId: container.children[0] })];
+  container.parentId = children[0];
+  const canvasChildren = [];
+
+  // We hardcoded the number of items in the list widget for POC
+  // we should see if we can do this work on the worker itself, with listData as the dependency.
+  // like metaProperties, create metaWidgets
+  // [ We can communicate how to handle this to the worker similar to derived properties ] #LWV2
+  for (let i = 0; i < 10; i++) {
+    const newContainer = JSON.parse(JSON.stringify(container));
+    newContainer.children[0].widgetId = newContainer.children[0].widgetName = `${widgetName}_canvas_${i}`;
+
+    newContainer.widgetId = newContainer.widgetName = `${widgetName}_container_${i}`;
+    newContainer.children[0].children = [];
+    newContainer.bottomRow =
+      container.bottomRow * (i + 1) * GridDefaults.DEFAULT_GRID_ROW_HEIGHT;
+    Object.keys(template2).forEach((key) => {
+      const newWidget = JSON.parse(
+        JSON.stringify(template2[key]).replace(
+          "currentItem",
+          `${widgetName}.listData[${i}]`,
+        ),
+      );
+      newWidget.widgetName = `${widgetName}_${key}_${i}`;
+      newWidget.widgetId = `${widgetName}_${key}_${i}`;
+
+      newContainer.children[0].children.push(
+        generateDataTreeWidget(newWidget, {}),
+      );
+    });
+    canvasChildren.push(newContainer);
+  }
+  childCanvas.children = canvasChildren;
+  return childCanvas;
+};
+
+function parseForList(tree: any) {
+  Object.values(tree).forEach((val: any) => {
+    if (val.type === "LIST_WIDGET") {
+      const dsl = getDSL(val, tree);
+      const temp = CanvasWidgetsNormalizer.normalize(dsl);
+      tree = { ...tree, ...temp.entities.canvasWidgets };
+      const { entities, result } = temp;
+      const canvas = entities.canvasWidgets[result];
+      tree[canvas.widgetName] = canvas;
+      // delete tree[result];
+    }
+  });
+
+  return tree;
+}
+
 function* evaluateTreeSaga(
   postEvalActions?: Array<ReduxAction<unknown> | ReduxActionWithoutPayload>,
   shouldReplay?: boolean,
 ) {
-  const unevalTree = yield select(getUnevaluatedDataTree);
+  let unevalTree = yield select(getUnevaluatedDataTree);
+
+  unevalTree = parseForList(unevalTree); // Adds more items to the uneval tree
   const widgets = yield select(getWidgets);
   log.debug({ unevalTree });
   PerformanceTracker.startAsyncTracking(

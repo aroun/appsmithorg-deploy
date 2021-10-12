@@ -49,12 +49,16 @@ class CanvasWidget extends ContainerWidget {
       return null;
     }
     const snapSpaces = this.getSnapSpaces();
-
-    childWidgetData.parentColumnSpace = snapSpaces.snapColumnSpace;
-    childWidgetData.parentRowSpace = snapSpaces.snapRowSpace;
-    if (this.props.noPad) childWidgetData.noContainerOffset = true;
-    childWidgetData.parentId = this.props.widgetId;
-
+    // Some these properties are not available, so we are bypassing these errors during POC #LWV2
+    try {
+      childWidgetData.parentColumnSpace = snapSpaces.snapColumnSpace;
+      childWidgetData.parentRowSpace = snapSpaces.snapRowSpace;
+      if (this.props.noPad) childWidgetData.noContainerOffset = true;
+      childWidgetData.parentId = this.props.widgetId;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log("key.......", childWidgetData, e);
+    }
     return WidgetFactory.createWidget(childWidgetData, this.props.renderMode);
   }
 

@@ -174,17 +174,22 @@ class ContainerWidget extends BaseWidget<
     }
 
     const { componentHeight, componentWidth } = this.getComponentDimensions();
+    // Some these properties are not available, so we are bypassing these errors during POC #LWV2
+    try {
+      childWidgetData.rightColumn = componentWidth;
+      childWidgetData.bottomRow = this.props.shouldScrollContents
+        ? childWidgetData.bottomRow
+        : componentHeight;
+      childWidgetData.minHeight = componentHeight;
+      childWidgetData.isVisible = this.props.isVisible;
+      childWidgetData.shouldScrollContents = false;
+      childWidgetData.canExtend = this.props.shouldScrollContents;
 
-    childWidgetData.rightColumn = componentWidth;
-    childWidgetData.bottomRow = this.props.shouldScrollContents
-      ? childWidgetData.bottomRow
-      : componentHeight;
-    childWidgetData.minHeight = componentHeight;
-    childWidgetData.isVisible = this.props.isVisible;
-    childWidgetData.shouldScrollContents = false;
-    childWidgetData.canExtend = this.props.shouldScrollContents;
-
-    childWidgetData.parentId = this.props.widgetId;
+      childWidgetData.parentId = this.props.widgetId;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log("key...", childWidgetData, e);
+    }
 
     return WidgetFactory.createWidget(childWidgetData, this.props.renderMode);
   }

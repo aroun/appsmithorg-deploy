@@ -347,6 +347,7 @@ export default class DataTreeEvaluator {
         dependencyMap = { ...dependencyMap, ...entityListedDependencies };
       }
     });
+
     Object.keys(dependencyMap).forEach((key) => {
       dependencyMap[key] = _.flatten(
         dependencyMap[key].map((path) =>

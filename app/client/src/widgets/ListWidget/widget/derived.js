@@ -133,7 +133,6 @@ export default {
     return _.isNaN(perPage) ? 0 : _.floor(perPage);
   },
   //
-  // this is just a patch for #7520
   getChildAutoComplete: (props, moment, _) => {
     const data = [...props.listData];
 
@@ -149,4 +148,94 @@ export default {
     return { currentItem: structure, currentIndex: "" };
   },
   //
+  getDSL: (props, moment, _) => {
+    const listData = [...props.listData];
+    const children = [...props.children];
+    const template2 = props.template2;
+    const widgetName = props.widgetName;
+    const childCanvas = JSON.parse(
+      JSON.stringify(_.find(self, { widgetId: children[0] })),
+    );
+    const container = _.find(self, { widgetId: childCanvas.children[0] });
+    container.children = [_.find(self, { widgetId: container.children[0] })];
+    container.children[0].widgetId = _.uniqueId("contact_");
+    container.parentId = children[0];
+    const canvasChildren = [];
+    for (let i = 0; i < listData.length; i++) {
+      const newContainer = JSON.parse(JSON.stringify(container));
+      newContainer.widgetId = _.uniqueId("contact_");
+      newContainer.children[0].children = [];
+      newContainer.bottomRow = container.bottomRow * (i + 1);
+      Object.keys(template2).forEach((key) => {
+        const newWidget = JSON.parse(
+          JSON.stringify(template2[key]).replace(
+            "currentItem",
+            `${widgetName}.listData.${i}`,
+          ),
+        );
+        newWidget.widgetName = `${widgetName}.${key}.${i}`;
+        newWidget.widgetId = _.uniqueId("contact_");
+
+        newContainer.children[0].children.push(newWidget);
+      });
+      canvasChildren.push(newContainer);
+    }
+    childCanvas.children = canvasChildren;
+    return childCanvas;
+  },
+  //
 };
+
+// generateDSL = () => {
+//   const { children = [], listData = [], template2, widgetName } = this.props;
+//   const childCanvas = children[0];
+//   const container = childCanvas.children[0]; //container
+//   const canvasChildren = [];
+//   for (let i = 0; i < listData.length; i++) {
+//     const newContainer = JSON.parse(JSON.stringify(container));
+//     //@todo add height, + new names
+//     // todo change widget ID's
+//     newContainer.children[0].children = [];
+//     newContainer.bottomRow = container.bottomRow * (i + 1);
+//     Object.keys(template2).forEach((key) => {
+//       const newWidget = JSON.parse(
+//         JSON.stringify(template2[key]).replace(
+//           "currentItem",
+//           `${widgetName}.listData.${i}.${key}`,
+//         ),
+//       );
+//       //@todo update parentID and widgetID
+
+//       newWidget.widgetName = `${widgetName}.${key}.${i}`;
+//       newContainer.children[0].children.push(newWidget);
+//     });
+//     canvasChildren.push(newContainer);
+//   }
+//   childCanvas.children = canvasChildren;
+
+//   debugger;
+//   return childCanvas;
+// };
+
+// for (let i = 0; i < listData.length; i++) {
+//   const newContainer = JSON.parse(JSON.stringify(container));
+//   //@todo add height, + new names
+//   // todo change widget ID's
+//   newContainer.children[0].children = [];
+//   newContainer.bottomRow = container.bottomRow * (i + 1);
+//   Object.keys(template2).forEach((key) => {
+//     const newWidget = JSON.parse(
+//       JSON.stringify(template2[key]).replace(
+//         "currentItem",
+//         `${widgetName}.listData.${i}.${key}`,
+//       ),
+//     );
+//     //@todo update parentID and widgetID
+
+//     newWidget.widgetName = `${widgetName}.${key}.${i}`;
+//     newContainer.children[0].children.push(newWidget);
+//   });
+//   canvasChildren.push(newContainer);
+// }
+// childCanvas.children = canvasChildren;
+// return { listData, children, widgetName, template2 };
