@@ -20,9 +20,11 @@ import "codemirror/addon/lint/lint";
 import "codemirror/addon/lint/lint.css";
 
 import { getDataTreeForAutocomplete } from "selectors/dataTreeSelectors";
-import EvaluatedValuePopup from "components/editorComponents/CodeEditor/EvaluatedValuePopup";
+import EvaluatedValuePopup, {
+  CurrentValueViewer,
+} from "components/editorComponents/CodeEditor/EvaluatedValuePopup";
 import { WrappedFieldInputProps } from "redux-form";
-import _, { isString } from "lodash";
+import _, { isArray, isString } from "lodash";
 import {
   DataTree,
   ENTITY_TYPE,
@@ -76,12 +78,13 @@ import Button from "components/ads/Button";
 import { getPluginIdToImageLocation } from "sagas/selectors";
 import { ExpectedValueExample } from "utils/validation/common";
 import { getRecentEntityIds } from "selectors/globalSearchSelectors";
-import { AutocompleteDataType } from "utils/autocomplete/TernServer";
+import Tern, { AutocompleteDataType } from "utils/autocomplete/TernServer";
 import { Placement } from "@blueprintjs/popover2";
 import { getLintAnnotations } from "./lintHelpers";
 import { executeCommandAction } from "actions/apiPaneActions";
 import { SlashCommandPayload } from "entities/Action";
 import { Indices } from "constants/Layers";
+import evaluate from "workers/evaluate";
 
 const AUTOCOMPLETE_CLOSE_KEY_CODES = [
   "Enter",
@@ -348,6 +351,8 @@ class CodeEditor extends Component<Props, State> {
       return;
     }
     const mode = cm.getModeAt(cm.getCursor());
+    const data = cm.getSelection();
+
     if (
       mode &&
       [EditorModes.JAVASCRIPT, EditorModes.JSON].includes(mode.name)
@@ -355,6 +360,12 @@ class CodeEditor extends Component<Props, State> {
       this.editor.setOption("matchBrackets", true);
     } else {
       this.editor.setOption("matchBrackets", false);
+    }
+    const entityInformation: FieldEntityInformation = this.getEntityInformation();
+
+    if (data.length && entityInformation.entityType === ENTITY_TYPE.JSACTION) {
+      const finalResult = _.get(this.props.dynamicData, data, "");
+      Tern.tempTooltip(cm, JSON.stringify(finalResult));
     }
   };
 

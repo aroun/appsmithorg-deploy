@@ -210,6 +210,9 @@ export const CodemirrorHintStyles = createGlobalStyle<{
   }
   .CodeMirror-Tern-tooltip {
     z-index: 20 !important;
+    max-width : 400px;
+    max-height: 400px;
+    overflow: auto;
   }
   li.CodeMirror-hint-active {
     background: #6A86CE;

@@ -775,7 +775,7 @@ class TernServer {
         else mouseOnTip = false;
       }
     });
-    setTimeout(maybeClear, hintDelay);
+    // setTimeout(maybeClear, hintDelay);
     const clearActivity = this.onEditorActivity(cm, clear);
   }
 
