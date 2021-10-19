@@ -15,7 +15,7 @@ import {
 import {
   getCurrentGitBranch,
   getFetchingBranches,
-  getGitBranches,
+  getGitBranchNameList,
 } from "selectors/gitSyncSelectors";
 
 import Skeleton from "components/utils/Skeleton";
@@ -109,7 +109,7 @@ export default function BranchList(props: {
   setIsPopupOpen?: (flag: boolean) => void;
   setShowCreateNewBranchForm?: (flag: boolean) => void;
 }) {
-  const branches = useSelector(getGitBranches);
+  const branches = useSelector(getGitBranchNameList);
   const [activeHoverIndex, setActiveHoverIndexInState] = useState(0);
 
   useEffect(() => {

@@ -258,7 +258,7 @@ export type GitSyncReducerState = {
   gitPushError?: string;
   globalGitConfig: GitConfig;
   isFetchingGitConfig?: boolean;
-  branches: string[];
+  branches: Array<{ name: string; default: boolean }>;
   fetchingBranches: boolean;
 
   isDisconnectingGit: boolean;

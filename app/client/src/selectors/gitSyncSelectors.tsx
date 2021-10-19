@@ -83,6 +83,12 @@ export const getIsFetchingLocalGitConfig = createSelector(
   getGitSyncState,
   (gitSync) => gitSync.isFetchingLocalGitConfig,
 );
+export const getGitBranchNameList = createSelector(
+  getGitSyncState,
+  (gitSync) => {
+    return gitSync.branches.map((branchObj) => branchObj.name);
+  },
+);
 
 export const getGitBranches = (state: AppState) => state.ui.gitSync.branches;
 export const getFetchingBranches = (state: AppState) =>
