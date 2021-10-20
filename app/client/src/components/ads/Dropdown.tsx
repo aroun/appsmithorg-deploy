@@ -603,6 +603,8 @@ export default function Dropdown(props: DropdownProps) {
 
   const onBlur = useCallback(() => {
     if (!props.disabled && keyboardInteraction) {
+      const option = props.options[optionIndex.current];
+      onSelect && onSelect(option.value, option);
       setIsOpen(false);
     }
   }, []);
