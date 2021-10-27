@@ -15,10 +15,33 @@ import { ValidationTypes } from "constants/WidgetValidation";
 
 import WidgetsMultiSelectBox from "pages/Editor/WidgetsMultiSelectBox";
 import { CanvasSelectionArena } from "pages/common/CanvasSelectionArena";
-import { compact, map, sortBy } from "lodash";
+import { compact, isEqual, map, sortBy } from "lodash";
 
 import { CanvasDraggingArena } from "pages/common/CanvasDraggingArena";
 import { getCanvasSnapRows } from "utils/WidgetPropsUtils";
+import { useSelector } from "store";
+
+function SatishGandham(props: any) {
+  const { widgetData, widgetId } = props;
+  const childWidgetData = useSelector((state) => {
+    const tree = state.evaluations.tree;
+    const name = Object.keys(tree).find(
+      (item) => (tree[item] as WidgetProps).widgetId === widgetId,
+    );
+    const out = tree[name as string] as any;
+    // debugger;
+    // Object.keys(widgetData).forEach((key: any) => {
+    //   out[key] = widgetData[key];
+    // });
+
+    return out;
+  }, isEqual);
+
+  return (
+    <>{WidgetFactory.createWidget(childWidgetData as WidgetProps, "CANVAS")}</>
+  );
+}
+
 class ContainerWidget extends BaseWidget<
   ContainerWidgetProps<WidgetProps>,
   WidgetState
@@ -173,19 +196,21 @@ class ContainerWidget extends BaseWidget<
       return null;
     }
 
+    debugger;
     const { componentHeight, componentWidth } = this.getComponentDimensions();
-
-    childWidgetData.rightColumn = componentWidth;
-    childWidgetData.bottomRow = this.props.shouldScrollContents
-      ? childWidgetData.bottomRow
+    const widgetData: any = {};
+    widgetData.rightColumn = componentWidth;
+    widgetData.bottomRow = this.props.shouldScrollContents
+      ? widgetData.bottomRow
       : componentHeight;
-    childWidgetData.minHeight = componentHeight;
-    childWidgetData.isVisible = this.props.isVisible;
-    childWidgetData.shouldScrollContents = false;
-    childWidgetData.canExtend = this.props.shouldScrollContents;
+    widgetData.minHeight = componentHeight;
+    widgetData.isVisible = this.props.isVisible;
+    widgetData.shouldScrollContents = false;
+    widgetData.canExtend = this.props.shouldScrollContents;
 
-    childWidgetData.parentId = this.props.widgetId;
+    widgetData.parentId = this.props.widgetId;
 
+    return <SatishGandham widgetData={widgetData} widgetId={childWidgetData} />;
     return WidgetFactory.createWidget(childWidgetData, this.props.renderMode);
   }
 

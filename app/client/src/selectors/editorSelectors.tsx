@@ -216,7 +216,7 @@ export const getCanvasWidgetDsl = createSelector(
           canvasWidget.widgetName,
         );
       });
-
+    return widgets["0"];
     return CanvasWidgetsNormalizer.denormalize("0", {
       canvasWidgets: widgets,
     });
