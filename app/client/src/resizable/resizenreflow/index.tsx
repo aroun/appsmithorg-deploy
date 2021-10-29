@@ -151,7 +151,6 @@ export function Resizable(props: ResizableProps) {
   const reflow = useReflow(
     props.widgetId,
     props.parentId || "",
-    widgetOccupiedSpace,
     resizableRef,
     props.ignoreCollision,
     widgetParentSpaces,
@@ -174,7 +173,7 @@ export function Resizable(props: ResizableProps) {
   });
 
   const setNewDimensions = (rect: DimensionProps) => {
-    const { horizontalMove, verticalMove } = reflow(rect);
+    const { horizontalMove, verticalMove } = reflow(rect, widgetOccupiedSpace);
     set((prevState) => {
       let newRect = { ...rect };
       if (!horizontalMove) {

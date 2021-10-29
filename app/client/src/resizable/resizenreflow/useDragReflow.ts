@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { reflowMove, startReflow, stopReflow } from "actions/reflowActions";
 import { DropTargetContext } from "components/editorComponents/DropTargetComponent";
 import { GridDefaults } from "constants/WidgetConstants";
@@ -10,6 +11,7 @@ import {
   Reflow,
   reflowWidgets,
   StaticReflowWidget,
+  widgetReflowState,
 } from "reducers/uiReducers/reflowReducer";
 import { DimensionProps, ResizeDirection } from "resizable/resizenreflow";
 import { getOccupiedSpaces } from "selectors/editorSelectors";
@@ -85,7 +87,7 @@ type CollisionAccessors = {
   isHorizontal: boolean;
 };
 
-export const useReflow = (
+export const useDragReflow = (
   widgetId: string,
   parentId: string,
   resizableRef: RefObject<HTMLDivElement>,
@@ -93,14 +95,16 @@ export const useReflow = (
   widgetParentSpaces: WidgetParentSpaces,
 ) => {
   const occupiedSpaces = useSelector(getOccupiedSpaces);
-  const widgetReflowSelector = getReflowWidgetSelector(widgetId);
-  const reflowState = useSelector(widgetReflowSelector);
+  // const widgetReflowSelector = getReflowWidgetSelector(widgetId);
+  // const reflowState = useSelector(widgetReflowSelector);
+  // console.log({ reflowState });
   const positions = useRef({ X: 0, Y: 0 });
   const occupiedSpacesBySiblingWidgets = useMemo(() => {
     return occupiedSpaces && parentId && occupiedSpaces[parentId]
       ? occupiedSpaces[parentId]
       : undefined;
   }, [occupiedSpaces, parentId]);
+  const reflowState = useRef<widgetReflowState>();
 
   const { updateDropTargetRows } = useContext(DropTargetContext);
 
@@ -243,10 +247,11 @@ export const useReflow = (
   const reflow = (
     dimensions: DimensionProps,
     widgetPosition: OccupiedSpace,
+    // reflowState?: widgetReflowState,
   ): { verticalMove: boolean; horizontalMove: boolean } => {
     const { direction, height, width, x, X = 0, y, Y = 0 } = dimensions;
-    // eslint-disable-next-line no-console
-    console.log({ dimensions, widgetPosition });
+    console.log({ reflowState });
+
     const { isColliding: isWidgetsColliding, resizedPositions } = isColliding(
       { width, height },
       { x, y },
@@ -258,7 +263,14 @@ export const useReflow = (
       ...resizedPositions,
     };
 
-    if (!isWidgetsColliding && reflowState?.isReflowing) {
+    if (!isWidgetsColliding && reflowState.current?.isReflowing) {
+      reflowState.current = {
+        isReflowing: false,
+        reflow: {
+          resizeDirections: ResizeDirection.UNSET,
+        },
+      };
+
       dispatch(stopReflow());
       positions.current = { X, Y };
       return {
@@ -279,8 +291,8 @@ export const useReflow = (
       };
     }
 
-    let newStaticWidget = reflowState?.reflow?.staticWidget;
-    if (!reflowState?.isReflowing) {
+    let newStaticWidget = reflowState.current?.reflow?.staticWidget;
+    if (!reflowState.current?.isReflowing) {
       let widgetReflow: Reflow = {
         staticWidgetId: newWidgetPosition.id,
         resizeDirections: direction,
@@ -304,8 +316,7 @@ export const useReflow = (
         if (currentDirection === "RIGHT") {
           currentDirection;
         }
-        //eslint-disable-next-line
-        console.log(currentDirection, positions.current, { X, Y });
+
         const widgetMovementMap: reflowWidgets = {};
         newStaticWidget = getMovementMapInDirection(
           widgetMovementMap,
@@ -336,9 +347,13 @@ export const useReflow = (
           staticWidget: newStaticWidget,
         };
       }
+      reflowState.current = { isReflowing: true, reflow: { ...widgetReflow } };
       dispatch(startReflow(widgetReflow));
-    } else if (reflowState.reflow && reflowState.reflow.reflowingWidgets) {
-      const reflowing = { ...reflowState.reflow };
+    } else if (
+      reflowState.current.reflow &&
+      reflowState.current.reflow.reflowingWidgets
+    ) {
+      const reflowing = { ...reflowState.current.reflow };
       let horizontalMove = true,
         verticalMove = true;
       if (direction.indexOf("|") > -1) {
@@ -353,7 +368,7 @@ export const useReflow = (
             verticalMove: true,
           };
 
-        const { reflowingWidgets, staticWidget } = reflowState.reflow;
+        const { reflowingWidgets, staticWidget } = reflowState.current.reflow;
         newStaticWidget = getCompositeMovementMap(
           occupiedSpacesBySiblingWidgets,
           { ...newWidgetPosition, ...resizedPositions },
@@ -397,6 +412,9 @@ export const useReflow = (
           }
         }
       }
+      console.log({ dimensions, widgetPosition, reflowState });
+      reflowState.current = { isReflowing: true, reflow: { ...reflowing } };
+
       dispatch(reflowMove(reflowing));
       positions.current = { X, Y };
       return {
@@ -714,8 +732,7 @@ function getCompositeMovementMap(
       }
     }
   }
-  //eslint-disable-next-line
-  console.log(cloneDeep({ widgets: reflowWidgets, direction }));
+
   if (primaryCollidingKeys.length <= 0 && secondaryCollidingKeys.length > 0) {
     return secondaryStaticWidget;
   } else if (secondaryWidgetMovementMap) {
@@ -826,16 +843,6 @@ function getMovementMapInDirection(
   const staticWidget = widgetMovementMap[widgetCollisionGraph.id];
 
   delete widgetMovementMap[widgetCollisionGraph.id];
-
-  //eslint-disable-next-line
-  console.log(
-    cloneDeep({
-      graph: widgetCollisionGraph,
-      map: widgetMovementMap,
-      direction,
-      accessors,
-    }),
-  );
 
   if (accessors.isHorizontal) {
     return {
