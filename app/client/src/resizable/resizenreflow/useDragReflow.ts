@@ -24,6 +24,7 @@ import {
 } from "utils/WidgetPropsUtils";
 import { WidgetRowCols } from "widgets/BaseWidget";
 import { getReflowWidgetSelector } from "selectors/widgetReflowSelectors";
+import { WidgetDraggingBlock } from "utils/hooks/useBlocksToBeDraggedOnCanvas";
 
 type WidgetCollisionGraph = OccupiedSpace & {
   children?: {
@@ -247,16 +248,20 @@ export const useDragReflow = (
   const reflow = (
     dimensions: DimensionProps,
     widgetPosition: OccupiedSpace,
+    newDimensions: WidgetDraggingBlock,
     // reflowState?: widgetReflowState,
   ): { verticalMove: boolean; horizontalMove: boolean } => {
     const { direction, height, width, x, X = 0, y, Y = 0 } = dimensions;
     console.log({ reflowState });
+    const resizedPositions = {
+      left: newDimensions.left,
+      top: newDimensions.top,
+      right: newDimensions.left + newDimensions.width,
+      bottom: newDimensions.top + newDimensions.height,
+      id: newDimensions.widgetId,
+    };
 
-    const { isColliding: isWidgetsColliding, resizedPositions } = isColliding(
-      { width, height },
-      { x, y },
-      widgetPosition,
-    );
+    const isWidgetsColliding = !newDimensions.isNotColliding;
 
     const newWidgetPosition = {
       ...widgetPosition,

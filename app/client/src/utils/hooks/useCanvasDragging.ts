@@ -341,10 +341,10 @@ export const useCanvasDragging = (
               const block: DimensionProps = {
                 width: currentBlock.width,
                 height: currentBlock.height,
-                X: 0,
-                Y: 0,
-                x: (leftColumn - widgetOccupiedSpace.left) * snapColumnSpace,
-                y: (topRow - widgetOccupiedSpace.top) * snapColumnSpace,
+                X: (leftColumn - widgetOccupiedSpace.left) * snapColumnSpace,
+                Y: (topRow - widgetOccupiedSpace.top) * snapRowSpace,
+                x: 0,
+                y: 0,
                 // width: number;
                 // height: number;
                 // x: number;
@@ -354,6 +354,7 @@ export const useCanvasDragging = (
               debouncedReflow(
                 block,
                 widgetOccupiedSpace,
+                { ...currentBlock, left: leftColumn, top: topRow },
                 reflowStateRef.current,
               );
             }
