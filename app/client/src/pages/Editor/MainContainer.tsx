@@ -1,3 +1,4 @@
+import { tw } from "twind";
 import React, { useState, useCallback, useMemo } from "react";
 import styled from "styled-components";
 import * as Sentry from "@sentry/react";
@@ -81,13 +82,13 @@ function MainContainer() {
 
   return (
     <>
-      <Container className="w-full overflow-x-hidden">
+      <Container className={tw`w-full overflow-x-hidden`}>
         <EntityExplorerSidebar
           onDragEnd={onLeftSidebarDragEnd}
           onWidthChange={onLeftSidebarWidthChange}
           width={sidebarWidth}
         />
-        <div className="relative flex flex-col w-full overflow-auto">
+        <div className={tw`relative flex flex-col w-full overflow-auto`}>
           <Switch>
             <SentryRoute component={WidgetsEditor} exact path={BUILDER_URL} />
             <SentryRoute

@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import { tw } from "twind";
 import history from "utils/history";
 import * as Sentry from "@sentry/react";
 import { useDispatch, useSelector } from "react-redux";
@@ -159,7 +159,6 @@ export const EntityExplorerSidebar = memo((props: Props) => {
       }
     }
   };
-
   /**
    * toggles the pinned state of sidebar
    */
@@ -169,58 +168,61 @@ export const EntityExplorerSidebar = memo((props: Props) => {
 
   return (
     <div
-      className={classNames({
-        "js-entity-explorer t--entity-explorer transform transition-all flex h-full z-3 duration-400 border-r border-gray-200": true,
-        "relative ": pinned && !isPreviewMode,
-        "-translate-x-full": (!pinned && !active) || isPreviewMode,
-        "shadow-xl": !pinned,
-        fixed: !pinned || isPreviewMode,
-      })}
+      className={tw`js-entity-explorer t--entity-explorer transform transition-all flex h-full z-3 duration-400 border-r border-gray-200
+        ${pinned && !isPreviewMode && "relative"}
+        ${((!pinned && !active) || isPreviewMode) && "-translate-x-full"}
+        ${!pinned && "shadow-xl"}
+        ${(!pinned || isPreviewMode) && "fixed"} `}
     >
       {/* SIDEBAR */}
       <div
-        className="flex flex-col p-0 overflow-y-auto bg-white t--sidebar min-w-48 max-w-96"
+        className={tw`flex flex-col p-0 overflow-y-auto bg-white t--sidebar min-w-48 max-w-96
+          ${resizer.resizing && "pointer-events-none"}`}
         ref={sidebarRef}
         style={{ width: props.width }}
       >
         {(enableFirstTimeUserOnboarding ||
           isFirstTimeUserOnboardingComplete) && <OnboardingStatusbar />}
+
         {/* ENTITY EXPLORE HEADER */}
-        <div className="sticky top-0 flex items-center justify-between px-3 py-3 z-1">
-          <h3 className="text-sm font-medium text-gray-800 uppercase">
+        <div
+          className={tw`sticky top-0 flex items-center justify-between px-3 py-3 z-1`}
+        >
+          <h3 className={tw`text-sm font-medium text-gray-800 uppercase`}>
             Navigation
           </h3>
           <div
-            className={classNames({
-              "flex items-center transition-all duration-300 transform": true,
-              "opacity-0 pointer-events-none scale-50": pinned === false,
-              "opacity-100 scale-100": pinned,
-            })}
+            className={tw`flex items-center transition-all duration-300 transform
+            ${pinned === false && "opacity-0 pointer-events-none scale-50"}
+            ${pinned === true && "opacity-100 scale-100"}`}
           >
             <TooltipComponent
               content={
-                <div className="flex items-center justify-between">
+                <div className={tw`flex items-center justify-between`}>
                   <span>Close sidebar</span>
-                  <span className="ml-4 text-xs text-gray-300">Ctrl + /</span>
+                  <span className={tw`ml-4 text-xs text-gray-300`}>
+                    Ctrl + /
+                  </span>
                 </div>
               }
             >
               <button
-                className="p-2 hover:bg-warmGray-100 group t--unpin-entity-explorer"
+                className={tw`p-2 hover:bg-warmGray-100 group t--unpin-entity-explorer`}
                 onClick={onPin}
                 type="button"
               >
-                <PinIcon className="w-3 h-3 text-trueGray-500" />
+                <PinIcon className={tw`w-3 h-3 text-trueGray-500`} />
               </button>
             </TooltipComponent>
           </div>
         </div>
+
         {/* SWITCHER */}
-        <div className="px-3 mt-1 mb-3">
+        <div className={tw`px-3 mt-1 mb-3`}>
           <Switcher activeObj={activeSwitch} switches={switches} />
         </div>
         <PanelStack
-          className="flex-grow"
+          className={tw`flex-grow`}
           initialPanel={{
             component: Explorer,
           }}
@@ -228,9 +230,10 @@ export const EntityExplorerSidebar = memo((props: Props) => {
         />
         <AppComments />
       </div>
+
       {/* RESIZER */}
       <div
-        className="absolute z-10 w-2 h-full -mr-1 group cursor-ew-resize"
+        className={tw`absolute z-10 w-1 h-full -mr-1 group cursor-ew-resize`}
         onMouseDown={resizer.onMouseDown}
         onTouchEnd={resizer.onMouseUp}
         onTouchStart={resizer.onTouchStart}
@@ -239,12 +242,21 @@ export const EntityExplorerSidebar = memo((props: Props) => {
           display: isPreviewMode ? "none" : "initial",
         }}
       >
-        <div
-          className={classNames({
-            "w-1 h-full bg-transparent group-hover:bg-blue-500 transform transition": true,
-            "bg-blue-500": resizer.resizing,
-          })}
-        />
+        <TooltipComponent
+          content={
+            <div className={tw`flex items-center justify-between`}>
+              <span>Close sidebar</span>
+              <span className={tw`ml-4 text-xs text-gray-300`}>Ctrl + /</span>
+            </div>
+          }
+          position="right"
+        >
+          <div
+            className={tw`w-1 h-full  transform transition
+          ${resizer.resizing && "bg-gray-400"}
+          ${!resizer.resizing && "bg-transparent group-hover:bg-gray-200"}`}
+          />
+        </TooltipComponent>
       </div>
     </div>
   );

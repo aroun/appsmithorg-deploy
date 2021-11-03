@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import { tw } from "twind";
 import { useDispatch } from "react-redux";
 import React, { useMemo, useCallback } from "react";
 
@@ -90,13 +91,15 @@ export function MainContainerLayoutControl() {
   );
 
   return (
-    <div className="px-3 space-y-2 t--layout-control-wrapper">
-      <p className="text-sm text-gray-700">Canvas Size</p>
-      <div className="flex justify-around">
+    <div className={tw`px-3 space-y-2 t--layout-control-wrapper`}>
+      <p className={tw`text-sm text-gray-700`}>Canvas Size</p>
+      <div className={tw`flex justify-around`}>
         {AppsmithLayouts.map((layoutOption: any, index: number) => {
+          const isSelectedLayout = selectedLayout?.name === layoutOption.name;
+
           return (
             <TooltipComponent
-              className="flex-grow"
+              className={tw`flex-grow`}
               content={layoutOption.name}
               key={layoutOption.name}
               position={
@@ -104,13 +107,10 @@ export function MainContainerLayoutControl() {
               }
             >
               <button
-                className={classNames({
-                  "border-transparent border flex items-center justify-center p-2 flex-grow": true,
-                  "bg-white border-gray-300":
-                    selectedLayout?.name === layoutOption.name,
-                  "bg-gray-100 hover:bg-gray-200":
-                    selectedLayout?.name !== layoutOption.name,
-                })}
+                className={tw`border flex items-center justify-center p-2 flex-grow
+                  ${isSelectedLayout && "bg-white border-gray-300"}
+                  ${!isSelectedLayout &&
+                    "bg-gray-100 hover:bg-gray-200 border-transparent"}`}
                 onClick={() => updateAppLayout(layoutOption)}
               >
                 <Icon

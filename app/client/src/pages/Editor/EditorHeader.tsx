@@ -1,3 +1,4 @@
+import { tw } from "twind";
 import React, { useCallback, useEffect, useState, lazy, Suspense } from "react";
 import styled, { ThemeProvider } from "styled-components";
 import classNames from "classnames";
@@ -232,7 +233,9 @@ const GlobalSearch = lazy(() => {
 
 export function ShareButtonComponent() {
   return (
-    <ShareButton className="flex items-center t--application-share-btn header__application-share-btn">
+    <ShareButton
+      className={tw`flex items-center t--application-share-btn header__application-share-btn`}
+    >
       <StyledSharedIcon name="share-line" />
       <StyledShareText>SHARE</StyledShareText>
     </ShareButton>
@@ -334,31 +337,33 @@ export function EditorHeader(props: EditorHeaderProps) {
 
   return (
     <ThemeProvider theme={theme}>
-      <HeaderWrapper className="pr-3">
-        <HeaderSection className="space-x-3">
+      <HeaderWrapper className={tw`pr-3`}>
+        <HeaderSection className={tw`space-x-3`}>
           <div
-            className={classNames({
-              "text-gray-800 transform transition-all duration-400 pl-3 relative": true,
-              "ml-0": !pinned,
-              "-ml-7": pinned,
-            })}
+            className={tw`text-gray-800 transform transition-all duration-400 pl-3 relative
+              ${!pinned && "ml-0"}
+              ${pinned && "-ml-7"}`}
           >
             <TooltipComponent
               content={
-                <div className="flex items-center justify-between">
+                <div className={tw`flex items-center justify-between`}>
                   <span>Lock sidebar open</span>
-                  <span className="ml-4 text-xs text-gray-300">Ctrl + /</span>
+                  <span className={tw`ml-4 text-xs text-gray-300`}>
+                    Ctrl + /
+                  </span>
                 </div>
               }
               position="bottom-left"
             >
               <div
-                className="relative w-4 h-4 text-trueGray-600 group t--pin-entity-explorer"
+                className={tw`relative w-4 h-4 text-trueGray-600 group t--pin-entity-explorer`}
                 onMouseEnter={onMenuHover}
               >
-                <MenuIcon className="absolute w-4 h-4 transition-opacity opacity-100 fill-current group-hover:opacity-0" />
+                <MenuIcon
+                  className={tw`absolute w-4 h-4 transition-opacity opacity-100 fill-current group-hover:opacity-0`}
+                />
                 <UnpinIcon
-                  className="absolute w-4 h-4 transition-opacity opacity-0 cursor-pointer fill-current group-hover:opacity-100"
+                  className={tw`absolute w-4 h-4 transition-opacity opacity-0 cursor-pointer fill-current group-hover:opacity-100`}
                   onClick={onPin}
                 />
               </div>

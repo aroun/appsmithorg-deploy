@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import { tw } from "twind";
 import * as Sentry from "@sentry/react";
 import { useSelector } from "react-redux";
 import React, { memo, useEffect, useRef, useMemo } from "react";
@@ -65,32 +65,28 @@ export const PropertyPaneSidebar = memo((props: Props) => {
   }, [selectedWidgets, isDraggingForSelection]);
 
   return (
-    <div className="relative">
+    <div className={tw`relative`}>
       {/* RESIZOR */}
       <div
-        className="absolute top-0 left-0 w-2 h-full -ml-2 group z-4 cursor-ew-resize"
+        className={tw`absolute top-0 left-0 w-2 h-full -ml-2 group z-4 cursor-ew-resize`}
         onMouseDown={onMouseDown}
         onTouchEnd={onMouseUp}
         onTouchStart={onTouchStart}
       >
         <div
-          className={classNames({
-            "w-1 h-full ml-1 bg-transparent group-hover:bg-blue-500 transform transition": true,
-            "bg-blue-500": resizing,
-          })}
+          className={tw`w-1 h-full ml-1 bg-transparent group-hover:bg-blue-500 transform transition
+            ${resizing && "bg-blue-500"}`}
         />
       </div>
       {/* PROPERTY PANE */}
       <div
-        className={classNames({
-          "js-property-pane-sidebar t--property-pane-sidebar bg-white flex h-full z-3 border-l border-gray-200 transform transition duration-300": true,
-          "relative ": !isPreviewMode,
-          "fixed translate-x-full right-0": isPreviewMode || isCommentMode,
-        })}
+        className={tw`js-property-pane-sidebar t--property-pane-sidebar bg-white flex h-full z-3 border-l border-gray-200 transform transition duration-400
+          ${!isPreviewMode && "relative"} ${(isPreviewMode || isCommentMode) &&
+          "fixed translate-x-full right-0"}`}
         ref={sidebarRef}
       >
         <div
-          className="h-full p-0 overflow-y-auto min-w-72 max-w-104"
+          className={tw`h-full p-0 overflow-y-auto min-w-72 max-w-104`}
           style={{ width: props.width }}
         >
           {propertyPane}
