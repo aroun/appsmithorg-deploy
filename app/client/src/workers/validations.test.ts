@@ -20,7 +20,7 @@ const DUMMY_WIDGET: WidgetProps = {
 };
 
 describe("Validate Validators", () => {
-  it("correctly validates text", () => {
+  it.only("correctly validates text", () => {
     const validation = {
       type: ValidationTypes.TEXT,
       params: {
@@ -73,8 +73,11 @@ describe("Validate Validators", () => {
         parsed: "123",
       },
       {
-        isValid: true,
-        parsed: "",
+        isValid: false,
+        parsed: "abc",
+        messages: [
+          `${WIDGET_TYPE_VALIDATION_ERROR} string ( abc | 123 | mno | test )`,
+        ],
       },
     ];
     inputs.forEach((input, index) => {
@@ -83,7 +86,7 @@ describe("Validate Validators", () => {
     });
   });
 
-  it("correctly validates text when required is set to false", () => {
+  it.only("correctly validates text when required is set to false", () => {
     const validation = {
       type: ValidationTypes.TEXT,
       params: {
@@ -95,7 +98,7 @@ describe("Validate Validators", () => {
     const expected = [
       {
         isValid: true,
-        parsed: "",
+        parsed: "abc",
       },
     ];
     inputs.forEach((input, index) => {
@@ -104,7 +107,7 @@ describe("Validate Validators", () => {
     });
   });
 
-  it("correctly validates strict text", () => {
+  it.only("correctly validates strict text", () => {
     const validation = {
       type: ValidationTypes.TEXT,
       params: {
