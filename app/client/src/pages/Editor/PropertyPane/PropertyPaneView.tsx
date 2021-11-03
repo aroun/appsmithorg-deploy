@@ -1,3 +1,4 @@
+import { tw } from "twind";
 import React, { ReactElement, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getWidgetPropsForPropertyPane } from "selectors/propertyPaneSelectors";
@@ -71,7 +72,7 @@ function PropertyPaneView(
         tooltipContent: "Copy Widget",
         icon: (
           <button
-            className="p-1 hover:bg-warmGray-100 group t--copy-widget"
+            className={tw`p-1 hover:bg-warmGray-100 group t--copy-widget`}
             onClick={onCopy}
           >
             <CopyIcon className="w-4 h-4 text-gray-500" />
@@ -96,7 +97,7 @@ function PropertyPaneView(
 
   return (
     <div
-      className="relative flex flex-col w-full pt-3 overflow-y-auto"
+      className={tw`relative flex flex-col w-full pt-3 overflow-y-auto`}
       key={`property-pane-${widgetProperties.widgetId}`}
     >
       <PropertyPaneTitle
@@ -107,7 +108,9 @@ function PropertyPaneView(
         widgetType={widgetProperties?.type}
       />
 
-      <div className="p-3 pb-24 overflow-x-hidden overflow-y-scroll t--property-pane-view">
+      <div
+        className={tw`p-3 pb-24 overflow-x-hidden overflow-y-scroll t--property-pane-view`}
+      >
         {!doActionsExist && !hideConnectDataCTA && (
           <ConnectDataCTA
             widgetId={widgetProperties.widgetId}

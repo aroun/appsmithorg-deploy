@@ -221,6 +221,7 @@ export const EntityExplorerSidebar = memo((props: Props) => {
         <div className={tw`px-3 mt-1 mb-3`}>
           <Switcher activeObj={activeSwitch} switches={switches} />
         </div>
+
         <PanelStack
           className={tw`flex-grow`}
           initialPanel={{
@@ -242,21 +243,11 @@ export const EntityExplorerSidebar = memo((props: Props) => {
           display: isPreviewMode ? "none" : "initial",
         }}
       >
-        <TooltipComponent
-          content={
-            <div className={tw`flex items-center justify-between`}>
-              <span>Close sidebar</span>
-              <span className={tw`ml-4 text-xs text-gray-300`}>Ctrl + /</span>
-            </div>
-          }
-          position="right"
-        >
-          <div
-            className={tw`w-1 h-full  transform transition
+        <div
+          className={tw`w-1 h-full  transform transition
           ${resizer.resizing && "bg-gray-400"}
           ${!resizer.resizing && "bg-transparent group-hover:bg-gray-200"}`}
-          />
-        </TooltipComponent>
+        />
       </div>
     </div>
   );

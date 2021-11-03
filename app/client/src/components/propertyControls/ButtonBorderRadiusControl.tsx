@@ -6,12 +6,14 @@ import BaseControl, { ControlProps } from "./BaseControl";
 import { ControlIcons } from "icons/ControlIcons";
 import { ThemeProp } from "components/ads/common";
 
-export enum ButtonBorderRadiusTypes {
-  SHARP = "SHARP",
-  ROUNDED = "ROUNDED",
-  CIRCLE = "CIRCLE",
-}
-export type ButtonBorderRadius = keyof typeof ButtonBorderRadiusTypes;
+export const ButtonBorderRadiusTypes = {
+  SHARP: "none",
+  ROUNDED: "lg",
+  CIRCLE: "full",
+} as const;
+
+type Keys = keyof typeof ButtonBorderRadiusTypes;
+export type ButtonBorderRadius = typeof ButtonBorderRadiusTypes[Keys];
 
 const StyledButtonGroup = styled(ButtonGroup)`
   height: 33px;
@@ -58,13 +60,15 @@ class ButtonBorderRadiusOptionsControl extends BaseControl<
     return (
       <StyledButtonGroup fill>
         <StyledButton
-          active={propertyValue === ButtonBorderRadiusTypes.SHARP || undefined}
+          active={propertyValue === ButtonBorderRadiusTypes.SHARP}
           icon={<ControlIcons.BORDER_RADIUS_SHARP color="#979797" width={15} />}
           large
           onClick={() => this.toggleOption(ButtonBorderRadiusTypes.SHARP)}
         />
         <StyledButton
-          active={propertyValue === ButtonBorderRadiusTypes.ROUNDED}
+          active={
+            propertyValue === ButtonBorderRadiusTypes.ROUNDED || undefined
+          }
           icon={
             <ControlIcons.BORDER_RADIUS_ROUNDED color="#979797" width={15} />
           }
