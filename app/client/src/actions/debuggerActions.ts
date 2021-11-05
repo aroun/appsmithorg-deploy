@@ -61,6 +61,11 @@ export const deleteErrorLog = (id: string) => ({
   payload: id,
 });
 
+export const moveErrorToTop = (id: string) => ({
+  type: ReduxActionTypes.DEBUGGER_MOVE_ERROR_TOP,
+  payload: id,
+});
+
 // Only used for analytics
 export const logDebuggerErrorAnalytics = (
   payload: LogDebuggerErrorAnalyticsPayload,

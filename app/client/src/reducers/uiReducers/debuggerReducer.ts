@@ -1,7 +1,7 @@
 import { createReducer } from "utils/AppsmithUtils";
 import { Log } from "entities/AppsmithConsole";
 import { ReduxAction, ReduxActionTypes } from "constants/ReduxActionConstants";
-import { omit, isUndefined } from "lodash";
+import { omit, isUndefined, get } from "lodash";
 
 const initialState: DebuggerReduxState = {
   logs: [],
@@ -49,6 +49,26 @@ const debuggerReducer = createReducer(initialState, {
       ...state,
       errors: {
         [action.payload.id]: action.payload,
+        ...errors,
+      },
+    };
+  },
+  [ReduxActionTypes.DEBUGGER_MOVE_ERROR_TOP]: (
+    state: DebuggerReduxState,
+    action: ReduxAction<string>,
+  ) => {
+    if (!action.payload) return state;
+
+    const error = get(state.errors, action.payload);
+
+    if (!error) return state;
+
+    const errors = omit(state.errors, action.payload);
+
+    return {
+      ...state,
+      errors: {
+        [action.payload]: error,
         ...errors,
       },
     };

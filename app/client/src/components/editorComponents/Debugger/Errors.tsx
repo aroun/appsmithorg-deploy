@@ -37,11 +37,15 @@ function Errors(props: { hasShortCut?: boolean }) {
             placeholderText={createMessage(NO_ERRORS)}
           />
         ) : (
-          Object.values(errors).map((e, index) => {
+          Object.values(errors).map((e) => {
             const logItemProps = getLogItemProps(e);
             // Expand all errors by default
             return (
-              <LogItem key={`debugger-${index}`} {...logItemProps} expand />
+              <LogItem
+                key={`${e.source?.id}-${e.source?.propertyPath}`}
+                {...logItemProps}
+                expand
+              />
             );
           })
         )}

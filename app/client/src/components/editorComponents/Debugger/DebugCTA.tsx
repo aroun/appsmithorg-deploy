@@ -1,7 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 import Button from "components/ads/Button";
-import { setCurrentTab, showDebugger } from "actions/debuggerActions";
+import {
+  moveErrorToTop,
+  setCurrentTab,
+  showDebugger,
+} from "actions/debuggerActions";
 import { useDispatch, useSelector } from "react-redux";
 import { Classes, Variant } from "components/ads/common";
 import { getAppMode } from "selectors/applicationSelectors";
@@ -54,6 +58,16 @@ export function EvaluatedValueDebugButton(props: {
   error: Message;
   entity?: FieldEntityInformation;
 }) {
+  const dispatch = useDispatch();
+
+  const onClick = () => {
+    dispatch(showDebugger(true));
+    dispatch(setCurrentTab(DEBUGGER_TAB_KEYS.ERROR_TAB));
+    dispatch(
+      moveErrorToTop(`${props.entity?.entityId}-${props.entity?.propertyPath}`),
+    );
+  };
+
   return (
     <Wrapper>
       <ContextualMenu
@@ -72,7 +86,7 @@ export function EvaluatedValueDebugButton(props: {
         }}
         position={Position.BOTTOM_RIGHT}
       >
-        <EVDebugButton>
+        <EVDebugButton onClick={onClick}>
           DEBUG
           <Icon
             fillColor={Colors.POMEGRANATE2}
