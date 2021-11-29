@@ -86,13 +86,13 @@ import { RunPluginActionDescription } from "entities/DataTree/actionTriggers";
 import { APP_MODE } from "entities/App";
 import { FileDataTypes } from "widgets/constants";
 import { hideDebuggerErrors } from "actions/debuggerActions";
-import { TriggerMeta } from "sagas/ActionExecution/ActionExecutionSagas";
 import {
   PluginTriggerFailureError,
   PluginActionExecutionError,
   UserCancelledActionExecutionError,
   getErrorAsString,
 } from "sagas/ActionExecution/errorUtils";
+import { trimQueryString } from "utils/helpers";
 
 enum ActionResponseDataTypes {
   BINARY = "BINARY",
@@ -242,7 +242,6 @@ function* confirmRunActionSaga() {
 export default function* executePluginActionTriggerSaga(
   pluginAction: RunPluginActionDescription["payload"],
   eventType: EventType,
-  triggerMeta: TriggerMeta,
 ) {
   const { actionId, params } = pluginAction;
   PerformanceTracker.startAsyncTracking(
@@ -309,7 +308,6 @@ export default function* executePluginActionTriggerSaga(
     throw new PluginTriggerFailureError(
       createMessage(ERROR_PLUGIN_ACTION_EXECUTE, action.name),
       [payload.body, params],
-      triggerMeta,
     );
   } else {
     AppsmithConsole.info({
@@ -334,13 +332,13 @@ function* runActionShortcutSaga() {
   const location = window.location.pathname;
   const match: any = matchPath(location, {
     path: [
-      API_EDITOR_URL(),
-      API_EDITOR_ID_URL(),
-      QUERIES_EDITOR_URL(),
-      QUERIES_EDITOR_ID_URL(),
-      API_EDITOR_URL_WITH_SELECTED_PAGE_ID(),
-      INTEGRATION_EDITOR_URL(),
-      SAAS_EDITOR_API_ID_URL(),
+      trimQueryString(API_EDITOR_URL()),
+      trimQueryString(API_EDITOR_ID_URL()),
+      trimQueryString(QUERIES_EDITOR_URL()),
+      trimQueryString(QUERIES_EDITOR_ID_URL()),
+      trimQueryString(API_EDITOR_URL_WITH_SELECTED_PAGE_ID()),
+      trimQueryString(INTEGRATION_EDITOR_URL()),
+      trimQueryString(SAAS_EDITOR_API_ID_URL()),
     ],
     exact: true,
     strict: false,
@@ -664,6 +662,10 @@ function* executePluginActionSaga(
   if (pluginAction.confirmBeforeExecute) {
     const confirmed = yield call(confirmRunActionSaga);
     if (!confirmed) {
+      yield put({
+        type: ReduxActionTypes.RUN_ACTION_CANCELLED,
+        payload: { id: actionId },
+      });
       throw new UserCancelledActionExecutionError();
     }
   }
