@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Set;
 
-public interface CustomActionRepository extends AppsmithRepository<Action> {
+public interface CustomActionRepositoryCE extends AppsmithRepository<Action> {
 
     Mono<Action> findByNameAndPageId(String name, String pageId, AclPermission aclPermission);
 

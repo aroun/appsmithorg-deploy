@@ -2,7 +2,7 @@ package com.appsmith.server.services;
 
 import com.appsmith.external.models.ApiTemplate;
 import com.appsmith.server.constants.FieldName;
-import com.appsmith.server.repositories.ApiTemplateRepository;
+import com.appsmith.server.repositories.ee.ApiTemplateRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;

@@ -3,7 +3,7 @@ package com.appsmith.server.services;
 import com.appsmith.server.domains.Asset;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.exceptions.AppsmithException;
-import com.appsmith.server.repositories.AssetRepository;
+import com.appsmith.server.repositories.ee.AssetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.buffer.DataBuffer;

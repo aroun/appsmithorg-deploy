@@ -35,7 +35,7 @@ import java.util.Set;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
 @Slf4j
-public abstract class BaseAppsmithRepositoryImpl<T extends BaseDomain> {
+public class BaseAppsmithRepositoryImpl<T extends BaseDomain> implements AppsmithRepository<T> {
 
     protected final ReactiveMongoOperations mongoOperations;
 

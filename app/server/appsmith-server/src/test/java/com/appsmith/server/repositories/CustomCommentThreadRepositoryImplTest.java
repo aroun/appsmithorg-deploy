@@ -7,6 +7,7 @@ import com.appsmith.server.domains.CommentThread;
 import com.appsmith.server.domains.User;
 import com.appsmith.server.dtos.CommentThreadFilterDTO;
 import com.appsmith.server.helpers.PolicyUtils;
+import com.appsmith.server.repositories.ee.CommentThreadRepository;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

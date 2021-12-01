@@ -4,6 +4,7 @@ import com.appsmith.server.acl.AclPermission;
 import com.appsmith.server.domains.ActionCollection;
 import com.appsmith.server.domains.QActionCollection;
 import com.appsmith.server.domains.User;
+import com.appsmith.server.repositories.ee.CustomActionCollectionRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -17,11 +18,12 @@ import java.util.List;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
-public class CustomActionCollectionRepositoryImpl extends BaseAppsmithRepositoryImpl<ActionCollection> implements CustomActionCollectionRepository {
+public abstract class CustomActionCollectionRepositoryImpl extends BaseAppsmithRepositoryImpl<ActionCollection>
+        implements CustomActionCollectionRepository {
+
     public CustomActionCollectionRepositoryImpl(ReactiveMongoOperations mongoOperations, MongoConverter mongoConverter) {
         super(mongoOperations, mongoConverter);
     }
-
 
     @Override
     public Flux<ActionCollection> findByApplicationId(String applicationId, AclPermission aclPermission, Sort sort) {

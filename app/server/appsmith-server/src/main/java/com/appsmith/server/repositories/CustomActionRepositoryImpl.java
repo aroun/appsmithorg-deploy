@@ -4,6 +4,7 @@ import com.appsmith.external.models.QActionConfiguration;
 import com.appsmith.server.acl.AclPermission;
 import com.appsmith.server.domains.Action;
 import com.appsmith.server.domains.QAction;
+import com.appsmith.server.repositories.ee.CustomActionRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoOperations;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -17,7 +18,7 @@ import java.util.Set;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 
-public class CustomActionRepositoryImpl extends BaseAppsmithRepositoryImpl<Action> implements CustomActionRepository {
+public abstract class CustomActionRepositoryImpl extends BaseAppsmithRepositoryImpl<Action> implements CustomActionRepository {
 
     public CustomActionRepositoryImpl(ReactiveMongoOperations mongoOperations, MongoConverter mongoConverter) {
         super(mongoOperations, mongoConverter);

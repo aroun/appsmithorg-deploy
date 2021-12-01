@@ -8,7 +8,7 @@ import com.appsmith.server.domains.CommentThread;
 import com.appsmith.server.domains.Organization;
 import com.appsmith.server.dtos.CommentThreadFilterDTO;
 import com.appsmith.server.dtos.PageDTO;
-import com.appsmith.server.repositories.ApplicationRepository;
+import com.appsmith.server.repositories.ee.ApplicationRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;

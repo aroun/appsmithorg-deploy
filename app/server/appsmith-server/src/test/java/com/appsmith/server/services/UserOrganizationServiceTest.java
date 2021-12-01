@@ -12,10 +12,10 @@ import com.appsmith.server.domains.User;
 import com.appsmith.server.domains.UserRole;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.helpers.PolicyUtils;
-import com.appsmith.server.repositories.ApplicationRepository;
-import com.appsmith.server.repositories.CommentThreadRepository;
 import com.appsmith.server.repositories.OrganizationRepository;
 import com.appsmith.server.repositories.UserRepository;
+import com.appsmith.server.repositories.ee.ApplicationRepository;
+import com.appsmith.server.repositories.ee.CommentThreadRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -37,8 +37,8 @@ import java.util.Set;
 import static com.appsmith.server.acl.AppsmithRole.ORGANIZATION_ADMIN;
 import static com.appsmith.server.acl.AppsmithRole.ORGANIZATION_DEVELOPER;
 import static com.appsmith.server.acl.AppsmithRole.ORGANIZATION_VIEWER;
-import static org.junit.Assert.assertFalse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j

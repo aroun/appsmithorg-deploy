@@ -1,14 +1,13 @@
 package com.appsmith.server.repositories;
 
 import com.appsmith.server.domains.Action;
-import org.springframework.stereotype.Repository;
+import com.appsmith.server.repositories.ee.CustomActionRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Set;
 
-@Repository
-public interface ActionRepository extends BaseRepository<Action, String>, CustomActionRepository {
+public interface ActionRepositoryCE extends BaseRepository<Action, String>, CustomActionRepository {
 
     Flux<Action> findDistinctActionsByNameInAndPageIdAndActionConfiguration_HttpMethodAndUserSetOnLoad(
             Set<String> names, String pageId, String httpMethod, Boolean userSetOnLoad);

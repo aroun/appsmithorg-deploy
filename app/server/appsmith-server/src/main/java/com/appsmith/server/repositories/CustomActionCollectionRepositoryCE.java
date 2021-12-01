@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 
 import java.util.List;
 
-public interface CustomActionCollectionRepository extends AppsmithRepository<ActionCollection> {
+public interface CustomActionCollectionRepositoryCE extends AppsmithRepository<ActionCollection> {
 
     Flux<ActionCollection> findByApplicationId(String applicationId, AclPermission aclPermission, Sort sort);
 

@@ -8,7 +8,7 @@ import com.appsmith.server.dtos.OrganizationApplicationsDTO;
 import com.appsmith.server.dtos.UserHomepageDTO;
 import com.appsmith.server.exceptions.AppsmithError;
 import com.appsmith.server.exceptions.AppsmithException;
-import com.appsmith.server.repositories.ApplicationRepository;
+import com.appsmith.server.repositories.ee.ApplicationRepository;
 import com.appsmith.server.services.OrganizationService;
 import com.appsmith.server.services.SessionUserServiceImpl;
 import com.appsmith.server.services.UserDataService;

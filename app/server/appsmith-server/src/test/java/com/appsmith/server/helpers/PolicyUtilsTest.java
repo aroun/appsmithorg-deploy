@@ -4,7 +4,7 @@ import com.appsmith.external.models.Policy;
 import com.appsmith.server.acl.AclPermission;
 import com.appsmith.server.domains.CommentThread;
 import com.appsmith.server.domains.User;
-import com.appsmith.server.repositories.CommentThreadRepository;
+import com.appsmith.server.repositories.ee.CommentThreadRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
