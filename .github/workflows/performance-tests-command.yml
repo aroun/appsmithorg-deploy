@@ -396,7 +396,7 @@ jobs:
 
           APPSMITH_DISABLE_TELEMETRY: true
           POSTGRES_PASSWORD: postgres
-          NODE_TLS_REJECT_UNAUTHORIZED: 0
+          NODE_TLS_REJECT_UNAUTHORIZED: "0"
 
         run: ./start-test.sh
 
