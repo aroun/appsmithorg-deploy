@@ -388,3 +388,8 @@ jobs:
         shell: bash
         working-directory: app/client/perf       
         run: ./start-test.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: performance-summaries
+          path: app/client/perf/traces/reports
