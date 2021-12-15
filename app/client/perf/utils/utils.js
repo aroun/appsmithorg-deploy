@@ -97,12 +97,9 @@ exports.login = async (page) => {
 
   await delay(1000);
 
-  const emailSelector =
-    "#root > section > div.StyledComponents__AuthCardContainer-sc-1a3zid1-1.MoHzZ > div > form > div:nth-child(1) > div > div > input";
-  const passwordSelector =
-    "#root > section > div.StyledComponents__AuthCardContainer-sc-1a3zid1-1.MoHzZ > div > form > div:nth-child(2) > div > div > input";
-  const buttonSelector =
-    "#root > section > div.StyledComponents__AuthCardContainer-sc-1a3zid1-1.MoHzZ > div > form > div.StyledComponents__FormActions-sc-1a3zid1-9.cGIzTy > button";
+  const emailSelector = "input[name='username']";
+  const passwordSelector = "input[name='password']";
+  const buttonSelector = "button[type='submit']";  
   await page.waitForSelector(emailSelector);
   await page.waitForSelector(passwordSelector);
   await page.waitForSelector(buttonSelector);
