@@ -387,4 +387,20 @@ jobs:
       - name: Run performance tests
         shell: bash
         working-directory: app/client/perf       
+        env:
+          APPSMITH_SSL_CERTIFICATE: ${{ secrets.APPSMITH_SSL_CERTIFICATE }}
+          APPSMITH_SSL_KEY: ${{ secrets.APPSMITH_SSL_KEY }}
+
+          CYPRESS_TESTUSERNAME1: ${{ secrets.CYPRESS_TESTUSERNAME1 }}
+          CYPRESS_TESTPASSWORD1: ${{ secrets.CYPRESS_TESTPASSWORD1 }}
+
+          APPSMITH_DISABLE_TELEMETRY: true
+          POSTGRES_PASSWORD: postgres
+          NODE_TLS_REJECT_UNAUTHORIZED: "0"
+
         run: ./start-test.sh
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: performance-summaries
+          path: app/client/perf/traces/reports

@@ -9,7 +9,7 @@ process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
 
 async function testTyping() {
   // const perf = new Perf({ headless: false, devtools: true });
-  const perf = new Perf({});
+  const perf = new Perf({ignoreHTTPSErrors:true});
   await perf.launch();
   const page = perf.getPage();
   await perf.loadDSL(dsl);
