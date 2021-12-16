@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 
-const delay = (time) => {
-  console.log("waiting for ", time / 1000, "s");
+const delay = (time, msg = "") => {
+  console.log(`waiting ${msg}:`, time / 1000, "s");
   return new Promise(function(resolve) {
     setTimeout(resolve, time);
   });

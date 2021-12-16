@@ -1,13 +1,13 @@
+const Tracelib = require("tracelib");
+const puppeteer = require("puppeteer");
+const fs = require("fs");
 const {
   delay,
   login,
   getFormattedTime,
   sortObjectKeys,
 } = require("./utils/utils");
-const Tracelib = require("tracelib");
-
-const puppeteer = require("puppeteer");
-const fs = require("fs");
+const { summaries } = require("./summary");
 
 module.exports = class Perf {
   constructor(launchOptions = {}) {
@@ -22,7 +22,6 @@ module.exports = class Perf {
    * Launches the browser and, gives you the page
    */
   launch = async () => {
-    console.log(this.launchOptions);
     this.browser = await puppeteer.launch(this.launchOptions);
     const pages_ = await this.browser.pages();
     this.page = pages_[0];
@@ -31,7 +30,29 @@ module.exports = class Perf {
 
   _login = async () => {
     await login(this.page);
-    await delay(2000);
+    await delay(2000, "after login");
+  };
+
+  startTrace = async (action = "foo") => {
+    if (this.traceInProgress) {
+      console.warn("Trace progress. You can run only one trace at a time");
+      return;
+    }
+
+    this.traceInProgress = true;
+    await delay(3000, `before starting trace ${action}`);
+    const path = `${APP_ROOT}/traces/${action}-${getFormattedTime()}-chrome-profile.json`;
+    await this.page.tracing.start({
+      path: path,
+      screenshots: true,
+    });
+    this.traces.push({ action, path });
+  };
+
+  stopTrace = async () => {
+    this.traceInProgress = false;
+    await delay(5000, "before stoping the trace");
+    await this.page.tracing.stop();
   };
 
   getPage = () => {
@@ -79,27 +100,10 @@ module.exports = class Perf {
       },
       { pageId, dsl },
     );
-    await this.page.goto(currentUrl.replace("generate-page?a=b", ""));
-    // await this.page.waitForNavigation();
-  };
-
-  startTrace = async (action = "foo") => {
-    if (this.traceInProgress) {
-      console.warn("Trace progress. You can run only one trace at a time");
-      return;
-    }
-    this.traceInProgress = true;
-    const path = `${__dirname}/traces/${action}-${getFormattedTime()}-chrome-profile.json`;
-    await this.page.tracing.start({
-      path: path,
-      screenshots: true,
+    await this.page.goto(currentUrl.replace("generate-page", ""), {
+      waitUntil: "networkidle2",
+      timeout: 60000,
     });
-    this.traces.push({ action, path });
-  };
-
-  stopTrace = async () => {
-    this.traceInProgress = false;
-    await this.page.tracing.stop();
   };
 
   generateReport = async () => {
@@ -115,7 +119,7 @@ module.exports = class Perf {
     });
 
     fs.writeFile(
-      `${__dirname}/traces/reports/${getFormattedTime()}.json`,
+      `${APP_ROOT}/traces/reports/${getFormattedTime()}.json`,
       JSON.stringify(report, "", 4),
       (err) => {
         if (err) {
@@ -128,6 +132,7 @@ module.exports = class Perf {
   };
 
   close = async () => {
-    await this.browser.close();
+    this.browser.close();
+    summaries(`${APP_ROOT}/traces/reports`);
   };
 };
