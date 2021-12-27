@@ -34,6 +34,7 @@ enum NodeTypes {
   FunctionExpression = "FunctionExpression",
   AssignmentPattern = "AssignmentPattern",
   Literal = "Literal",
+  CallExpression = "CallExpression",
 }
 
 type Pattern = IdentifierNode | AssignmentPatternNode;
@@ -88,6 +89,11 @@ interface LiteralNode extends Node {
   value: string | boolean | null | number | RegExp;
 }
 
+interface CallExpression extends Node {
+  type: NodeTypes.CallExpression;
+  arguments: Node[];
+}
+
 /* We need these functions to typescript casts the nodes with the correct types */
 const isIdentifierNode = (node: Node): node is IdentifierNode => {
   return node.type === NodeTypes.Identifier;
@@ -115,6 +121,10 @@ const isAssignmentPatternNode = (node: Node): node is AssignmentPatternNode => {
 
 const isLiteralNode = (node: Node): node is LiteralNode => {
   return node.type === NodeTypes.Literal;
+};
+
+const isCallExpression = (node: Node): node is CallExpression => {
+  return node.type === NodeTypes.CallExpression;
 };
 
 const isArrayAccessorNode = (node: Node): node is MemberExpressionNode => {
@@ -232,7 +242,7 @@ export const extractIdentifiersFromCode = (code: string): string[] => {
       }
     },
     FunctionDeclaration(node: Node) {
-      // params in function declarations are also counted as identifiers so we keep
+      // params in function declarations are also counted as identifiers, so we keep
       // track of them and remove them from the final list of identifiers
       if (!isFunctionDeclaration(node)) return;
       functionalParams = new Set([
@@ -256,6 +266,21 @@ export const extractIdentifiersFromCode = (code: string): string[] => {
   functionalParams.forEach((param) => identifiers.delete(param));
 
   return Array.from(identifiers);
+};
+
+export const getFunctionArguments = (code: string): string[] => {
+  const args: string[] = [];
+  const ast = getAST(code);
+  ancestor(ast, {
+    CallExpression(node: Node) {
+      if (!isCallExpression(node)) return;
+      node.arguments.forEach((arg) => {
+        const nodeText = code.slice(arg.start, arg.end);
+        args.push(nodeText);
+      });
+    },
+  });
+  return args;
 };
 
 const getFunctionalParamsFromNode = (
