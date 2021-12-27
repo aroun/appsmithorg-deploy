@@ -22,11 +22,13 @@ export class BaseActionFunction {
     // TODO support for default arguments
     this.parseFunction();
   }
-  getValue(fieldName: string) {
-    // Implement AST to get the value of a field;
+  getValue(fieldName: string): string {
+    // TODO find the value of the field name and send that
+    return "";
   }
   onValueChange(fieldName: string, value: string) {
     // Update the value of a field and return the value
+    // TODO
     return "";
   }
   getFields(): FieldConfig[] {

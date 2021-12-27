@@ -1,5 +1,5 @@
 import { parse, Node } from "acorn";
-import { ancestor } from "acorn-walk";
+import { ancestor, simple } from "acorn-walk";
 import _ from "lodash";
 import { ECMA_VERSION } from "workers/constants";
 import { sanitizeScript } from "./evaluate";
@@ -92,6 +92,7 @@ interface LiteralNode extends Node {
 interface CallExpression extends Node {
   type: NodeTypes.CallExpression;
   arguments: Node[];
+  callee: IdentifierNode | MemberExpressionNode;
 }
 
 /* We need these functions to typescript casts the nodes with the correct types */
@@ -268,10 +269,36 @@ export const extractIdentifiersFromCode = (code: string): string[] => {
   return Array.from(identifiers);
 };
 
+export const getFunctionCalls = (
+  code: string,
+): { name: string; functionCall: string }[] => {
+  // TODO need to get nesting structure as well
+  const functionCalls: { name: string; functionCall: string }[] = [];
+  const ast = getAST(code);
+  simple(ast, {
+    CallExpression(node: Node) {
+      if (!isCallExpression(node)) return;
+      const functionCall = code.slice(node.start, node.end);
+      if (isIdentifierNode(node.callee)) {
+        functionCalls.push({
+          name: node.callee.name,
+          functionCall,
+        });
+      } else if (isMemberExpressionNode(node.callee)) {
+        functionCalls.push({
+          name: constructFinalMemberExpIdentifier(node.callee),
+          functionCall,
+        });
+      }
+    },
+  });
+  return functionCalls;
+};
+
 export const getFunctionArguments = (code: string): string[] => {
   const args: string[] = [];
   const ast = getAST(code);
-  ancestor(ast, {
+  simple(ast, {
     CallExpression(node: Node) {
       if (!isCallExpression(node)) return;
       node.arguments.forEach((arg) => {

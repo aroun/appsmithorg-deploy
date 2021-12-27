@@ -1,7 +1,7 @@
 import React from "react";
 import BaseControl, { ControlProps } from "./BaseControl";
 // import DynamicActionCreator from "components/editorComponents/DynamicActionCreator";
-import { ActionCreator } from "components/editorComponents/ActionCreator";
+import ActionCreator from "components/editorComponents/ActionCreator/ActionCreator";
 
 class ActionSelectorControl extends BaseControl<ControlProps> {
   handleValueUpdate = (newValue: string) => {
@@ -14,7 +14,6 @@ class ActionSelectorControl extends BaseControl<ControlProps> {
 
     return (
       <ActionCreator
-        additionalAutoComplete={this.props.additionalAutoComplete}
         onValueChange={this.handleValueUpdate}
         value={propertyValue}
       />
