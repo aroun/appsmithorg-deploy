@@ -7,7 +7,9 @@ import { AppViewerRouteParams, BUILDER_PAGE_URL } from "constants/routes";
 import { AppState } from "reducers";
 import { theme } from "constants/DefaultTheme";
 import { Icon, NonIdealState, Spinner } from "@blueprintjs/core";
-import Centered from "components/designSystems/appsmith/CenteredWrapper";
+import Centered, {
+  Box,
+} from "components/designSystems/appsmith/CenteredWrapper";
 import AppPage from "./AppPage";
 import {
   getCanvasWidgetDsl,
@@ -77,19 +79,19 @@ class AppViewerPageContainer extends Component<AppViewerPageContainerProps> {
       );
     }
     const pageNotFound = (
-      <Centered>
+      <Box full>
         <NonIdealState
           description={appsmithEditorLink}
           icon={
             <Icon
-              color={theme.colors.primaryOld}
+              color={theme.colors.primaryDarker}
               icon="page-layout"
               iconSize={theme.fontSizes[9]}
             />
           }
           title="This page seems to be blank"
         />
-      </Centered>
+      </Box>
     );
     const pageLoading = (
       <Centered>
@@ -101,16 +103,17 @@ class AppViewerPageContainer extends Component<AppViewerPageContainerProps> {
     } else if (!this.props.isFetchingPage && this.props.widgets) {
       return (
         <Section>
-          {!(
-            this.props.widgets.children &&
-            this.props.widgets.children.length > 0
-          ) && pageNotFound}
-          <AppPage
-            appName={this.props.currentAppName}
-            dsl={this.props.widgets}
-            pageId={this.props.match.params.pageId}
-            pageName={this.props.currentPageName}
-          />
+          {this.props.widgets.children &&
+          this.props.widgets.children.length > 0 ? (
+            <AppPage
+              appName={this.props.currentAppName}
+              dsl={this.props.widgets}
+              pageId={this.props.match.params.pageId}
+              pageName={this.props.currentPageName}
+            />
+          ) : (
+            pageNotFound
+          )}
           <ConfirmRunModal />
           <EndTourHelper />
         </Section>
