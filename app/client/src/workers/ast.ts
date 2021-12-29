@@ -271,9 +271,13 @@ export const extractIdentifiersFromCode = (code: string): string[] => {
 
 export const getFunctionCalls = (
   code: string,
-): { name: string; functionCall: string }[] => {
+): { name: string; functionCall: string; node: Node }[] => {
   // TODO need to get nesting structure as well
-  const functionCalls: { name: string; functionCall: string }[] = [];
+  const functionCalls: {
+    name: string;
+    functionCall: string;
+    node: Node;
+  }[] = [];
   const ast = getAST(code);
   simple(ast, {
     CallExpression(node: Node) {
@@ -283,11 +287,13 @@ export const getFunctionCalls = (
         functionCalls.push({
           name: node.callee.name,
           functionCall,
+          node,
         });
       } else if (isMemberExpressionNode(node.callee)) {
         functionCalls.push({
           name: constructFinalMemberExpIdentifier(node.callee),
           functionCall,
+          node,
         });
       }
     },
@@ -295,15 +301,16 @@ export const getFunctionCalls = (
   return functionCalls;
 };
 
-export const getFunctionArguments = (code: string): string[] => {
-  const args: string[] = [];
+type FunctionArgument = { value: string; node: Node };
+export const getFunctionArguments = (code: string): FunctionArgument[] => {
+  const args: FunctionArgument[] = [];
   const ast = getAST(code);
   simple(ast, {
     CallExpression(node: Node) {
       if (!isCallExpression(node)) return;
       node.arguments.forEach((arg) => {
         const nodeText = code.slice(arg.start, arg.end);
-        args.push(nodeText);
+        args.push({ value: nodeText, node: arg });
       });
     },
   });

@@ -6,7 +6,7 @@ import {
   FieldWrapper,
 } from "components/propertyControls/StyledControls";
 import { InputText } from "components/propertyControls/InputTextControl";
-import log from "loglevel";
+import { Node } from "acorn";
 
 type Props = {
   value: string;
@@ -14,11 +14,29 @@ type Props = {
 };
 
 function ActionCreator(props: Props) {
+  // TODO handle binding brackets {{ }}
   const actions = getFunctionCalls(props.value);
-  log.debug(actions, props.value);
+  const updateFieldValue = (
+    value: string,
+    fieldName: string,
+    action: { name: string; functionCall: string; node: Node },
+    actionFunction: BaseActionFunction,
+  ) => {
+    const newActionFunctionValue = actionFunction.onValueChange(
+      fieldName,
+      value,
+    );
+    const newValue =
+      props.value.substring(0, action.node.start) +
+      newActionFunctionValue +
+      props.value.substring(action.node.end, props.value.length);
+    props.onValueChange(newValue);
+  };
   return (
     <>
       {actions.map((action) => {
+        // TODO get correct ActionFunction class based on the name
+        // Need to register all possible names with the class
         const actionFunction = new BaseActionFunction(action.functionCall);
         const fields = actionFunction.getFields();
         return (
@@ -32,14 +50,18 @@ function ActionCreator(props: Props) {
                     <InputText
                       label={field.name}
                       onChange={(event: ChangeEvent<any> | string) => {
+                        let value: string;
                         if (typeof event === "object" && "target" in event) {
-                          actionFunction.onValueChange(
-                            field.name,
-                            event.target.value,
-                          );
+                          value = event.target.value;
                         } else {
-                          actionFunction.onValueChange(field.name, event);
+                          value = event;
                         }
+                        updateFieldValue(
+                          value,
+                          field.name,
+                          action,
+                          actionFunction,
+                        );
                       }}
                       value={field.value}
                     />
@@ -50,6 +72,7 @@ function ActionCreator(props: Props) {
           </>
         );
       })}
+      {/* TODO Render the action selector dropdown to append functions */}
     </>
   );
 }
