@@ -1,11 +1,14 @@
+import { isNil } from "lodash";
+
 /* eslint-disable @typescript-eslint/no-unused-vars*/
 export default {
   isValid: (props, moment, _) => {
-    let hasValidValue, value;
+    let hasValidValue, value, isEmpty;
     switch (props.inputType) {
       case "NUMBER":
       case "INTEGER":
         try {
+          isEmpty = isNil(props.text);
           value = Number(props.text);
           hasValidValue = Number.isFinite(value);
           break;
@@ -15,16 +18,18 @@ export default {
       case "TEXT":
       case "EMAIL":
       case "PASSWORD":
+        isEmpty = !value;
         value = props.text;
         hasValidValue = !!value;
         break;
       default:
+        isEmpty = !value;
         value = props.text;
         hasValidValue = !!value;
         break;
     }
 
-    if (!props.isRequired && (props.text === "" || props.text === undefined)) {
+    if (!props.isRequired && isEmpty) {
       return true;
     }
     if (props.isRequired && !hasValidValue) {
