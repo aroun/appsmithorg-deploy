@@ -13,6 +13,15 @@ type Props = {
   onValueChange: (newValue: string) => void;
 };
 
+const registeredActionFunctions = new Map<string, BaseActionFunction>();
+
+export const registerActionFunction = (
+  name: string,
+  handlerClass: BaseActionFunction,
+) => {
+  registeredActionFunctions.set(name, handlerClass);
+};
+
 function ActionCreator(props: Props) {
   // TODO handle binding brackets {{ }}
   const actions = getFunctionCalls(props.value);
@@ -37,7 +46,11 @@ function ActionCreator(props: Props) {
       {actions.map((action) => {
         // TODO get correct ActionFunction class based on the name
         // Need to register all possible names with the class
-        const actionFunction = new BaseActionFunction(action.functionCall);
+        const HandlerClass = registeredActionFunctions.get(action.name);
+        if (!HandlerClass) {
+          throw Error("No action function registered");
+        }
+        const actionFunction = new HandlerClass(action.functionCall);
         const fields = actionFunction.getFields();
         return (
           <>
