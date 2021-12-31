@@ -1,9 +1,16 @@
-import { BaseActionFunction } from "components/editorComponents/ActionCreator/BaseActionFunction";
-import { registerActionFunction } from "components/editorComponents/ActionCreator/ActionCreator";
+import {
+  BaseActionFunction,
+  FieldComponent,
+  FieldConfig,
+} from "components/editorComponents/ActionCreator/BaseActionFunction";
 
 class ShowAlert extends BaseActionFunction {
   static funcName = "showAlert";
-  fieldNames: string[] = ["message", "type"];
+
+  protected fieldConfig: FieldConfig[] = [
+    { name: "message", fieldComponent: FieldComponent.TEXT_FIELD },
+    { name: "type", fieldComponent: FieldComponent.ENUM_SELECTOR },
+  ];
 
   constructor(...args: any[]) {
     super(...args);
@@ -15,5 +22,3 @@ class ShowAlert extends BaseActionFunction {
 }
 
 export default ShowAlert;
-
-registerActionFunction("showAlert", ShowAlert);

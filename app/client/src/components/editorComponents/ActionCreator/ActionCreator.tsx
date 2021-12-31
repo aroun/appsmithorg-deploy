@@ -7,20 +7,26 @@ import {
 } from "components/propertyControls/StyledControls";
 import { InputText } from "components/propertyControls/InputTextControl";
 import { Node } from "acorn";
+import ShowAlert from "components/editorComponents/ActionCreator/actionFunctions/showAlert";
 
 type Props = {
   value: string;
   onValueChange: (newValue: string) => void;
 };
 
-const registeredActionFunctions = new Map<string, BaseActionFunction>();
+const registeredActionFunctions = new Map<
+  string,
+  { new (actionFunction?: string): BaseActionFunction; funcName: string }
+>();
 
-export const registerActionFunction = (
-  name: string,
-  handlerClass: BaseActionFunction,
-) => {
-  registeredActionFunctions.set(name, handlerClass);
+export const registerActionFunction = (handlerClass: {
+  new (actionFunction?: string): BaseActionFunction;
+  funcName: string;
+}) => {
+  registeredActionFunctions.set(handlerClass.funcName, handlerClass);
 };
+
+registerActionFunction(ShowAlert);
 
 function ActionCreator(props: Props) {
   // TODO handle binding brackets {{ }}
@@ -51,7 +57,9 @@ function ActionCreator(props: Props) {
           throw Error("No action function registered");
         }
         const actionFunction = new HandlerClass(action.functionCall);
+        actionFunction.parseFunction();
         const fields = actionFunction.getFields();
+        debugger;
         return (
           <>
             <label>{action.name}</label>

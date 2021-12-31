@@ -9,32 +9,40 @@ export enum FieldComponent {
   KEY_VALUE_FIELD = "KEY_VALUE_FIELD",
 }
 
-export type FieldConfig = {
+export type FieldDetails = {
   name: string;
   value: string;
   fieldComponent: FieldComponent;
   node: Node;
 };
 
+export type FieldConfig = {
+  name: string;
+  fieldComponent: FieldComponent;
+};
+
 export abstract class BaseActionFunction {
+  static funcName: string;
   protected actionFunction: string;
-  protected fields: FieldConfig[] = [];
+  protected fields: FieldDetails[] = [];
   // The names assigned to the fields of an actions.
   // This will be assigned in the field config.
-  abstract fieldNames: string[];
+  protected abstract fieldConfig: FieldConfig[];
 
   protected constructor(actionFunction?: string) {
-    if (!actionFunction) {
-      this.actionFunction = "";
-      this.initializeActionFunction();
-    } else {
-      this.actionFunction = actionFunction;
-    }
-    this.parseFunction();
+    this.actionFunction = actionFunction || "";
   }
+
+  parseFunction() {
+    if (!this.actionFunction) {
+      this.initializeActionFunction();
+    }
+    this.parseFields();
+  }
+
   // When creating a new action function, this method will be called
   // Base classes need to create the new function with default arguments here
-  abstract initializeActionFunction(): void;
+  protected abstract initializeActionFunction(): void;
 
   public getValue(fieldName: string): string {
     const field = this.fields.find((field) => field.name === fieldName);
@@ -49,7 +57,7 @@ export abstract class BaseActionFunction {
    * @param field
    * @protected
    */
-  protected handleGetValue(field: FieldConfig): string {
+  protected handleGetValue(field: FieldDetails): string {
     return field.value;
   }
   public onValueChange(fieldName: string, value: string): string {
@@ -58,6 +66,7 @@ export abstract class BaseActionFunction {
       throw Error("Field not found");
     }
     this.handleValueChange(field, value);
+    this.parseFields();
     return this.actionFunction;
   }
 
@@ -67,25 +76,27 @@ export abstract class BaseActionFunction {
    * @param value
    * @protected
    */
-  protected handleValueChange(field: FieldConfig, value: string) {
+  protected handleValueChange(field: FieldDetails, value: string) {
     this.actionFunction =
       this.actionFunction.substring(0, field.node.start) +
       value +
       this.actionFunction.substring(field.node.end, this.actionFunction.length);
-    this.parseFunction();
   }
-  public getFields(): FieldConfig[] {
+  public getFields(): FieldDetails[] {
     return this.fields;
   }
-  private parseFunction() {
+  private parseFields() {
     try {
       const args = getFunctionArguments(this.actionFunction);
-      this.fields = args.map((arg, index) => ({
-        name: this.fieldNames ? this.fieldNames[index] : (index + 1).toString(),
-        value: arg.value,
-        node: arg.node,
-        fieldComponent: FieldComponent.TEXT_FIELD,
-      }));
+      this.fields = this.fieldConfig.map((config, index) => {
+        const arg = args[index];
+        return {
+          name: config.name || (index + 1).toString(),
+          value: arg.value,
+          node: arg.node,
+          fieldComponent: config.fieldComponent || FieldComponent.TEXT_FIELD,
+        };
+      });
     } catch (e) {
       //TODO  Use the syntax error here for syntax error
     }
