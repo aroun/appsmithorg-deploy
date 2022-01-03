@@ -3,10 +3,12 @@ package com.appsmith.server.services.ce;
 import com.appsmith.server.domains.ApplicationMode;
 import com.appsmith.server.domains.Theme;
 import com.appsmith.server.services.CrudService;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ThemeServiceCE extends CrudService<Theme, String> {
     Mono<Theme> getApplicationTheme(String applicationId, ApplicationMode applicationMode);
+    Flux<Theme> getApplicationThemes(String applicationId);
     Mono<Theme> updateTheme(String applicationId, Theme resource);
     Mono<Theme> changeCurrentTheme(String themeId, String applicationId);
 

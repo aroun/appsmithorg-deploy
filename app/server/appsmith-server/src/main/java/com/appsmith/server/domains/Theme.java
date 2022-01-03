@@ -23,6 +23,7 @@ public class Theme extends BaseDomain {
 
     @NotNull
     private String name;
+    private String applicationId;
     private Config config;
     private Properties properties;
     private Map<String, WidgetStyle> stylesheet;

@@ -23,12 +23,19 @@ public class CustomThemeRepositoryTest {
 
     @WithUserDetails("api_user")
     @Test
-    public void getSystemThemes_WhenThemesExists_ReturnsSystemThemes() {
-        Mono<List<Theme>> systemThemesMono = themeRepository.save(new Theme())
-                .then(themeRepository.getSystemThemes().collectList());
+    public void getApplicationThemes_WhenThemesExists_ReturnsSystemThemesAndAppThemes() {
+        String testAppId = "second-app-id";
+        Theme firstAppTheme = new Theme();
+        firstAppTheme.setApplicationId("first-app-id");
+
+        Theme secondAppTheme = new Theme();
+        secondAppTheme.setApplicationId(testAppId);
+
+        Mono<List<Theme>> systemThemesMono = themeRepository.saveAll(List.of(firstAppTheme, secondAppTheme))
+                .then(themeRepository.getApplicationThemes(testAppId).collectList());
 
         StepVerifier.create(systemThemesMono).assertNext(themes -> {
-            assertThat(themes.size()).isEqualTo(4); // 4 system themes were created from db migration
+            assertThat(themes.size()).isEqualTo(5); // 4 system themes were created from db migration
         }).verifyComplete();
     }
 

@@ -36,26 +36,27 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
     }
 
     @Override
-    public Flux<Theme> get(MultiValueMap<String, String> params) {
-        return repository.getSystemThemes(); // return the list of system themes
-    }
-
-    @Override
     public Mono<Theme> create(Theme resource) {
         // user can get the list of themes under an application only
-        throw new UnsupportedOperationException();
+        throw new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION);
     }
 
     @Override
     public Mono<Theme> update(String s, Theme resource) {
         // we don't allow to update a theme by id, user can only update a theme under their application
-        throw new UnsupportedOperationException();
+        throw new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION);
     }
 
     @Override
     public Mono<Theme> getById(String s) {
-        // TODO: better to add permission check
-        return repository.findById(s);
+        // we don't allow to get a theme by id from DB
+        throw new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION);
+    }
+
+    @Override
+    public Flux<Theme> get(MultiValueMap<String, String> params) {
+        // we don't allow to get all themes from DB
+        throw new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION);
     }
 
     @Override
@@ -75,6 +76,11 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                         return repository.getSystemThemeByName(Theme.DEFAULT_THEME_NAME);
                     }
                 });
+    }
+
+    @Override
+    public Flux<Theme> getApplicationThemes(String applicationId) {
+        return repository.getApplicationThemes(applicationId);
     }
 
     @Override

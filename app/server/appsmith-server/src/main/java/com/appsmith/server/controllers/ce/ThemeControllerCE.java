@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RequestMapping(Url.THEME_URL)
@@ -25,7 +26,13 @@ public class ThemeControllerCE extends BaseController<ThemeService, Theme, Strin
     }
 
     @GetMapping("applications/{applicationId}")
-    public Mono<ResponseDTO<Theme>> getThemes(@PathVariable String applicationId, @RequestParam(required = false, defaultValue = "EDIT") ApplicationMode mode) {
+    public Mono<ResponseDTO<List<Theme>>> getApplicationThemes(@PathVariable String applicationId) {
+        return service.getApplicationThemes(applicationId).collectList()
+                .map(themes -> new ResponseDTO<>(HttpStatus.OK.value(), themes, null));
+    }
+
+    @GetMapping("applications/{applicationId}/current")
+    public Mono<ResponseDTO<Theme>> getCurrentTheme(@PathVariable String applicationId, @RequestParam(required = false, defaultValue = "EDIT") ApplicationMode mode) {
         return service.getApplicationTheme(applicationId, mode)
                 .map(theme -> new ResponseDTO<>(HttpStatus.OK.value(), theme, null));
     }
