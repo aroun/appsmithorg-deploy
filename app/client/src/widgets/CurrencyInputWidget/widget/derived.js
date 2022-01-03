@@ -50,47 +50,4 @@ export default {
     }
   },
   //
-  defaultValueValidation(value, props, _) {
-    const NUMBER_ERROR_MESSAGE = "This value must be number";
-    const EMPTY_ERROR_MESSAGE = "";
-    if (_.isObject(value)) {
-      return {
-        isValid: false,
-        parsed: JSON.stringify(value, null, 2),
-        messages: [NUMBER_ERROR_MESSAGE],
-      };
-    }
-
-    let parsed = Number(value);
-    let isValid, messages;
-
-    if (_.isString(value) && value.trim() === "") {
-      /*
-       *  When value is emtpy string
-       */
-      isValid = true;
-      messages = [EMPTY_ERROR_MESSAGE];
-      parsed = undefined;
-    } else if (!Number.isFinite(parsed)) {
-      /*
-       *  When parsed value is not a finite numer
-       */
-      isValid = false;
-      messages = [NUMBER_ERROR_MESSAGE];
-      parsed = undefined;
-    } else {
-      /*
-       *  When parsed value is a Number
-       */
-      isValid = true;
-      messages = [EMPTY_ERROR_MESSAGE];
-    }
-
-    return {
-      isValid,
-      parsed,
-      messages,
-    };
-  },
-  //
 };

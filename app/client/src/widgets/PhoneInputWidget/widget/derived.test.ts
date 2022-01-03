@@ -18,8 +18,8 @@ describe("Derived property - ", () => {
       expect(isValid).toBeFalsy();
 
       isValid = derivedProperty.isValid({
-        value: 100,
-        text: "100",
+        value: "0000000000",
+        text: "0000000000",
         isRequired: true,
       });
 
@@ -28,16 +28,16 @@ describe("Derived property - ", () => {
 
     it("should test validation", () => {
       let isValid = derivedProperty.isValid({
-        value: 100,
-        text: "100",
+        value: "0000000000",
+        text: "0000000000",
         validation: false,
       });
 
       expect(isValid).toBeFalsy();
 
       isValid = derivedProperty.isValid({
-        value: 100,
-        text: "100",
+        value: "0000000000",
+        text: "0000000000",
         validation: true,
       });
 
@@ -46,17 +46,17 @@ describe("Derived property - ", () => {
 
     it("should test regex validation", () => {
       let isValid = derivedProperty.isValid({
-        value: 100,
-        text: "100",
-        regex: "^100$",
+        value: "0000000000",
+        text: "0000000000",
+        regex: "^0000000000$",
       });
 
       expect(isValid).toBeTruthy();
 
       isValid = derivedProperty.isValid({
-        value: 101,
-        text: "101",
-        regex: "^100$",
+        value: "0000000001",
+        text: "0000000001",
+        regex: "^0000000000$",
       });
 
       expect(isValid).toBeFalsy();

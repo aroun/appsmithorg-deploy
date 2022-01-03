@@ -41,7 +41,6 @@ export function defaultValueValidation(
   const { inputType } = props;
   let parsed;
   switch (inputType) {
-    case "INTEGER":
     case "NUMBER":
       parsed = Number(value);
       let isValid, messages;
@@ -232,7 +231,6 @@ class InputWidget extends BaseInputWidget<InputWidgetProps, WidgetState> {
     let parsedValue;
     switch (this.props.inputType) {
       case "NUMBER":
-      case "INTEGER":
         try {
           if (value === "") {
             parsedValue = null;

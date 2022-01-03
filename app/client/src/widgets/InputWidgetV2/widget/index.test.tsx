@@ -1,111 +1,139 @@
 import { defaultValueValidation, InputWidgetProps } from "./index";
 import _ from "lodash";
 
-describe("#defaultValueValidation", () => {
-  const defaultInputWidgetProps: InputWidgetProps = {
-    bottomRow: 2,
-    inputType: "NUMBER",
-    inputValidators: [],
-    isLoading: false,
-    isValid: true,
-    label: "",
-    leftColumn: 0,
-    parentColumnSpace: 71.75,
-    parentRowSpace: 38,
-    renderMode: "CANVAS",
-    rightColumn: 100,
-    text: "",
-    topRow: 0,
-    type: "INPUT_WIDGET",
-    validation: true,
-    version: 1,
-    widgetId: "23424",
-    widgetName: "input1",
-  };
+describe("defaultValueValidation", () => {
+  let result: any;
 
-  const inputs = [
-    "",
-    "   ",
-    "0",
-    "123",
-    "-23",
-    "0.000001",
-    -23,
-    0,
-    100,
-    "&*()(",
-    "abcd",
-  ];
-  const expectedOutputs = [
-    { isValid: true, parsed: undefined, messages: [""] },
-    { isValid: true, parsed: undefined, messages: [""] },
-    { isValid: true, parsed: 0, messages: [""] },
-    { isValid: true, parsed: 123, messages: [""] },
-    { isValid: true, parsed: -23, messages: [""] },
-    { isValid: true, parsed: 0.000001, messages: [""] },
-    { isValid: true, parsed: -23, messages: [""] },
-    { isValid: true, parsed: 0, messages: [""] },
-    { isValid: true, parsed: 100, messages: [""] },
-    {
+  it("should validate defaulttext of text type", () => {
+    result = defaultValueValidation(
+      "text",
+      { inputType: "TEXT" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "text",
+      messages: [""],
+    });
+
+    result = defaultValueValidation(
+      1,
+      { inputType: "TEXT" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "1",
+      messages: [""],
+    });
+  });
+
+  it("should validate defaulttext of Number type", () => {
+    result = defaultValueValidation(
+      1,
+      { inputType: "NUMBER" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: 1,
+      messages: [""],
+    });
+
+    result = defaultValueValidation(
+      "test",
+      { inputType: "NUMBER" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
       isValid: false,
       parsed: undefined,
-      messages: ["This value must be a number"],
-    },
-    {
+      messages: ["This value must be number"],
+    });
+  });
+
+  it("should validate defaulttext of Email type", () => {
+    result = defaultValueValidation(
+      "test@appsmith.com",
+      { inputType: "EMAIL" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "test@appsmith.com",
+      messages: [""],
+    });
+
+    result = defaultValueValidation(
+      1,
+      { inputType: "EMAIL" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "1",
+      messages: [""],
+    });
+  });
+
+  it("should validate defaulttext of Password type", () => {
+    result = defaultValueValidation(
+      "admin123",
+      { inputType: "PASSWORD" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "admin123",
+      messages: [""],
+    });
+
+    result = defaultValueValidation(
+      1,
+      { inputType: "PASSWORD" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
+      isValid: true,
+      parsed: "1",
+      messages: [""],
+    });
+  });
+
+  it("should validate defaulttext with type missing", () => {
+    result = defaultValueValidation(
+      "admin123",
+      { inputType: "" } as InputWidgetProps,
+      _,
+    );
+
+    expect(result).toEqual({
       isValid: false,
-      parsed: undefined,
-      messages: ["This value must be a number"],
-    },
-  ];
-
-  it("validates correctly for Number type", () => {
-    const props = {
-      ...defaultInputWidgetProps,
-    };
-
-    inputs.forEach((input, index) => {
-      const response = defaultValueValidation(input, props, _);
-
-      expect(response).toStrictEqual(expectedOutputs[index]);
+      parsed: "",
+      messages: ["This value must be string"],
     });
   });
 
-  it("validates correctly for Integer type", () => {
-    const props = {
-      ...defaultInputWidgetProps,
-      inputType: "INTEGER",
-    };
+  it("should validate defaulttext with object value", () => {
+    const value = {};
+    result = defaultValueValidation(
+      value,
+      { inputType: "" } as InputWidgetProps,
+      _,
+    );
 
-    inputs.forEach((input, index) => {
-      const response = defaultValueValidation(input, props, _);
-
-      expect(response).toStrictEqual(expectedOutputs[index]);
-    });
-  });
-
-  it("validates correctly for Currency type", () => {
-    const props = {
-      ...defaultInputWidgetProps,
-      inputType: "CURRENCY",
-    };
-
-    inputs.forEach((input, index) => {
-      const response = defaultValueValidation(input, props, _);
-
-      expect(response).toStrictEqual(expectedOutputs[index]);
-    });
-  });
-
-  it("validates correctly for Phone Number type", () => {
-    const props = {
-      ...defaultInputWidgetProps,
-      inputType: "PHONE_NUMBER",
-    };
-
-    inputs.forEach((input, index) => {
-      const response = defaultValueValidation(input, props, _);
-
-      expect(response).toStrictEqual(expectedOutputs[index]);
+    expect(result).toEqual({
+      isValid: false,
+      parsed: JSON.stringify(value, null, 2),
+      messages: ["This value must be string"],
     });
   });
 });
