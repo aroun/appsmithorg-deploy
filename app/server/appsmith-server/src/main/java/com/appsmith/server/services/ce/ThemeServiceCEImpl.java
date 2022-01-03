@@ -95,10 +95,11 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
 
     @Override
     public Mono<Theme> changeCurrentTheme(String newThemeId, String applicationId) {
+        Mono<Theme> newThemeMono = repository.findById(newThemeId).cache();
         // set provided theme to application and return that theme object
         Mono<Theme> setAppThemeMono = applicationRepository.setAppTheme(
                 applicationId, newThemeId,null, MANAGE_APPLICATIONS
-        ).then(repository.findById(newThemeId));
+        ).then(newThemeMono);
 
         // in case a customized theme was set to application, we need to delete that
         return applicationRepository.findById(applicationId, AclPermission.MANAGE_APPLICATIONS)
@@ -107,13 +108,22 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                 )
                 .flatMap(application -> repository.findById(application.getEditModeThemeId())
                         .defaultIfEmpty(new Theme())
-                        .flatMap(currentTheme -> {
-                            if (!StringUtils.isEmpty(currentTheme.getId()) && !currentTheme.isSystemTheme()) {
-                                // current theme is not a system theme but customized one, delete this
+                        .zipWith(newThemeMono)
+                        .flatMap(themeTuple2 -> {
+                            Theme currentTheme = themeTuple2.getT1();
+                            Theme newTheme = themeTuple2.getT2();
+                            if(!newTheme.isSystemTheme() && !applicationId.equals(newTheme.getApplicationId())) {
+                                // new theme is neither a system theme nor belongs to this application, throw error
+                                return Mono.error(new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION));
+                            }
+                            if (StringUtils.hasLength(currentTheme.getId()) && !currentTheme.isSystemTheme()
+                                    && !StringUtils.hasLength(currentTheme.getApplicationId())) {
+                                // current theme is neither a system theme nor app theme, delete the user customizations
                                 return repository.delete(currentTheme).then(setAppThemeMono);
                             }
                             return setAppThemeMono;
-                        }));
+                        })
+                );
     }
 
     @Override
@@ -182,7 +192,9 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                     theme.setConfig(resource.getConfig());
                     theme.setStylesheet(resource.getStylesheet());
                     theme.setProperties(resource.getProperties());
-                    theme.setName(resource.getName());
+                    if(StringUtils.hasLength(resource.getName())) {
+                        theme.setName(resource.getName());
+                    }
                     boolean newThemeCreated = false;
                     if (theme.isSystemTheme()) {
                         // if this is a system theme, create a new one
@@ -193,7 +205,7 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                     return repository.save(theme).zipWith(Mono.just(newThemeCreated));
                 }).flatMap(savedThemeTuple -> {
                     Theme theme = savedThemeTuple.getT1();
-                    if (savedThemeTuple.getT2()) { // new published theme created, update the application
+                    if (savedThemeTuple.getT2()) { // new theme created, update the application
                         if(applicationMode == ApplicationMode.EDIT) {
                             return applicationRepository.setAppTheme(
                                     applicationId, theme.getId(), null, MANAGE_APPLICATIONS
@@ -206,6 +218,36 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                     } else {
                         return Mono.just(theme); // old theme overwritten, no need to update application
                     }
+                });
+    }
+
+    @Override
+    public Mono<Theme> persistCurrentTheme(String applicationId, Theme resource) {
+        return applicationRepository.findById(applicationId, MANAGE_APPLICATIONS)
+                .switchIfEmpty(Mono.error(
+                        new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.APPLICATION, applicationId))
+                )
+                .flatMap(application -> {
+                    String themeId = application.getEditModeThemeId();
+                    if(!StringUtils.hasLength(themeId)) {
+                        return Mono.error(new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION));
+                    } else { // theme id is not present, return default theme
+                        return repository.findById(themeId);
+                    }
+                })
+                .flatMap(theme -> {
+                    if(theme.isSystemTheme() ||
+                            (StringUtils.hasLength(theme.getApplicationId()) && !theme.getApplicationId().equals(applicationId))) {
+                        // it's a system theme or already published for another application, throw error
+                        return Mono.error(new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION));
+                    }
+                    theme.setApplicationId(applicationId);
+                    if(StringUtils.hasLength(resource.getName())) {
+                        theme.setName(resource.getName());
+                    } else {
+                        theme.setName("Copy of " + theme.getName());
+                    }
+                    return repository.save(theme);
                 });
     }
 

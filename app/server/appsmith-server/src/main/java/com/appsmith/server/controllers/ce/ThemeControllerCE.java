@@ -42,4 +42,10 @@ public class ThemeControllerCE extends BaseController<ThemeService, Theme, Strin
         return service.updateTheme(applicationId, resource)
                 .map(theme -> new ResponseDTO<>(HttpStatus.OK.value(), theme, null));
     }
+
+    @PostMapping("applications/{applicationId}/persist")
+    public Mono<ResponseDTO<Theme>> publishCurrentTheme(@PathVariable String applicationId, @RequestBody Theme resource) {
+        return service.persistCurrentTheme(applicationId, resource)
+                .map(theme -> new ResponseDTO<>(HttpStatus.OK.value(), theme, null));
+    }
 }
