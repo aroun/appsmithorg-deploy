@@ -239,9 +239,8 @@ public class ThemeServiceTest {
                     application.setPublishedModeThemeId("this-id-should-be-overridden");
                     return applicationRepository.save(application);
                 }).flatMap(savedApplication ->
-                        themeService.publishTheme(savedApplication.getEditModeThemeId(),
-                                savedApplication.getPublishedModeThemeId(), savedApplication.getId()
-                        ).then(applicationRepository.findById(savedApplication.getId()))
+                        themeService.publishTheme(savedApplication.getId())
+                                .then(applicationRepository.findById(savedApplication.getId()))
                 )
                 .zipWith(classicThemeMono);
 
@@ -268,9 +267,7 @@ public class ThemeServiceTest {
                     application.setPublishedModeThemeId(themes.getT2().getId()); // system theme
                     return applicationRepository.save(application);
                 }).flatMap(application ->
-                        themeService.publishTheme(application.getEditModeThemeId(),
-                                application.getPublishedModeThemeId(), application.getId()
-                        ).then(Mono.zip(
+                        themeService.publishTheme(application.getId()).then(Mono.zip(
                                 themeService.getApplicationTheme(application.getId(), ApplicationMode.EDIT),
                                 themeService.getApplicationTheme(application.getId(), ApplicationMode.PUBLISHED)
                         ))
@@ -367,9 +364,8 @@ public class ThemeServiceTest {
                         createApplication("api_user", Set.of(MANAGE_APPLICATIONS))
                 )
                 .flatMap(savedApplication ->
-                        themeService.publishTheme(savedApplication.getEditModeThemeId(),
-                                savedApplication.getPublishedModeThemeId(), savedApplication.getId()
-                        ).then(applicationRepository.findById(savedApplication.getId()))
+                        themeService.publishTheme(savedApplication.getId())
+                                .then(applicationRepository.findById(savedApplication.getId()))
                 )
                 .zipWith(classicThemeMono);
 

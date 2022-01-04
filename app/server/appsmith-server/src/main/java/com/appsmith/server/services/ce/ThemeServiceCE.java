@@ -28,7 +28,7 @@ public interface ThemeServiceCE extends CrudService<Theme, String> {
      */
     Mono<Theme> cloneThemeToApplication(String srcThemeId, String destApplicationId);
 
-    Mono<Theme> publishTheme(String editModeThemeId, String publishedThemeId, String applicationId);
+    Mono<Theme> publishTheme(String applicationId);
     Mono<Theme> persistCurrentTheme(String applicationId, Theme theme);
     void resetDefaultThemeIdCache();
 }

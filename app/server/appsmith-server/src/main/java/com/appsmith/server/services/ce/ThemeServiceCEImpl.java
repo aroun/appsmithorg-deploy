@@ -152,57 +152,68 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
         );
     }
 
+    /**
+     * Publishes a theme from edit mode to published mode
+     * @param applicationId application id
+     * @return Mono of theme object that was set in published mode
+     */
     @Override
-    public Mono<Theme> publishTheme(String editModeThemeId, String publishedThemeId, String applicationId) {
-        Mono<Theme> editModeThemeMono;
-        if(!StringUtils.hasLength(editModeThemeId)) { // theme id is empty, use the default theme
-            editModeThemeMono = repository.getSystemThemeByName(Theme.LEGACY_THEME_NAME);
-        } else { // theme id is not empty, fetch it by id
-            editModeThemeMono = repository.findById(editModeThemeId);
-        }
-
-        Mono<Theme> publishThemeMono = editModeThemeMono.flatMap(editModeTheme -> {
-            if (editModeTheme.isSystemTheme()) {  // system theme is set as edit mode theme
-                // just set the system theme id as edit and published mode theme id to application object
-                return applicationRepository.setAppTheme(
-                        applicationId, editModeTheme.getId(), editModeTheme.getId(), MANAGE_APPLICATIONS
-                ).thenReturn(editModeTheme);
-            } else {  // a customized theme is set as edit mode theme, copy that theme for published mode
-                return saveThemeForApplication(publishedThemeId, editModeTheme, applicationId, ApplicationMode.PUBLISHED);
-            }
-        });
+    public Mono<Theme> publishTheme(String applicationId) {
         // fetch application to make sure user has permission to manage this application
-        return applicationRepository.findById(applicationId, MANAGE_APPLICATIONS).then(publishThemeMono);
+        return applicationRepository.findById(applicationId, MANAGE_APPLICATIONS).flatMap(application -> {
+            Mono<Theme> editModeThemeMono;
+            if(!StringUtils.hasLength(application.getEditModeThemeId())) { // theme id is empty, use the default theme
+                editModeThemeMono = repository.getSystemThemeByName(Theme.LEGACY_THEME_NAME);
+            } else { // theme id is not empty, fetch it by id
+                editModeThemeMono = repository.findById(application.getEditModeThemeId());
+            }
+
+            return editModeThemeMono.flatMap(editModeTheme -> {
+                if (editModeTheme.isSystemTheme()) {  // system theme is set as edit mode theme
+                    // Delete published mode theme if it was a copy of custom theme
+                    return deletePublishedCustomizedThemeCopy(application.getPublishedModeThemeId()).then(
+                            // Set the system theme id as edit and published mode theme id to application object
+                            applicationRepository.setAppTheme(
+                                    applicationId, editModeTheme.getId(), editModeTheme.getId(), MANAGE_APPLICATIONS
+                            )
+                    ).thenReturn(editModeTheme);
+                } else {  // a customized theme is set as edit mode theme, copy that theme for published mode
+                    return saveThemeForApplication(
+                            application.getPublishedModeThemeId(), editModeTheme, applicationId, ApplicationMode.PUBLISHED
+                    );
+                }
+            });
+        });
     }
 
     /**
      * Creates a new theme if Theme with provided themeId is a system theme.
      * It sets the properties from the provided theme resource to the existing or newly created theme.
      * It'll also update the application if a new theme was created.
-     * @param themeId ID of the existing theme that might be updated
-     * @param resource new theme DTO that'll be stored as a new theme or override the existing theme
+     * @param currentThemeId ID of the existing theme that might be updated
+     * @param targetThemeResource new theme DTO that'll be stored as a new theme or override the existing theme
      * @param applicationId Application that contains the theme
      * @param applicationMode In which mode this theme will be set
      * @return Updated or newly created theme Publisher
      */
-    private Mono<Theme> saveThemeForApplication(String themeId, Theme resource, String applicationId, ApplicationMode applicationMode) {
-        return repository.findById(themeId)
-                .flatMap(theme -> {
+    private Mono<Theme> saveThemeForApplication(String currentThemeId, Theme targetThemeResource, String applicationId, ApplicationMode applicationMode) {
+        return repository.findById(currentThemeId)
+                .flatMap(currentTheme -> {
                     // set the edit mode values to published mode theme
-                    theme.setConfig(resource.getConfig());
-                    theme.setStylesheet(resource.getStylesheet());
-                    theme.setProperties(resource.getProperties());
-                    if(StringUtils.hasLength(resource.getName())) {
-                        theme.setName(resource.getName());
+                    currentTheme.setConfig(targetThemeResource.getConfig());
+                    currentTheme.setStylesheet(targetThemeResource.getStylesheet());
+                    currentTheme.setProperties(targetThemeResource.getProperties());
+                    if(StringUtils.hasLength(targetThemeResource.getName())) {
+                        currentTheme.setName(targetThemeResource.getName());
                     }
                     boolean newThemeCreated = false;
-                    if (theme.isSystemTheme()) {
+                    if (currentTheme.isSystemTheme()) {
                         // if this is a system theme, create a new one
-                        theme.setId(null); // setting id to null will create a new theme
-                        theme.setSystemTheme(false);
+                        currentTheme.setId(null); // setting id to null will create a new theme
+                        currentTheme.setSystemTheme(false);
                         newThemeCreated = true;
                     }
-                    return repository.save(theme).zipWith(Mono.just(newThemeCreated));
+                    return repository.save(currentTheme).zipWith(Mono.just(newThemeCreated));
                 }).flatMap(savedThemeTuple -> {
                     Theme theme = savedThemeTuple.getT1();
                     if (savedThemeTuple.getT2()) { // new theme created, update the application
@@ -249,6 +260,24 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                     }
                     return repository.save(theme);
                 });
+    }
+
+    /**
+     * This method will fetch a theme by id and delete this if it's not a system theme.
+     * When an app is published with a customized theme, we store a copy of that theme so that changes are available
+     * in published mode even user has changed the theme in edit mode. When user switches back to another theme and
+     * publish the application where that app was previously published with a custom theme, we should delete that copy.
+     * Otherwise there'll be a lot of orphan theme copies that were set a published mode once but are used no more.
+     * @param themeId id of the theme that'll be deleted
+     * @return deleted theme mono
+     */
+    private Mono<Theme> deletePublishedCustomizedThemeCopy(String themeId) {
+        return repository.findById(themeId).flatMap(theme -> {
+            if(!theme.isSystemTheme()) {
+                return repository.deleteById(themeId).thenReturn(theme);
+            }
+            return Mono.just(theme);
+        });
     }
 
     @Override

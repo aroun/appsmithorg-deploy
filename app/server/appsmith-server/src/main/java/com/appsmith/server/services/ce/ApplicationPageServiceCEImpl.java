@@ -835,9 +835,9 @@ public class ApplicationPageServiceCEImpl implements ApplicationPageServiceCE {
                 .switchIfEmpty(Mono.error(new AppsmithException(AppsmithError.NO_RESOURCE_FOUND, FieldName.APPLICATION, applicationId)))
                 .cache();
 
-        Mono<Theme> publishThemeMono = applicationMono.flatMap(application ->  themeService.publishTheme(
-                application.getEditModeThemeId(), application.getPublishedModeThemeId(), application.getId()
-        ));
+        Mono<Theme> publishThemeMono = applicationMono.flatMap(
+                application ->  themeService.publishTheme(application.getId())
+        );
 
         Flux<NewPage> publishApplicationAndPages = applicationMono
                 //Return all the pages in the Application
