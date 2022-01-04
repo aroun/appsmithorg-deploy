@@ -272,6 +272,9 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
      * @return deleted theme mono
      */
     private Mono<Theme> deletePublishedCustomizedThemeCopy(String themeId) {
+        if(!StringUtils.hasLength(themeId)) {
+            return Mono.empty();
+        }
         return repository.findById(themeId).flatMap(theme -> {
             if(!theme.isSystemTheme()) {
                 return repository.deleteById(themeId).thenReturn(theme);

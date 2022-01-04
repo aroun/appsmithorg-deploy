@@ -21,6 +21,7 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -255,6 +256,33 @@ public class ThemeServiceTest {
 
     @WithUserDetails("api_user")
     @Test
+    public void publishTheme_WhenSystemThemeInEditModeAndCustomThemeInPublishedMode_PublisedCopyDeleted() {
+        Mono<Theme> classicThemeMono = themeRepository.getSystemThemeByName("classic").cache();
+
+        Theme customTheme = new Theme();
+        customTheme.setName("published-theme-copy");
+        Mono<Theme> publishedCustomThemeMono = themeRepository.save(customTheme);
+
+        Mono<Theme> deletedThemeMono = classicThemeMono
+                .zipWith(publishedCustomThemeMono)
+                .flatMap(themesTuple -> {
+                    Theme systemTheme = themesTuple.getT1();
+                    Theme savedCustomTheme = themesTuple.getT2();
+                    Application application = createApplication("api_user", Set.of(MANAGE_APPLICATIONS));
+                    application.setEditModeThemeId(systemTheme.getId());
+                    application.setPublishedModeThemeId(savedCustomTheme.getId());
+                    return applicationRepository.save(application);
+                }).flatMap(savedApplication ->
+                        themeService.publishTheme(savedApplication.getId())
+                                .then(themeRepository.findById(savedApplication.getPublishedModeThemeId()))
+                );
+
+        StepVerifier.create(deletedThemeMono)
+                .verifyComplete();
+    }
+
+    @WithUserDetails("api_user")
+    @Test
     public void publishTheme_WhenCustomThemeIsSet_ThemeCopiedForPublishedMode() {
         Theme customTheme = new Theme();
         customTheme.setName("my-custom-theme");
@@ -375,5 +403,29 @@ public class ThemeServiceTest {
                     Theme classicSystemTheme = objects.getT2();
                     assertThat(application.getPublishedModeThemeId()).isEqualTo(classicSystemTheme.getId());
                 }).verifyComplete();
+    }
+
+    @WithUserDetails("api_user")
+    @Test
+    public void persistCurrentTheme_WhenCustomThemeSetInEditMode_ApplicationIdSetToTheme() {
+        Theme customTheme = new Theme();
+        customTheme.setName("Classic");
+
+        Mono<Tuple2<List<Theme>, Theme>> tuple2Mono = themeRepository.save(customTheme).flatMap(theme -> {
+            Application application = createApplication("api_user", Set.of(MANAGE_APPLICATIONS));
+            application.setEditModeThemeId(theme.getId());
+            return applicationRepository.save(application);
+        }).flatMap(application -> {
+            Theme theme = new Theme();
+            theme.setName("My custom theme");
+            return themeService.persistCurrentTheme(application.getId(), theme).zipWith(Mono.just(application.getId()));
+        }).flatMap(objects ->
+            themeService.getApplicationThemes(objects.getT2()).collectList().zipWith(Mono.just(objects.getT1()))
+        );
+
+        StepVerifier.create(tuple2Mono).assertNext(tuple2 -> {
+            assertThat(tuple2.getT1().size()).isEqualTo(5); // 4 system themes, one custom theme
+            assertThat(tuple2.getT2().getApplicationId()).isNotEmpty(); // theme should have application id set
+        }).verifyComplete();
     }
 }

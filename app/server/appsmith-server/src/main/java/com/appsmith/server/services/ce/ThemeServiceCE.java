@@ -20,7 +20,7 @@ public interface ThemeServiceCE extends CrudService<Theme, String> {
     Mono<String> getDefaultThemeId();
 
     /**
-     * Duplicates a theme if the theme is customized one. It'll set the application id to the new theme.
+     * Duplicates a theme if the theme is customized one.
      * If the source theme is a system theme, it'll skip creating a new theme and return the system theme instead.
      * @param srcThemeId ID of source theme that needs to be duplicated
      * @param destApplicationId ID of the application for which theme'll be created
