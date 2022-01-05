@@ -4741,14 +4741,18 @@ public class DatabaseChangelog {
         // Update plugin data.
         mongockTemplate.save(firestorePlugin);
     }
-
-    @ChangeSet(order = "108", id = "create-system-themes", author = "")
+  
+    @ChangeSet(order = "108", id = "create-system-themes", author = "", runAlways = true)
     public void createSystemThemes(MongockTemplate mongockTemplate) throws IOException {
-        Index uniqueApplicationIdIndex = new Index()
+        Index systemThemeIndex = new Index()
                 .on(fieldName(QTheme.theme.isSystemTheme), Sort.Direction.ASC)
                 .named("system_theme_index");
 
-        ensureIndexes(mongockTemplate, Theme.class, uniqueApplicationIdIndex);
+        Index applicationIdIndex = new Index()
+                .on(fieldName(QTheme.theme.applicationId), Sort.Direction.ASC)
+                .named("application_id_index");
+
+        ensureIndexes(mongockTemplate, Theme.class, systemThemeIndex, applicationIdIndex);
 
         final String themesJson = StreamUtils.copyToString(
                 new DefaultResourceLoader().getResource("system-themes.json").getInputStream(),
@@ -4757,20 +4761,41 @@ public class DatabaseChangelog {
         Theme[] themes = new Gson().fromJson(themesJson, Theme[].class);
 
         Theme legacyTheme = null;
+        boolean themeExists = false;
+
         for (Theme theme : themes) {
             theme.setSystemTheme(true);
-            Theme savedTheme = mongockTemplate.save(theme);
-            if(savedTheme.getName().equalsIgnoreCase(Theme.LEGACY_THEME_NAME)) {
+            theme.setCreatedAt(Instant.now());
+            Query query = new Query(Criteria.where(fieldName(QTheme.theme.name)).is(theme.getName())
+                    .and(fieldName(QTheme.theme.isSystemTheme)).is(true));
+
+            Theme savedTheme = mongockTemplate.findOne(query, Theme.class);
+            if(savedTheme == null) {  // this theme does not exist, create it
+                mongockTemplate.save(theme);
+            } else { // theme already found, update
+                themeExists = true;
+                savedTheme.setConfig(theme.getConfig());
+                savedTheme.setProperties(theme.getProperties());
+                savedTheme.setStylesheet(theme.getStylesheet());
+                if(savedTheme.getCreatedAt() == null) {
+                    savedTheme.setCreatedAt(Instant.now());
+                }
+                mongockTemplate.save(savedTheme);
+            }
+
+            if(theme.getName().equalsIgnoreCase(Theme.LEGACY_THEME_NAME)) {
                 legacyTheme = savedTheme;
             }
         }
 
-        // migrate all applications and set legacy theme to them in both mode
-        Update update = new Update().set(fieldName(QApplication.application.publishedModeThemeId), legacyTheme.getId())
-                .set(fieldName(QApplication.application.editModeThemeId), legacyTheme.getId());
-        mongockTemplate.updateMulti(
-                new Query(where(fieldName(QApplication.application.deleted)).is(false)), update, Application.class
-        );
+        if(!themeExists) { // this is the first time we're running the migration
+            // migrate all applications and set legacy theme to them in both mode
+            Update update = new Update().set(fieldName(QApplication.application.publishedModeThemeId), legacyTheme.getId())
+                    .set(fieldName(QApplication.application.editModeThemeId), legacyTheme.getId());
+            mongockTemplate.updateMulti(
+                    new Query(where(fieldName(QApplication.application.deleted)).is(false)), update, Application.class
+            );
+        }
     }
 
     /**
