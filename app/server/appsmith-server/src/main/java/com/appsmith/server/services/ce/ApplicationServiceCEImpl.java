@@ -32,6 +32,7 @@ import com.appsmith.server.services.SessionUserService;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.mongodb.client.result.UpdateResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -546,4 +547,8 @@ public class ApplicationServiceCEImpl extends BaseService<ApplicationRepository,
         return ApplicationConstants.APP_CARD_COLORS[randomColorIndex];
     }
 
+    @Override
+    public Mono<UpdateResult> setAppTheme(String applicationId, String editModeThemeId, String publishedModeThemeId, AclPermission aclPermission) {
+        return repository.setAppTheme(applicationId, editModeThemeId, publishedModeThemeId, aclPermission);
+    }
 }
