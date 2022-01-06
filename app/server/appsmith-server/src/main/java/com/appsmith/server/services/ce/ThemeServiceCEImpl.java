@@ -37,8 +37,7 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
 
     @Override
     public Mono<Theme> create(Theme resource) {
-        // user can get the list of themes under an application only
-        throw new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION);
+        return repository.save(resource);
     }
 
     @Override

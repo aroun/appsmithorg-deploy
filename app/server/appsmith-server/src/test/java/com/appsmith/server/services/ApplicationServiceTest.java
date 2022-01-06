@@ -21,6 +21,7 @@ import com.appsmith.server.domains.NewPage;
 import com.appsmith.server.domains.Organization;
 import com.appsmith.server.domains.Plugin;
 import com.appsmith.server.domains.PluginType;
+import com.appsmith.server.domains.Theme;
 import com.appsmith.server.domains.User;
 import com.appsmith.server.dtos.ActionCollectionDTO;
 import com.appsmith.server.dtos.ActionDTO;
@@ -38,6 +39,7 @@ import com.appsmith.server.helpers.TextUtils;
 import com.appsmith.server.repositories.ApplicationRepository;
 import com.appsmith.server.repositories.NewPageRepository;
 import com.appsmith.server.repositories.PluginRepository;
+import com.appsmith.server.repositories.ThemeRepository;
 import com.appsmith.server.solutions.ApplicationFetcher;
 import com.appsmith.server.solutions.ImportExportApplicationService;
 import com.appsmith.server.solutions.ReleaseNotesService;
@@ -152,6 +154,9 @@ public class ApplicationServiceTest {
 
     @Autowired
     ThemeService themeService;
+
+    @Autowired
+    ThemeRepository themeRepository;
 
     @MockBean
     ReleaseNotesService releaseNotesService;
@@ -2249,4 +2254,41 @@ public class ApplicationServiceTest {
                 .verifyComplete();
     }
 
+    @Test
+    @WithUserDetails(value = "api_user")
+    public void cloneApplication_WithCustomSavedTheme_ThemesAlsoCopied() {
+        Application testApplication = new Application();
+        String appName = "cloneApplication_WithCustomSavedTheme_ThemesAlsoCopied";
+        testApplication.setName(appName);
+
+        Theme theme = new Theme();
+        theme.setName("Custom theme");
+        Mono<Theme> createTheme = themeService.create(theme);
+
+        Mono<Tuple2<Theme, Tuple2<Application, Application>>> tuple2Application = createTheme
+                .then(applicationPageService.createApplication(testApplication, orgId))
+                .flatMap(application ->
+                        themeService.updateTheme(application.getId(), theme).then(
+                                themeService.persistCurrentTheme(application.getId(), new Theme())
+                                        .flatMap(theme1 -> Mono.zip(
+                                                applicationPageService.cloneApplication(application.getId(), null),
+                                                Mono.just(application))
+                                        )
+                        )
+                ).flatMap(objects ->
+                    themeRepository.findById(objects.getT1().getEditModeThemeId()).zipWith(Mono.just(objects))
+                );
+
+        StepVerifier.create(tuple2Application)
+                .assertNext(objects -> {
+                    Theme clonnedTheme = objects.getT1();
+                    Application clonnedApp = objects.getT2().getT1();
+                    Application srcApp = objects.getT2().getT2();
+                    assertThat(clonnedApp.getEditModeThemeId()).isNotEqualTo(srcApp.getEditModeThemeId());
+                    assertThat(clonnedTheme.getApplicationId()).isEqualTo(clonnedApp.getId());
+                })
+                .verifyComplete();
+
+
+    }
 }
