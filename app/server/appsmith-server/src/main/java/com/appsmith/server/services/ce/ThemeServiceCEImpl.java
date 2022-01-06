@@ -146,6 +146,9 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                         return Mono.just(theme);
                     } else { // it's a customized theme, create a copy and return the copy
                         theme.setId(null); // setting id to null so that save method will create a new instance
+                        if(StringUtils.hasLength(theme.getApplicationId())) { // this custom theme was saved
+                            theme.setApplicationId(destApplicationId); // save for new app too
+                        }
                         return repository.save(theme);
                     }
                 })

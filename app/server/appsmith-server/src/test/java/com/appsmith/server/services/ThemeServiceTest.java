@@ -202,6 +202,43 @@ public class ThemeServiceTest {
 
     @WithUserDetails("api_user")
     @Test
+    public void cloneThemeToApplication_WhenSrcThemeIsCustomSavedTheme_NewCustomSavedThemeCreated() {
+        Application srcApplication = createApplication("api_user", Set.of(MANAGE_APPLICATIONS));
+
+        Mono<Tuple3<Theme, Theme, Application>> newAndOldThemeMono = applicationRepository.save(srcApplication)
+                .flatMap(application -> {
+                    Theme srcCustomTheme = new Theme();
+                    srcCustomTheme.setName("custom theme");
+                    srcCustomTheme.setApplicationId(application.getId());
+                    return themeRepository.save(srcCustomTheme);
+                })
+                .zipWith(applicationRepository.save(createApplication("api_user", Set.of(MANAGE_APPLICATIONS))))
+                .flatMap(objects -> {
+                    Theme srcTheme = objects.getT1();
+                    Application destApp = objects.getT2();
+                    return Mono.zip(
+                            themeService.cloneThemeToApplication(srcTheme.getId(), destApp.getId()),
+                            Mono.just(srcTheme), Mono.just(destApp)
+                    );
+                });
+
+        StepVerifier.create(newAndOldThemeMono)
+                .assertNext(objects -> {
+                    Theme clonnedTheme = objects.getT1();
+                    Theme srcTheme = objects.getT2();
+                    Application destApp = objects.getT3();
+
+                    assertThat(clonnedTheme.getId()).isNotEqualTo(srcTheme.getId());
+                    assertThat(clonnedTheme.getName()).isEqualTo(srcTheme.getName());
+                    assertThat(clonnedTheme.getApplicationId()).isNotEmpty();
+                    assertThat(clonnedTheme.getApplicationId()).isNotEqualTo(srcTheme.getApplicationId());
+                    assertThat(clonnedTheme.getApplicationId()).isEqualTo(destApp.getId());
+                })
+                .verifyComplete();
+    }
+
+    @WithUserDetails("api_user")
+    @Test
     public void getApplicationTheme_WhenUserHasPermission_ThemeReturned() {
         Theme customTheme = new Theme();
         customTheme.setName("custom theme for edit mode");
