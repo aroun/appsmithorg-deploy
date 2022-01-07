@@ -22,6 +22,7 @@ public class Theme extends BaseDomain {
     @NotNull
     private String name;
     private String applicationId;
+    private String organizationId;
     private Object config;
     private Object properties;
     private Map<String, Object> stylesheet;

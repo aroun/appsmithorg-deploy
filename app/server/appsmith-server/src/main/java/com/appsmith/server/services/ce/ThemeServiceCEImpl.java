@@ -2,6 +2,7 @@ package com.appsmith.server.services.ce;
 
 import com.appsmith.server.acl.AclPermission;
 import com.appsmith.server.constants.FieldName;
+import com.appsmith.server.domains.Application;
 import com.appsmith.server.domains.ApplicationMode;
 import com.appsmith.server.domains.Theme;
 import com.appsmith.server.exceptions.AppsmithError;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
+import reactor.util.function.Tuples;
 
 import javax.validation.Validator;
 
@@ -138,7 +140,7 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
 
     @Override
     public Mono<Theme> cloneThemeToApplication(String srcThemeId, String destApplicationId) {
-        return applicationRepository.findById(destApplicationId, MANAGE_APPLICATIONS).then(
+        return applicationRepository.findById(destApplicationId, MANAGE_APPLICATIONS).flatMap(application ->
                 // make sure the current user has permission to manage application
                 repository.findById(srcThemeId).flatMap(theme -> {
                     if (theme.isSystemTheme()) { // it's a system theme, no need to copy
@@ -147,6 +149,7 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                         theme.setId(null); // setting id to null so that save method will create a new instance
                         if(StringUtils.hasLength(theme.getApplicationId())) { // this custom theme was saved
                             theme.setApplicationId(destApplicationId); // save for new app too
+                            theme.setOrganizationId(application.getOrganizationId());
                         }
                         return repository.save(theme);
                     }
@@ -245,16 +248,19 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
                     if(!StringUtils.hasLength(themeId)) {
                         return Mono.error(new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION));
                     } else { // theme id is not present, return default theme
-                        return repository.findById(themeId);
+                        return repository.findById(themeId).map(theme -> Tuples.of(theme, application));
                     }
                 })
-                .flatMap(theme -> {
+                .flatMap(themeAndApplicationTuple -> {
+                    Theme theme = themeAndApplicationTuple.getT1();
+                    Application application = themeAndApplicationTuple.getT2();
                     if(theme.isSystemTheme() ||
                             (StringUtils.hasLength(theme.getApplicationId()) && !theme.getApplicationId().equals(applicationId))) {
                         // it's a system theme or already published for another application, throw error
                         return Mono.error(new AppsmithException(AppsmithError.UNSUPPORTED_OPERATION));
                     }
                     theme.setApplicationId(applicationId);
+                    theme.setOrganizationId(application.getOrganizationId());
                     if(StringUtils.hasLength(resource.getName())) {
                         theme.setName(resource.getName());
                     } else {

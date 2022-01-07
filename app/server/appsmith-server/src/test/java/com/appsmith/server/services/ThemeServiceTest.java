@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple3;
+import reactor.util.function.Tuples;
 
 import java.util.Collection;
 import java.util.List;
@@ -444,25 +445,31 @@ public class ThemeServiceTest {
 
     @WithUserDetails("api_user")
     @Test
-    public void persistCurrentTheme_WhenCustomThemeSetInEditMode_ApplicationIdSetToTheme() {
+    public void persistCurrentTheme_WhenCustomThemeSetInEditMode_ApplicationIdAndOrgIdSetToTheme() {
         Theme customTheme = new Theme();
         customTheme.setName("Classic");
 
         Mono<Tuple2<List<Theme>, Theme>> tuple2Mono = themeRepository.save(customTheme).flatMap(theme -> {
             Application application = createApplication("api_user", Set.of(MANAGE_APPLICATIONS));
             application.setEditModeThemeId(theme.getId());
+            application.setOrganizationId("theme-test-org-id");
             return applicationRepository.save(application);
         }).flatMap(application -> {
             Theme theme = new Theme();
             theme.setName("My custom theme");
-            return themeService.persistCurrentTheme(application.getId(), theme).zipWith(Mono.just(application.getId()));
-        }).flatMap(objects ->
-            themeService.getApplicationThemes(objects.getT2()).collectList().zipWith(Mono.just(objects.getT1()))
+            return themeService.persistCurrentTheme(application.getId(), theme)
+                    .map(theme1 -> Tuples.of(theme1, application.getId()));
+        }).flatMap(persistedThemeAndAppId ->
+            themeService.getApplicationThemes(persistedThemeAndAppId.getT2()).collectList()
+                    .map(themes -> Tuples.of(themes, persistedThemeAndAppId.getT1()))
         );
 
         StepVerifier.create(tuple2Mono).assertNext(tuple2 -> {
-            assertThat(tuple2.getT1().size()).isEqualTo(5); // 4 system themes, one custom theme
-            assertThat(tuple2.getT2().getApplicationId()).isNotEmpty(); // theme should have application id set
+            List<Theme> availableThemes = tuple2.getT1();
+            Theme currentTheme = tuple2.getT2();
+            assertThat(availableThemes.size()).isEqualTo(5); // 4 system themes, one custom theme
+            assertThat(currentTheme.getApplicationId()).isNotEmpty(); // theme should have application id set
+            assertThat(currentTheme.getOrganizationId()).isEqualTo("theme-test-org-id"); // theme should have org id set
         }).verifyComplete();
     }
 }
