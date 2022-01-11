@@ -23,7 +23,25 @@ public class CustomThemeRepositoryTest {
 
     @WithUserDetails("api_user")
     @Test
-    public void getApplicationThemes_WhenThemesExists_ReturnsSystemThemesAndAppThemes() {
+    public void getSystemThemes_WhenThemesExists_ReturnsSystemThemes() {
+        String testAppId = "second-app-id";
+        Theme firstAppTheme = new Theme();
+        firstAppTheme.setApplicationId("first-app-id");
+
+        Theme secondAppTheme = new Theme();
+        secondAppTheme.setApplicationId(testAppId);
+
+        Mono<List<Theme>> systemThemesMono = themeRepository.saveAll(List.of(firstAppTheme, secondAppTheme))
+                .then(themeRepository.getSystemThemes().collectList());
+
+        StepVerifier.create(systemThemesMono).assertNext(themes -> {
+            assertThat(themes.size()).isEqualTo(4); // 4 system themes were created from db migration
+        }).verifyComplete();
+    }
+
+    @WithUserDetails("api_user")
+    @Test
+    public void getApplicationThemes_WhenThemesExists_ReturnsAppThemes() {
         String testAppId = "second-app-id";
         Theme firstAppTheme = new Theme();
         firstAppTheme.setApplicationId("first-app-id");
@@ -35,7 +53,7 @@ public class CustomThemeRepositoryTest {
                 .then(themeRepository.getApplicationThemes(testAppId).collectList());
 
         StepVerifier.create(systemThemesMono).assertNext(themes -> {
-            assertThat(themes.size()).isEqualTo(5); // 4 system themes were created from db migration
+            assertThat(themes.size()).isEqualTo(1); // 4 system themes were created from db migration
         }).verifyComplete();
     }
 

@@ -39,6 +39,12 @@ public class ThemeControllerCE extends BaseController<ThemeService, Theme, Strin
                 .map(themes -> new ResponseDTO<>(HttpStatus.OK.value(), themes, null));
     }
 
+    @GetMapping("templates")
+    public Mono<ResponseDTO<List<Theme>>> getSystemThemes() {
+        return service.getSystemThemes().collectList()
+                .map(themes -> new ResponseDTO<>(HttpStatus.OK.value(), themes, null));
+    }
+
     @GetMapping("applications/{applicationId}/current")
     public Mono<ResponseDTO<Theme>> getCurrentTheme(@PathVariable String applicationId, @RequestParam(required = false, defaultValue = "EDIT") ApplicationMode mode) {
         return service.getApplicationTheme(applicationId, mode)

@@ -9,12 +9,14 @@ import com.appsmith.server.acl.AppsmithRole;
 import com.appsmith.server.constants.FieldName;
 import com.appsmith.server.domains.ActionCollection;
 import com.appsmith.server.domains.Application;
+import com.appsmith.server.domains.ApplicationMode;
 import com.appsmith.server.domains.Layout;
 import com.appsmith.server.domains.NewAction;
 import com.appsmith.server.domains.NewPage;
 import com.appsmith.server.domains.Organization;
 import com.appsmith.server.domains.Plugin;
 import com.appsmith.server.domains.PluginType;
+import com.appsmith.server.domains.Theme;
 import com.appsmith.server.dtos.ActionCollectionDTO;
 import com.appsmith.server.dtos.ActionDTO;
 import com.appsmith.server.dtos.InviteUsersDTO;
@@ -34,6 +36,7 @@ import com.appsmith.server.services.NewActionService;
 import com.appsmith.server.services.NewPageService;
 import com.appsmith.server.services.OrganizationService;
 import com.appsmith.server.services.SessionUserService;
+import com.appsmith.server.services.ThemeService;
 import com.appsmith.server.services.UserService;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,12 +63,15 @@ import org.springframework.util.LinkedMultiValueMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuple4;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.appsmith.server.acl.AclPermission.READ_ACTIONS;
 import static com.appsmith.server.acl.AclPermission.READ_APPLICATIONS;
@@ -135,6 +141,9 @@ public class ApplicationForkingServiceTests {
 
     @Autowired
     private LayoutCollectionService layoutCollectionService;
+
+    @Autowired
+    private ThemeService themeService;
 
     private static String sourceAppId;
 
@@ -380,6 +389,293 @@ public class ApplicationForkingServiceTests {
                 .expectErrorMatches(throwable -> throwable instanceof AppsmithException &&
                         throwable.getMessage().equals(AppsmithError.ACL_NO_RESOURCE_FOUND.getMessage(FieldName.ORGANIZATION, testUserOrgId)))
                 .verify();
+    }
+
+    @Test
+    @WithUserDetails(value = "api_user")
+    public void test4_validForkApplication_cancelledMidWay_createValidApplication() {
+
+        Organization targetOrganization = new Organization();
+        targetOrganization.setName("Target Organization");
+        targetOrganization = organizationService.create(targetOrganization).block();
+
+        // Trigger the fork application flow
+        applicationForkingService.forkApplicationToOrganization(sourceAppId, targetOrganization.getId())
+                .timeout(Duration.ofMillis(10))
+                .subscribe();
+
+        // Wait for fork to complete
+        Mono<Application> forkedAppFromDbMono = Mono.just(targetOrganization)
+                .flatMap(organization -> {
+                    try {
+                        // Before fetching the forked application, sleep for 5 seconds to ensure that the forking finishes
+                        Thread.sleep(5000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    return applicationService.findByOrganizationId(organization.getId(), READ_APPLICATIONS).next();
+                })
+                .cache();
+
+        StepVerifier
+                .create(forkedAppFromDbMono.zipWhen(application ->
+                        Mono.zip(
+                                newActionService.findAllByApplicationIdAndViewMode(application.getId(), false, READ_ACTIONS, null).collectList(),
+                                actionCollectionService.findAllByApplicationIdAndViewMode(application.getId(), false, READ_ACTIONS, null).collectList(),
+                                newPageService.findNewPagesByApplicationId(application.getId(), READ_PAGES).collectList()))
+                )
+                .assertNext(tuple -> {
+                    Application application = tuple.getT1();
+                    List<NewAction> actionList = tuple.getT2().getT1();
+                    List<ActionCollection> actionCollectionList = tuple.getT2().getT2();
+                    List<NewPage> pageList = tuple.getT2().getT3();
+
+                    assertThat(application).isNotNull();
+                    assertThat(application.getName()).isEqualTo("1 - public app");
+                    assertThat(application.getPages().get(0).getDefaultPageId())
+                            .isEqualTo(application.getPages().get(0).getId());
+                    assertThat(application.getPublishedPages().get(0).getDefaultPageId())
+                            .isEqualTo(application.getPublishedPages().get(0).getId());
+
+                    assertThat(pageList).isNotEmpty();
+                    pageList.forEach(newPage -> {
+                        assertThat(newPage.getDefaultResources()).isNotNull();
+                        assertThat(newPage.getDefaultResources().getPageId()).isEqualTo(newPage.getId());
+                        assertThat(newPage.getDefaultResources().getApplicationId()).isEqualTo(application.getId());
+
+                        newPage.getUnpublishedPage()
+                                .getLayouts()
+                                .forEach(layout ->
+                                        layout.getLayoutOnLoadActions().forEach(dslActionDTOS -> {
+                                            dslActionDTOS.forEach(actionDTO -> {
+                                                assertThat(actionDTO.getId()).isEqualTo(actionDTO.getDefaultActionId());
+                                            });
+                                        })
+                                );
+                    });
+
+                    assertThat(actionList).hasSize(2);
+                    actionList.forEach(newAction -> {
+                        assertThat(newAction.getDefaultResources()).isNotNull();
+                        assertThat(newAction.getDefaultResources().getActionId()).isEqualTo(newAction.getId());
+                        assertThat(newAction.getDefaultResources().getApplicationId()).isEqualTo(application.getId());
+
+                        ActionDTO action = newAction.getUnpublishedAction();
+                        assertThat(action.getDefaultResources()).isNotNull();
+                        assertThat(action.getDefaultResources().getPageId()).isEqualTo(application.getPages().get(0).getId());
+                        if (!StringUtils.isEmpty(action.getDefaultResources().getCollectionId())) {
+                            assertThat(action.getDefaultResources().getCollectionId()).isEqualTo(action.getCollectionId());
+                        }
+                    });
+
+                    assertThat(actionCollectionList).hasSize(1);
+                    actionCollectionList.forEach(actionCollection -> {
+                        assertThat(actionCollection.getDefaultResources()).isNotNull();
+                        assertThat(actionCollection.getDefaultResources().getCollectionId()).isEqualTo(actionCollection.getId());
+                        assertThat(actionCollection.getDefaultResources().getApplicationId()).isEqualTo(application.getId());
+
+                        ActionCollectionDTO unpublishedCollection = actionCollection.getUnpublishedCollection();
+
+                        assertThat(unpublishedCollection.getDefaultToBranchedActionIdsMap())
+                                .hasSize(1);
+                        unpublishedCollection.getDefaultToBranchedActionIdsMap().keySet()
+                                .forEach(key ->
+                                        assertThat(key).isEqualTo(unpublishedCollection.getDefaultToBranchedActionIdsMap().get(key))
+                                );
+
+                        assertThat(unpublishedCollection.getDefaultResources()).isNotNull();
+                        assertThat(unpublishedCollection.getDefaultResources().getPageId())
+                                .isEqualTo(application.getPages().get(0).getId());
+                    });
+                })
+                .verifyComplete();
+
+    }
+
+    @Test
+    @WithUserDetails("api_user")
+    public void forkApplicationToOrganization_WhenAppHasUnsavedThemeCustomization_ForkedWithCustomizations() {
+        String uniqueString = UUID.randomUUID().toString();
+        Organization organization = new Organization();
+        organization.setName("org_" + uniqueString);
+
+        Mono<Tuple4<Theme, Theme, Application, Application>> tuple4Mono = organizationService.create(organization)
+                .flatMap(createdOrg -> {
+                    Application application = new Application();
+                    application.setName("app_" + uniqueString);
+                    return applicationPageService.createApplication(application, createdOrg.getId());
+                }).flatMap(srcApplication -> {
+                    Theme theme = new Theme();
+                    theme.setName("theme_" + uniqueString);
+                    return themeService.updateTheme(srcApplication.getId(), theme)
+                            .then(applicationService.findById(srcApplication.getId()));
+                }).flatMap(srcApplication -> {
+                    Organization desOrg = new Organization();
+                    desOrg.setName("org_dest_" + uniqueString);
+                    return organizationService.create(desOrg).flatMap(createdOrg ->
+                            applicationForkingService.forkApplicationToOrganization(srcApplication.getId(), createdOrg.getId())
+                    ).zipWith(Mono.just(srcApplication));
+                }).flatMap(applicationTuple2 -> {
+                    Application forkedApp = applicationTuple2.getT1();
+                    Application srcApp = applicationTuple2.getT2();
+                    return Mono.zip(
+                            themeService.getApplicationTheme(forkedApp.getId(), ApplicationMode.EDIT),
+                            themeService.getApplicationTheme(forkedApp.getId(), ApplicationMode.PUBLISHED),
+                            Mono.just(forkedApp),
+                            Mono.just(srcApp)
+                    );
+                });
+
+        StepVerifier.create(tuple4Mono).assertNext(objects -> {
+            Theme editModeTheme = objects.getT1();
+            Theme publishedModeTheme = objects.getT2();
+            Application forkedApp = objects.getT3();
+            Application srcApp = objects.getT4();
+
+            assertThat(forkedApp.getEditModeThemeId()).isEqualTo(editModeTheme.getId());
+            assertThat(forkedApp.getPublishedModeThemeId()).isEqualTo(publishedModeTheme.getId());
+            assertThat(forkedApp.getEditModeThemeId()).isNotEqualTo(forkedApp.getPublishedModeThemeId());
+
+            // published mode should have the custom theme as we publish after forking the app
+            assertThat(publishedModeTheme.isSystemTheme()).isFalse();
+            // published mode theme will have no application id and org id set as the customizations were not saved
+            assertThat(publishedModeTheme.getOrganizationId()).isNullOrEmpty();
+            assertThat(publishedModeTheme.getApplicationId()).isNullOrEmpty();
+
+            // edit mode theme should be a custom one
+            assertThat(editModeTheme.isSystemTheme()).isFalse();
+            // edit mode theme will have no application id and org id set as the customizations were not saved
+            assertThat(editModeTheme.getOrganizationId()).isNullOrEmpty();
+            assertThat(editModeTheme.getApplicationId()).isNullOrEmpty();
+
+            // forked theme should have the same name as src theme
+            assertThat(editModeTheme.getName()).isEqualTo("theme_" + uniqueString);
+            assertThat(publishedModeTheme.getName()).isEqualTo("theme_" + uniqueString);
+
+            // forked application should have a new edit mode theme created, should not be same as src app theme
+            assertThat(srcApp.getEditModeThemeId()).isNotEqualTo(forkedApp.getEditModeThemeId());
+            assertThat(srcApp.getPublishedModeThemeId()).isNotEqualTo(forkedApp.getPublishedModeThemeId());
+        }).verifyComplete();
+    }
+
+    @Test
+    @WithUserDetails("api_user")
+    public void forkApplicationToOrganization_WhenAppHasSystemTheme_SystemThemeSet() {
+        String uniqueString = UUID.randomUUID().toString();
+        Organization organization = new Organization();
+        organization.setName("org_" + uniqueString);
+
+        Mono<Tuple3<Theme, Application, Application>> tuple3Mono = organizationService.create(organization)
+                .flatMap(createdOrg -> {
+                    Application application = new Application();
+                    application.setName("app_" + uniqueString);
+                    return applicationPageService.createApplication(application, createdOrg.getId());
+                }).flatMap(srcApplication -> {
+                    Organization desOrg = new Organization();
+                    desOrg.setName("org_dest_" + uniqueString);
+                    return organizationService.create(desOrg).flatMap(createdOrg ->
+                            applicationForkingService.forkApplicationToOrganization(srcApplication.getId(), createdOrg.getId())
+                    ).zipWith(Mono.just(srcApplication));
+                }).flatMap(applicationTuple2 -> {
+                    Application forkedApp = applicationTuple2.getT1();
+                    Application srcApp = applicationTuple2.getT2();
+                    return Mono.zip(
+                            themeService.getApplicationTheme(forkedApp.getId(), ApplicationMode.EDIT),
+                            Mono.just(forkedApp),
+                            Mono.just(srcApp)
+                    );
+                });
+
+        StepVerifier.create(tuple3Mono).assertNext(objects -> {
+            Theme editModeTheme = objects.getT1();
+            Application forkedApp = objects.getT2();
+            Application srcApp = objects.getT3();
+
+            // same theme should be set to edit mode and published mode
+            assertThat(forkedApp.getEditModeThemeId()).isEqualTo(editModeTheme.getId());
+            assertThat(forkedApp.getPublishedModeThemeId()).isEqualTo(editModeTheme.getId());
+
+            // edit mode theme should be system theme
+            assertThat(editModeTheme.isSystemTheme()).isTrue();
+            // edit mode theme will have no application id and org id set as it's system theme
+            assertThat(editModeTheme.getOrganizationId()).isNullOrEmpty();
+            assertThat(editModeTheme.getApplicationId()).isNullOrEmpty();
+
+            // forked theme should be default theme
+            assertThat(editModeTheme.getName()).isEqualToIgnoringCase(Theme.DEFAULT_THEME_NAME);
+
+            // forked application should have same theme set
+            assertThat(srcApp.getEditModeThemeId()).isEqualTo(forkedApp.getEditModeThemeId());
+        }).verifyComplete();
+    }
+
+    @Test
+    @WithUserDetails("api_user")
+    public void forkApplicationToOrganization_WhenAppHasCustomSavedTheme_NewCustomAppThemeCreated() {
+        String uniqueString = UUID.randomUUID().toString();
+        Organization organization = new Organization();
+        organization.setName("org_" + uniqueString);
+
+        Mono<Tuple4<Theme, Theme, Application, Application>> tuple4Mono = organizationService.create(organization)
+                .flatMap(createdOrg -> {
+                    Application application = new Application();
+                    application.setName("app_" + uniqueString);
+                    return applicationPageService.createApplication(application, createdOrg.getId());
+                }).flatMap(srcApplication -> {
+                    Theme theme = new Theme();
+                    theme.setName("theme_" + uniqueString);
+                    return themeService.updateTheme(srcApplication.getId(), theme)
+                            .then(themeService.persistCurrentTheme(srcApplication.getId(), theme))
+                            .then(applicationService.findById(srcApplication.getId()));
+                }).flatMap(srcApplication -> {
+                    Organization desOrg = new Organization();
+                    desOrg.setName("org_dest_" + uniqueString);
+                    return organizationService.create(desOrg).flatMap(createdOrg ->
+                            applicationForkingService.forkApplicationToOrganization(srcApplication.getId(), createdOrg.getId())
+                    ).zipWith(Mono.just(srcApplication));
+                }).flatMap(applicationTuple2 -> {
+                    Application forkedApp = applicationTuple2.getT1();
+                    Application srcApp = applicationTuple2.getT2();
+                    return Mono.zip(
+                            themeService.getApplicationTheme(forkedApp.getId(), ApplicationMode.EDIT),
+                            themeService.getApplicationTheme(forkedApp.getId(), ApplicationMode.PUBLISHED),
+                            Mono.just(forkedApp),
+                            Mono.just(srcApp)
+                    );
+                });
+
+        StepVerifier.create(tuple4Mono).assertNext(objects -> {
+            Theme editModeTheme = objects.getT1();
+            Theme publishedModeTheme = objects.getT2();
+            Application forkedApp = objects.getT3();
+            Application srcApp = objects.getT4();
+
+            assertThat(forkedApp.getEditModeThemeId()).isEqualTo(editModeTheme.getId());
+            assertThat(forkedApp.getPublishedModeThemeId()).isEqualTo(publishedModeTheme.getId());
+            assertThat(forkedApp.getEditModeThemeId()).isNotEqualTo(forkedApp.getPublishedModeThemeId());
+
+            // published mode should have the custom theme as we publish after forking the app
+            assertThat(publishedModeTheme.isSystemTheme()).isFalse();
+
+            // published mode theme will have no application id and org id set as it's a copy
+            assertThat(publishedModeTheme.getOrganizationId()).isNullOrEmpty();
+            assertThat(publishedModeTheme.getApplicationId()).isNullOrEmpty();
+
+            // edit mode theme should be a custom one
+            assertThat(editModeTheme.isSystemTheme()).isFalse();
+
+            // edit mode theme will have application id and org id set as the customizations were saved
+            assertThat(editModeTheme.getOrganizationId()).isEqualTo(forkedApp.getOrganizationId());
+            assertThat(editModeTheme.getApplicationId()).isEqualTo(forkedApp.getId());
+
+            // forked theme should have the same name as src theme
+            assertThat(editModeTheme.getName()).isEqualTo("theme_" + uniqueString);
+            assertThat(publishedModeTheme.getName()).isEqualTo("theme_" + uniqueString);
+
+            // forked application should have a new edit mode theme created, should not be same as src app theme
+            assertThat(srcApp.getEditModeThemeId()).isNotEqualTo(forkedApp.getEditModeThemeId());
+            assertThat(srcApp.getPublishedModeThemeId()).isNotEqualTo(forkedApp.getPublishedModeThemeId());
+        }).verifyComplete();
     }
 
     private Flux<ActionDTO> getActionsInOrganization(Organization organization) {

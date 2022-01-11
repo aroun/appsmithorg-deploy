@@ -85,6 +85,11 @@ public class ThemeServiceCEImpl extends BaseService<ThemeRepositoryCE, Theme, St
     }
 
     @Override
+    public Flux<Theme> getSystemThemes() {
+        return repository.getSystemThemes();
+    }
+
+    @Override
     public Mono<Theme> updateTheme(String applicationId, Theme resource) {
         return applicationRepository.findById(applicationId, AclPermission.MANAGE_APPLICATIONS)
                 .flatMap(application -> {

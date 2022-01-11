@@ -2286,6 +2286,8 @@ public class ApplicationServiceTest {
                     Application srcApp = objects.getT2().getT2();
                     assertThat(clonnedApp.getEditModeThemeId()).isNotEqualTo(srcApp.getEditModeThemeId());
                     assertThat(clonnedTheme.getApplicationId()).isEqualTo(clonnedApp.getId());
+                    assertThat(clonnedTheme.getOrganizationId()).isNotEmpty();
+                    assertThat(clonnedTheme.getOrganizationId()).isEqualTo(clonnedApp.getOrganizationId());
                 })
                 .verifyComplete();
 

@@ -467,7 +467,7 @@ public class ThemeServiceTest {
         StepVerifier.create(tuple2Mono).assertNext(tuple2 -> {
             List<Theme> availableThemes = tuple2.getT1();
             Theme currentTheme = tuple2.getT2();
-            assertThat(availableThemes.size()).isEqualTo(5); // 4 system themes, one custom theme
+            assertThat(availableThemes.size()).isEqualTo(1); // one custom theme
             assertThat(currentTheme.getApplicationId()).isNotEmpty(); // theme should have application id set
             assertThat(currentTheme.getOrganizationId()).isEqualTo("theme-test-org-id"); // theme should have org id set
         }).verifyComplete();

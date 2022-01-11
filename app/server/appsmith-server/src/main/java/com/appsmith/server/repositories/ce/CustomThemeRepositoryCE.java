@@ -7,5 +7,6 @@ import reactor.core.publisher.Mono;
 
 public interface CustomThemeRepositoryCE extends AppsmithRepository<Theme> {
     Flux<Theme> getApplicationThemes(String applicationId);
+    Flux<Theme> getSystemThemes();
     Mono<Theme> getSystemThemeByName(String themeName);
 }

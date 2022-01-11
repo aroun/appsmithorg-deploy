@@ -781,9 +781,13 @@ public class ImportExportApplicationServiceTests {
 
                     assertThat(editTheme.isSystemTheme()).isFalse();
                     assertThat(editTheme.getName()).isEqualTo("Custom edit theme");
+                    assertThat(editTheme.getOrganizationId()).isEqualTo(application.getOrganizationId());
+                    assertThat(editTheme.getApplicationId()).isEqualTo(application.getId());
 
                     assertThat(publishedTheme.isSystemTheme()).isFalse();
                     assertThat(publishedTheme.getName()).isEqualTo("Custom published theme");
+                    assertThat(publishedTheme.getOrganizationId()).isNullOrEmpty();
+                    assertThat(publishedTheme.getApplicationId()).isNullOrEmpty();
                 })
                 .verifyComplete();
     }

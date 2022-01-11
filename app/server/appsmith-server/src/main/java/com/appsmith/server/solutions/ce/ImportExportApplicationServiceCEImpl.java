@@ -1385,8 +1385,8 @@ public class ImportExportApplicationServiceCEImpl implements ImportExportApplica
     }
 
     private Mono<Application> importThemes(Application application, ApplicationJson importedApplicationJson) {
-        Mono<Theme> importedEditModeTheme = getOrSaveTheme(importedApplicationJson.getEditModeTheme(), application.getId());
-        Mono<Theme> importedPublishedModeTheme = getOrSaveTheme(importedApplicationJson.getPublishedTheme(), null);
+        Mono<Theme> importedEditModeTheme = getOrSaveTheme(importedApplicationJson.getEditModeTheme(), application.getId(), application.getOrganizationId());
+        Mono<Theme> importedPublishedModeTheme = getOrSaveTheme(importedApplicationJson.getPublishedTheme(), null, null);
 
         return Mono.zip(importedEditModeTheme, importedPublishedModeTheme).flatMap(importedThemesTuple -> {
             String editModeThemeId = importedThemesTuple.getT1().getId();
@@ -1402,7 +1402,7 @@ public class ImportExportApplicationServiceCEImpl implements ImportExportApplica
         });
     }
 
-    private Mono<Theme> getOrSaveTheme(Theme theme, String destApplicationId) {
+    private Mono<Theme> getOrSaveTheme(Theme theme, String destApplicationId, String destOrgId) {
         if(theme == null) { // this application was exported without theme, assign the legacy theme to it
             return themeRepository.getSystemThemeByName(Theme.LEGACY_THEME_NAME); // return the default theme
         } else if (theme.isSystemTheme()) {
@@ -1411,6 +1411,10 @@ public class ImportExportApplicationServiceCEImpl implements ImportExportApplica
             if(StringUtils.isNotEmpty(theme.getApplicationId()) && StringUtils.isNotEmpty(destApplicationId)) {
                 // this was a saved custom theme, set the dest app id to make it saved custom theme as well
                 theme.setApplicationId(destApplicationId);
+                theme.setOrganizationId(destOrgId);
+            } else { // theme may contain values from exported json, remove them
+                theme.setApplicationId(null);
+                theme.setOrganizationId(null);
             }
             return themeRepository.save(theme);
         }
