@@ -137,7 +137,8 @@ class GlobalHotKeys extends React.Component<Props> {
     key: KeyboardKeyType,
     handler: KeyboardEventHandler,
   ) {
-    if (key in handler) {
+    const existingHandler = this.handlers[key];
+    if (existingHandler !== null) {
       throw new Error(`Keydown handler already exist for key ${key}`);
     }
     this.handlers[key] = handler;
@@ -426,7 +427,7 @@ class GlobalHotKeys extends React.Component<Props> {
           }}
         />
         <Hotkey
-          combo="f2"
+          combo={KeyboardKeyType.F2}
           global
           label="Focus widget title"
           onKeyDown={this.useKeyDownHandler.bind(this, KeyboardKeyType.F2)}
