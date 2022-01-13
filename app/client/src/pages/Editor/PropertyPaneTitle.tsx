@@ -2,6 +2,7 @@ import React, {
   memo,
   ReactElement,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState,
@@ -23,6 +24,7 @@ import { WidgetType } from "constants/WidgetConstants";
 
 import TooltipComponent from "components/ads/Tooltip";
 import { ReactComponent as BackIcon } from "assets/icons/control/back.svg";
+import { KeyboardContext, KeyboardKeyType } from "./GlobalHotKeys";
 
 type PropertyPaneTitleProps = {
   title: string;
@@ -95,6 +97,22 @@ const PropertyPaneTitle = memo(function PropertyPaneTitle(
     setName(props.title);
   }, [props.title]);
 
+  const [isEditingDefault, setIsEditingDefault] = useState(
+    !props.isPanelTitle ? isNew : undefined,
+  );
+
+  const { registerKeyDownHandler, unregisterKeyDownHandler } = useContext(
+    KeyboardContext,
+  );
+
+  useEffect(() => {
+    registerKeyDownHandler(KeyboardKeyType.F2, () => {
+      setIsEditingDefault(true);
+    });
+
+    return () => unregisterKeyDownHandler(KeyboardKeyType.F2);
+  }, []);
+
   return props.widgetId || props.isPanelTitle ? (
     <div className="flex items-center w-full px-3 space-x-1 z-3">
       {/* BACK BUTTON */}
@@ -114,7 +132,7 @@ const PropertyPaneTitle = memo(function PropertyPaneTitle(
           editInteractionKind={EditInteractionKind.SINGLE}
           fill
           hideEditIcon
-          isEditingDefault={!props.isPanelTitle ? isNew : undefined}
+          isEditingDefault={isEditingDefault}
           onBlur={!props.isPanelTitle ? updateTitle : undefined}
           onTextChanged={!props.isPanelTitle ? undefined : updateNewTitle}
           placeholder={props.title}

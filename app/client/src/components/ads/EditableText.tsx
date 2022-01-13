@@ -67,6 +67,8 @@ export function EditableText(props: EditableTextProps) {
     SavingState.NOT_STARTED,
   );
 
+  console.log("HEllo", isEditingDefault, isEditing);
+
   const editMode = useCallback(
     (e: React.MouseEvent) => {
       setIsEditing(true);
@@ -84,19 +86,10 @@ export function EditableText(props: EditableTextProps) {
     }
   };
 
-  const { registerKeyDownHandler, unregisterKeyDownHandler } = useContext(
-    KeyboardContext,
-  );
-
   useEffect(() => {
-    if (shouldFocusOnF2) {
-      registerKeyDownHandler(KeyboardKeyType.F2, () => {
-        setIsEditing(true);
-      });
-
-      return () => unregisterKeyDownHandler(KeyboardKeyType.F2);
-    }
-  }, []);
+    console.log("Running the effect isEditingDefault", isEditingDefault);
+    setIsEditing(!!isEditingDefault);
+  }, [isEditingDefault]);
 
   return (
     <EditableTextWrapper
